@@ -12,5 +12,6 @@ tableRouter.post('/', tableCtrl.saveTable)
 tableRouter.put('/:tableId', tableCtrl.updateTable)
 tableRouter.delete('/:tableId', tableCtrl.deleteTable)
 tableRouter.delete('/:sectionId/bySection', tableCtrl.deleteTablesBySection)
+tableRouter.delete('/:tableNumber/byNumber', tableCtrl.deleteTableByNumber)
 
 module.exports = tableRouter

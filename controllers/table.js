@@ -102,6 +102,15 @@ function deleteTablesBySection (req, res) {
   })
 }
 
+function deleteTableByNumber (req, res) {
+  let tableNumber = req.params.tableNumber;
+
+  Table.deleteOne({ number: tableNumber }, (err) => {
+    if (err) return res.status(500).send({ message: `Error al querer borrar la mesa número ${tableNumber}: ${err}`})
+    res.status(200).send({message: `La mesa número ${tableNumber} ha sido borrada`})
+  })
+}
+
 module.exports = {
   getTable,
   getTables,
@@ -110,5 +119,6 @@ module.exports = {
   saveTable,
   updateTable,
   deleteTable,
-  deleteTablesBySection
+  deleteTablesBySection,
+  deleteTableByNumber
 }
