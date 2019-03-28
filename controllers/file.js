@@ -15,7 +15,7 @@ function saveFile(req, res) {
   var folder = '';
 
 
-  if(req.body.type.contains('img')){    //POSIBLEMENTE HAYA QUE AGREGAR PARA CUANDO SEAN OTROS TIPOS DE ARCHIVOS DISTINTOS A IMG
+  if(req.body.type.indexOf('image') !=  -1){    //POSIBLEMENTE HAYA QUE AGREGAR PARA CUANDO SEAN OTROS TIPOS DE ARCHIVOS DISTINTOS A IMG
     switch (req.body.subtype) {
       case 'product':
         folder = 'products/'
@@ -34,20 +34,18 @@ function saveFile(req, res) {
   if(folder == ''){
     return res.status(500).send({ message: `El tipo de imagen no es correcto. No se encuentra el directorio de destino.` })
   }
-  if(!fs.access(folder)){
+  if(!fs.existsSync(folder)){
     fs.mkdir(folder, { recursive: true }, (err) => {
       if (err) throw err;
     });
   }
-  if(!fs.access(folder + imgName)){
+
+  if(!fs.existsSync(folder+imgName)) {
     fs.writeFile(folder + imgName, buf);
     return res;
-  }
-  else{
-    return res.status(500).send({ message: `Ya existe un archivo con este nombre en el directorio. El archivo ha sido asignado pero no cargado nuevamente.` })
-  }
-}
+  }; 
 
+}
 module.exports = {
   saveFile,
 }
