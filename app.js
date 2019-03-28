@@ -12,6 +12,7 @@ const paymentTypeRouter = require('./routes/paymentTypeRoutes')
 const sizeRouter = require('./routes/sizeRoutes')
 const sectionRouter = require('./routes/sectionRoutes')
 const tableRouter = require('./routes/tableRoutes')
+const fileRouter = require('./routes/fileRoutes')
 const cashRegisterRouter = require('./routes/cashRegister')
 const cashFlowRouter = require('./routes/cashFlow')
 const arqueoCajaRouter = require('./routes/arqueoCaja')
@@ -41,8 +42,8 @@ app.use('/api/cashRegister', cashRegisterRouter)
 app.use('/api/cashFlow', cashFlowRouter)
 app.use('/api/arqueo', arqueoCajaRouter)
 app.use('/api/client', clientRouter)
+app.use('/api/file',fileRouter)
 app.use('/api/supplier', supplierRouter)
-
 //Middleware to handle error
 app.use(function errorHandler(err, req, res, next) {
   if(err.name === 'ValidationError'){
