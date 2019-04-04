@@ -18,10 +18,8 @@ const cashFlowRouter = require('./routes/cashFlow')
 const arqueoCajaRouter = require('./routes/arqueoCaja')
 const clientRouter = require('./routes/clientRoutes')
 const supplierRouter = require('./routes/supplierRoutes')
-
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
+app.use(bodyParser.json({limit: '50mb'}))
 app.use(function (req, res, next) {
 res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');

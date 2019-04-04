@@ -1,7 +1,9 @@
+
 'use strict'
 
 //const File = require('../models/file')
 const fs = require('fs');
+const os = require('os');
 
 
 function saveFile(req, res) {
@@ -13,6 +15,7 @@ function saveFile(req, res) {
   var imgName = req.body.name;
   var buf = new Buffer(img, 'base64');
   var folder = '';
+  var homeDir = os.homedir()+'/Documents/BonApp/bonapp-web-system/src/assets/img/';
 
 
   if(req.body.type.indexOf('image') !=  -1){    //POSIBLEMENTE HAYA QUE AGREGAR PARA CUANDO SEAN OTROS TIPOS DE ARCHIVOS DISTINTOS A IMG
@@ -34,16 +37,24 @@ function saveFile(req, res) {
   if(folder == ''){
     return res.status(500).send({ message: `El tipo de imagen no es correcto. No se encuentra el directorio de destino.` })
   }
-  if(!fs.existsSync(folder)){
-    fs.mkdir(folder, { recursive: true }, (err) => {
+  if(!fs.existsSync(homeDir+folder)){
+    fs.mkdirSync(homeDir+folder, { recursive: true }, (err) => {
       if (err) throw err;
     });
   }
 
-  if(!fs.existsSync(folder+imgName)) {
-    fs.writeFile(folder + imgName, buf);
+  if(fs.existsSync(homeDir+folder)){
+    fs.chmod(homeDir+folder,777);
+  }
+
+  if(!fs.existsSync(homeDir+folder+imgName)) {
+    fs.writeFile(homeDir+folder + imgName, buf);
     return res;
-  }; 
+  };
+  
+  if(fs.existsSync(homeDir+folder+imgName)){
+    fs.chmod(homeDir+folder+imgName,777);
+  }
 
 }
 module.exports = {
