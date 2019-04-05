@@ -18,7 +18,7 @@ function saveFile(req, res) {
   var homeDir = os.homedir()+'/Documents/BonApp/bonapp-web-system/src/assets/img/';
 
 
-  if(req.body.type.indexOf('image') !=  -1){    //POSIBLEMENTE HAYA QUE AGREGAR PARA CUANDO SEAN OTROS TIPOS DE ARCHIVOS DISTINTOS A IMG
+  if(req.body.type.indexOf('image') !=  -1){    
     switch (req.body.subtype) {
       case 'product':
         folder = 'products/'
@@ -34,8 +34,12 @@ function saveFile(req, res) {
     }
   }
 
+  if(req.body.type.indexOf('application') !=  -1){  
+    folder = "documents/"
+  }
+
   if(folder == ''){
-    return res.status(500).send({ message: `El tipo de imagen no es correcto. No se encuentra el directorio de destino.` })
+    return res.status(500).send({ message: `El tipo de archivo no es correcto. No se encuentra el directorio de destino.` })
   }
   if(!fs.existsSync(homeDir+folder)){
     fs.mkdirSync(homeDir+folder, { recursive: true }, (err) => {
@@ -44,7 +48,7 @@ function saveFile(req, res) {
   }
 
   if(fs.existsSync(homeDir+folder)){
-    fs.chmod(homeDir+folder,777);
+    fs.chmod(homeDir+folder,0o777);
   }
 
   if(!fs.existsSync(homeDir+folder+imgName)) {
@@ -53,7 +57,7 @@ function saveFile(req, res) {
   };
   
   if(fs.existsSync(homeDir+folder+imgName)){
-    fs.chmod(homeDir+folder+imgName,777);
+    fs.chmod(homeDir+folder+imgName,0o777);
   }
 
 }
