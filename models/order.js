@@ -97,9 +97,9 @@ const orderSchema = Schema({
    * para no tener que calcularlo de nuevo cuando se muestre el detalle de la orden
    */
   discount: { 
-    discountRate: { type: Number, required: true },
-    discountAmount: { type: Number, required: true },
-    subtotal: { type: Number, required: true }
+    discountRate: { type: Number },
+    discountAmount: { type: Number },
+    subtotal: { type: Number }
   },
   /**Monto total del pedido */
   totalPrice: { type: Number }
