@@ -37,11 +37,19 @@ function getOrdersByUser (req, res) {
 function getOrderByTableByStatus(req, res) {
   let tableNro = req.params.table
   let status = req.query.open
-
-  Order.find({ table: tableNro, open: status }, (err, orders) => {
+  
+  Order.find({ table: tableNro, status: status }, (err, orders) => {
     if(err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})    
 
     res.status(200).send({ orders })
+  })
+}
+
+function getLastOrder(req, res) {
+  Order.find().sort({orderNumber:-1}).limit(1).exec((err, orders) => {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
+  
+    res.status(200).send({ lastOrder: orders[0] })
   })
 }
 
@@ -54,11 +62,12 @@ function saveOrder (req, res) {
   order.waiter = req.body.waiter
   order.status = 'Open'
   order.users = req.body.users
+  order.app = req.body.app
   order.created_at = new Date()
-  order.orderApp = req.body.orderApp
   //completed_at vacío hasta que se cierra el pedido (se hace en update)
   //discountPercentage idem anterior  
   //totalPrice idem anterior  
+  console.log(order)
 
   order.save((err, orderStored) => {
     if(err){      
@@ -98,6 +107,7 @@ module.exports = {
   getOrdersByUser,
   getOrders,
   getOrderByTableByStatus,
+  getLastOrder,
   saveOrder,
   updateOrder,
   deleteOrder
