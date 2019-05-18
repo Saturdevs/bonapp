@@ -42,11 +42,11 @@ const orderSchema = Schema({
      * Si el pedido se realiza por la app usar los id de usuarios correspondientes que se encuentran
      * en la coleccion users de la base de datos general.
     */
-    id: { type: Schema.Types.ObjectId },
+    user: { type: Schema.Types.ObjectId, ref: User },
     /**Productos pedidos por UN usuario */
     products: [{
       /**Id del producto que se encuentra en la coleccion products */
-      id: { type: Schema.Types.ObjectId, ref: Product, required: true },
+      product: { type: Schema.Types.ObjectId, ref: Product, required: true },
       /**Opciones seleccionadas para cada producto del pedido */
       options: [{
         name: { type: String, required:true },
@@ -74,7 +74,7 @@ const orderSchema = Schema({
      */
     totalPerUser: { type:Number },
     /**Tipos de pago usados para pagar el pedido. */
-    payment: [{
+    payments: [{
       amount: { type: Number, required: true },
       methodId: { type: Schema.Types.ObjectId, ref: PaymentMethod, required: true } 
     }],

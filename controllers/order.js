@@ -35,14 +35,19 @@ function getOrdersByUser (req, res) {
 
 //Devuelve los pedidos abiertos o cerrados (segun query) para la mesa que se recibe como parametro
 function getOrderByTableByStatus(req, res) {
-  let tableNro = req.params.table
+  let tableNro = parseInt(req.params.table)
   let status = req.query.open
-  
-  Order.find({ table: tableNro, status: status }, (err, orders) => {
-    if(err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})    
 
-    res.status(200).send({ orders })
-  })
+  Order.find({ table: tableNro, status: status })
+    .populate('users.user')
+    .populate('users.products.product')
+    .populate('waiter')
+    .populate('cashRegister')
+    .exec((err, orders) => {
+      if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})      
+
+      res.status(200).send({ orders })
+    })
 }
 
 function getLastOrder(req, res) {
