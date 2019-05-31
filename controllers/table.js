@@ -84,7 +84,7 @@ function updateTableByNumber (req, res) {
   let tableNumber = req.params.tableNumber
   let bodyUpdate = req.body
 
-  Table.updateOne({number: tableNumber}, bodyUpdate, (err, tableUpdated) => {
+  Table.findOneAndUpdate({number: tableNumber}, bodyUpdate, {new: true}, (err, tableUpdated) => {
     if(err){
       if(err['code'] == 11000) 
         return res.status(500).send({ message: `Ya existe una mesa con ese nombre. Ingrese otro nombre.` })
