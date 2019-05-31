@@ -80,6 +80,20 @@ function updateTable (req, res) {
   })
 }
 
+function updateTableByNumber (req, res) {
+  let tableNumber = req.params.tableNumber
+  let bodyUpdate = req.body
+
+  Table.updateOne({number: tableNumber}, bodyUpdate, (err, tableUpdated) => {
+    if(err){
+      if(err['code'] == 11000) 
+        return res.status(500).send({ message: `Ya existe una mesa con ese nombre. Ingrese otro nombre.` })
+    }
+
+    res.status(200).send({ table: tableUpdated })
+  })
+}
+
 function deleteTable (req, res) {
   let tableId = req.params.tableId
 
@@ -118,6 +132,7 @@ module.exports = {
   getTableBySection,
   saveTable,
   updateTable,
+  updateTableByNumber,
   deleteTable,
   deleteTablesBySection,
   deleteTableByNumber
