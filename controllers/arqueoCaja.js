@@ -124,11 +124,16 @@ async function getCashMovementsByDate (req, res) {
     if (orders) {
       orders.forEach(order => {
         order.users.forEach(orderUser => {
-          ingresos.push({
-            paymentType: orderUser.payment.methodId, 
-            desc: 'Ventas',
-            amount: orderUser.payment.amount
-          })
+          orderUser.payments.forEach(payment => {
+            if (payment !== null && payment !== 'undefined')
+            {
+              ingresos.push({
+                paymentType: payment.methodId, 
+                desc: 'Ventas',
+                amount: payment.amount
+              })
+            }
+          })          
         })
       })
     }

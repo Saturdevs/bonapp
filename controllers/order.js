@@ -87,7 +87,7 @@ function updateOrder (req, res) {
   let orderId = req.params.orderId
   let bodyUpdate = req.body
 
-  Order.findByIdAndUpdate(orderId, bodyUpdate, (err, orderUpdated) => {
+  Order.findByIdAndUpdate(orderId, bodyUpdate, {new: true}, (err, orderUpdated) => {
     if (err) return res.status(500).send({ message: `Error al querer actualizar la orden: ${err}`})
 
     res.status(200).send({ order: orderUpdated })
