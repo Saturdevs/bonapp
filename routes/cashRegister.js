@@ -6,9 +6,9 @@ const cashRegisterRouter = express.Router()
 
 cashRegisterRouter.get('/', cashRegisterCtrl.getCashRegisters)
 cashRegisterRouter.get('/availables', cashRegisterCtrl.getAvailableCashRegisters)
-cashRegisterRouter.get('/unSetDefaultCashRegister/:cashRegisterId', cashRegisterCtrl.unSetDefaultCashRegister)
 cashRegisterRouter.get('/:cashRegisterId', cashRegisterCtrl.getCashRegister)
 cashRegisterRouter.post('/', cashRegisterCtrl.saveCashRegister)
+cashRegisterRouter.put('/unSetDefaultCashRegister/:cashRegisterId', cashRegisterCtrl.unSetDefaultCashRegister)
 cashRegisterRouter.put('/:cashRegisterId', cashRegisterCtrl.updateCashRegister)
 cashRegisterRouter.delete('/:cashRegisterId', cashRegisterCtrl.deleteCashRegister)
 
