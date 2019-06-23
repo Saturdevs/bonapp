@@ -87,6 +87,14 @@ function deletePaymentType (req, res) {
   })
 }
 
+function unSetDefaultPaymentType (req, res) {
+  let paymentTypeId = req.params.paymentTypeId
+  PaymentType.updateMany({ default: true, _id: {"$ne": paymentTypeId} }, { $set: { default: false }}, (err, raw) => {
+    if (err) return handleError(err);
+    res.status(200).send({message: `El tipo de pago por defecto ha sido cambiado`})
+  });
+}
+
 module.exports = {
   getPaymentType,  
   getPaymentTypes,
@@ -94,5 +102,6 @@ module.exports = {
   getDefaultPaymentType,
   savePaymentType,
   updatePaymentType,
-  deletePaymentType
+  deletePaymentType,
+  unSetDefaultPaymentType
 }

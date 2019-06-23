@@ -9,6 +9,7 @@ paymentTypeRouter.get('/availables', paymentTypeCtrl.getAvailablePaymentTypes)
 paymentTypeRouter.get('/default', paymentTypeCtrl.getDefaultPaymentType)
 paymentTypeRouter.get('/:paymentTypeId', paymentTypeCtrl.getPaymentType)
 paymentTypeRouter.post('/', paymentTypeCtrl.savePaymentType)
+paymentTypeRouter.put('/unSetDefaultPaymentType/:paymentTypeId', paymentTypeCtrl.unSetDefaultPaymentType)
 paymentTypeRouter.put('/:paymentTypeId', paymentTypeCtrl.updatePaymentType)
 paymentTypeRouter.delete('/:paymentTypeId', paymentTypeCtrl.deletePaymentType)
 
