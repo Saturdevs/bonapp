@@ -11,6 +11,15 @@ function getCashRegisters (req, res) {
   })
 }
 
+function getAvailableCashRegisters (req, res) {
+  CashRegister.find({available: true}, (err, cashRegisters) => {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
+    if (!cashRegisters) return res.status(404).send({ message: `No existen cajas habilitadas en la base de datos.`})
+
+    res.status(200).send({ cashRegisters })
+  })
+}
+
 function getCashRegister (req, res) {
   let cashRegisterId = req.params.cashRegisterId
 
@@ -80,6 +89,7 @@ function deleteCashRegister (req, res) {
 module.exports = {
   getCashRegister,  
   getCashRegisters,
+  getAvailableCashRegisters,
   saveCashRegister,
   updateCashRegister,
   unSetDefaultCashRegister,
