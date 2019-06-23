@@ -11,6 +11,15 @@ function getClients (req, res) {
   })
 }
 
+function getWithCurrentAccountEnabled (req, res) {
+  Client.find({enabledTransactions: true}, (err, clients) => {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
+    if (!clients) return res.status(404).send({ message: `No existen clientes con cuentas corrientes habilitadas.`})
+
+    res.status(200).send({ clients })
+  })
+}
+
 function getClient (req, res) {
   let clientId = req.params.clientId
 
@@ -170,6 +179,7 @@ function deleteClient (req, res) {
 module.exports = {
   getClient,  
   getClients,
+  getWithCurrentAccountEnabled,
   getClientsWithTransactions,
   getTransactions,
   getTransactionByClientById,
