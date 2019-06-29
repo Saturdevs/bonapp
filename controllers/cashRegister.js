@@ -1,6 +1,10 @@
 'use strict'
 
 const CashRegister = require('../models/cashRegister')
+const Client = require('../models/client')
+const CashFlow = require('../models/cashFlow')
+const Order = require('../models/order')
+const CashCount = require('../models/arqueoCaja')
 
 function getCashRegisters (req, res) {
   CashRegister.find({}, (err, cashRegisters) => {
@@ -73,17 +77,69 @@ function unSetDefaultCashRegister (req, res) {
   });
 }
 
-function deleteCashRegister (req, res) {
+async function deleteCashRegister (req, res) {
   let cashRegisterId = req.params.cashRegisterId
 
-  CashRegister.findById(cashRegisterId, (err, cashRegister) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar la caja: ${err}`})
+  await CashRegister.findById(cashRegisterId, async (err, cashRegister) => {    
+    if (err) return res.status(500).send({ message: `Error al intentar borrar la caja: ${err}`})
 
-    cashRegister.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer borrar la caja: ${err}`})
-      res.status(200).send({message: `La caja ha sido eliminada`})
-    })
+    if (cashRegister !== 'undefined' && cashRegister !== null) {
+      let validationMessages = [];
+      validationMessages = await validateDelete(cashRegisterId)
+      if (validationMessages.length === 0) {
+        cashRegister.remove(err => {
+          if (err) return res.status(500).send({ message: `Error al intentar borrar la caja: ${err}`})
+          res.status(200).send({message: `La caja ha sido eliminada`})
+        })
+      } else {
+        return res.status(500).send({ message: validationMessages})        
+      } 
+    }
   })
+}
+
+async function validateDelete(cashRegisterId) {
+
+  let validationErrors = [];
+  await Client.find({}, (err, clients) => {
+    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de transacciones de clientes) ${err}`})
+
+    let found = false;
+    for (let i = 0; i < clients.length && !found; i++) {
+      for (let j = 0; j < clients[i].transactions.length && !found; j++) {                
+        if (clients[i].transactions[j].cashRegister.toString() === cashRegisterId) {          
+          validationErrors.push('Tiene TRANSACCIONES asociadas')
+          found = true;
+        }
+      }
+    }
+  })
+
+  await CashFlow.find({cashRegisterId: cashRegisterId}, (err, cashFlows) => {
+    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de movimientos de caja) ${err}`})
+
+    if (cashFlows !== null && cashFlows !== 'undefined' && cashFlows.length > 0) {
+      validationErrors.push('Tiene MOVIMIENTOS DE CAJA asociados')
+    }
+  })
+
+  await Order.find({cashRegister: cashRegisterId}, (err, orders) => {
+    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de pedidos) ${err}`})
+
+    if (orders !== null && orders !== 'undefined' && orders.length > 0) {
+      validationErrors.push('Tiene PEDIDOS asociados')
+    }
+  })
+
+  await CashCount.find({cashRegisterId: cashRegisterId}, (err, cashCounts) => {
+    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de arqueos) ${err}`})
+
+    if (cashCounts !== null && cashCounts !== 'undefined' && cashCounts.length > 0) {
+      validationErrors.push('Tiene ARQUEOS asociados')
+    }
+  })
+
+  return validationErrors
 }
 
 module.exports = {
