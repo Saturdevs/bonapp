@@ -85,6 +85,7 @@ async function deleteCashRegister (req, res) {
 
     if (cashRegister !== 'undefined' && cashRegister !== null) {
       let validationMessages = [];
+      let validationError;
       validationMessages = await validateDelete(cashRegisterId)
       if (validationMessages.length === 0) {
         cashRegister.remove(err => {
@@ -92,7 +93,14 @@ async function deleteCashRegister (req, res) {
           res.status(200).send({message: `La caja ha sido eliminada`})
         })
       } else {
-        return res.status(500).send({ message: validationMessages})        
+        validationError = `Esta caja (${cashRegister.name}) no puede ser eliminada debido a que:`
+
+        validationMessages.forEach(message => {
+          validationError += '\n\r\t- ' + message;            
+        });
+
+        validationError += '\n\rMárquela como inactiva en su lugar.'
+        return res.status(500).send({ message: validationError})        
       } 
     }
   })
