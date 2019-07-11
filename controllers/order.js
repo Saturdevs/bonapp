@@ -107,6 +107,14 @@ function deleteOrder (req, res) {
   })
 }
 
+function unSetTable (req, res) {
+  let tableNumber = req.params.tableNumber
+  Order.updateMany({ table: tableNumber }, { $set: { table: null }}, (err, raw) => {
+    if (err) return res.status(500).send({ message: `Error al eliminar la mesa del pedido: ${err}`});
+    res.status(200).send({message: `Todos los pedidos con número de mesa ${tableNumber} han quedado sin una mesa asignada`})
+  });
+}
+
 module.exports = {
   getOrder,
   getOrdersByUser,
@@ -115,5 +123,6 @@ module.exports = {
   getLastOrder,
   saveOrder,
   updateOrder,
-  deleteOrder
+  deleteOrder,
+  unSetTable
 }

@@ -1,6 +1,9 @@
 'use strict'
 
+const validationStatus = require('../shared/enums/validationStatus')
+const HttpStatus = require('http-status-codes')
 const Table = require('../models/table')
+const Order = require('../models/order')
 
 function getTables (req, res) {
   Table.find({}).sort( 'number' ).exec((err, tables) => {
@@ -94,16 +97,21 @@ function updateTableByNumber (req, res) {
   })
 }
 
-function deleteTable (req, res) {
+function deleteTableById (req, res) {
   let tableId = req.params.tableId
 
-  Table.findById(tableId, (err, table) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar la mesa: ${err}`})
+  Table.findById(tableId, async (err, table) => {
+    if (err) return res.status(500).send({ message: `Error al buscar una mesa con id ${tableId} para eliminarla: ${err}`})
 
-    table.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer borrar la mesa: ${err}`})
-      res.status(200).send({message: `La mesa ha sido eliminada`})
-    })
+    if (table !== null && table !== 'undefined') {
+      let result = await deleteTable(table.number);
+
+      if (result.status === HttpStatus.OK) {
+        res.status(HttpStatus.OK).send({message: result.message})
+      } else if (result.status !== HttpStatus.OK ) {
+        res.status(result.status).send({message: result.message})
+      }
+    }    
   })
 }
 
@@ -116,13 +124,85 @@ function deleteTablesBySection (req, res) {
   })
 }
 
-function deleteTableByNumber (req, res) {
+async function deleteTableByNumber (req, res) {
   let tableNumber = req.params.tableNumber;
 
-  Table.deleteOne({ number: tableNumber }, (err) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar la mesa número ${tableNumber}: ${err}`})
-    res.status(200).send({message: `La mesa número ${tableNumber} ha sido borrada`})
-  })
+  let result = await deleteTable(tableNumber);
+  
+  if (result.status === HttpStatus.OK) {
+    res.status(HttpStatus.OK).send({message: result.message})
+  } else if (result.status !== HttpStatus.OK ) {
+    res.status(result.status).send({message: result.message})
+  }
+}
+
+async function deleteTable (tableNumber) {
+  let result = {};
+  let validationStatusReturned = await validateDelete(tableNumber)
+
+  switch (validationStatusReturned) {
+    case validationStatus.OK:
+      await Table.deleteOne({ number: tableNumber }, (err) => {
+        if (err) {
+          result = {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: `Error al querer borrar la mesa número ${tableNumber}: ${err}`
+          }
+        } else {
+          result = {
+            status: HttpStatus.OK,
+            message: `La mesa número ${tableNumber} ha sido borrada`
+          } 
+        }
+      })
+      break;
+  
+    case validationStatus.FAIL_OPEN_ORDER:
+      result = {
+        status: HttpStatus.METHOD_NOT_ALLOWED,
+        message: `La mesa ${tableNumber} no puede ser eliminada por que tiene una venta en curso.`
+      }
+      break;
+
+    case validationStatus.HAS_CLOSE_ORDER:
+      result = {
+        status: HttpStatus.CONFLICT,
+        message: `La mesa ${tableNumber} tiene ventas asociadas.\n\n\r¿Deseas eliminarla de 
+        todas formas?\n\n\rTodas las ventas asociadas quedarán sin una mesa asignada.`
+      }
+      break;
+
+    default:
+      result = {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error al querer borrar la mesa número ${tableNumber}: ${err}`
+      }
+      break;  
+  }
+
+  return result
+}
+
+async function validateDelete(tableNumber) {  
+  let statusResult = validationStatus.OK;
+  await Order.findOne({ table: tableNumber, status: 'Open' }, (err, orderOpen) => {    
+    if (err) return res.status(500).send({ message: `Error al querer recuperar un pedido abierto para la mesa ${tableNumber}: ${err}`})
+
+    if (orderOpen !== null && orderOpen !== 'undefined') {          
+      statusResult = validationStatus.FAIL_OPEN_ORDER;
+    }
+  })  
+
+  if (statusResult === validationStatus.OK)
+  {
+    await Order.findOne({ table: tableNumber, status: 'Closed' }, (err, orderClosed) => {
+      if (orderClosed !== null && orderClosed !== 'undefined') {
+        statusResult = validationStatus.HAS_CLOSE_ORDER
+      }
+    })
+  }
+  
+  return statusResult;
 }
 
 module.exports = {
@@ -133,7 +213,7 @@ module.exports = {
   saveTable,
   updateTable,
   updateTableByNumber,
-  deleteTable,
+  deleteTableById,
   deleteTablesBySection,
   deleteTableByNumber
 }

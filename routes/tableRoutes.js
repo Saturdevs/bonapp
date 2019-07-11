@@ -11,7 +11,7 @@ tableRouter.get('/number/:tableNumber', tableCtrl.getTableByNumber)
 tableRouter.post('/', tableCtrl.saveTable)
 tableRouter.put('/byNumber/:tableNumber', tableCtrl.updateTableByNumber)
 tableRouter.put('/:tableId', tableCtrl.updateTable)
-tableRouter.delete('/:tableId', tableCtrl.deleteTable)
+tableRouter.delete('/:tableId', tableCtrl.deleteTableById)
 tableRouter.delete('/:sectionId/bySection', tableCtrl.deleteTablesBySection)
 tableRouter.delete('/:tableNumber/byNumber', tableCtrl.deleteTableByNumber)
 
