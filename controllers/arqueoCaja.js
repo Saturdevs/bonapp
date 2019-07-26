@@ -8,6 +8,7 @@ const Arqueo = require('../models/arqueoCaja')
 const Order = require('../models/order')
 const CashFlow = require('../models/cashFlow')
 const Client = require('../models/client')
+const HttpStatus = require('http-status-codes')
 
 /** 
  * @method
@@ -106,16 +107,16 @@ function getArqueoOpenByCashRegister (req, res) {
 
 /** 
  * @method
- * @description Devuelve los movimientos de caja por día de la caja registradora enviada como parámetro.
- * @param req.params.cashRegisterId {objectID} Es el id de la caja registradora.
- * @param req.query.date {date} Es el día seleccionado para obtener los movimientos.
- * @return {json} ingresos, egresos
+ * @description Setea los movimientos de la caja registradora para la cual se creó el nuevo arqueo realizados 
+ *              después de la fecha de apertura del arqueo.
+ * @param arqueo Nuevo arqueo 
  */
-async function getCashMovementsByDate (req, res) {
+async function setCashMovementsByDateToCashCount (arqueo) {
+  let result = {};
   let ingresos = new Array();
   let egresos = new Array();
-  let cashRegisterId = req.params.cashRegisterId;
-  let date = new Date(req.query.date);
+  let cashRegisterId = arqueo.cashRegisterId;
+  let date = arqueo.createdAt;
   let error;
 
   await Order.find({cashRegister: cashRegisterId, status: 'Closed', completed_at: {"$gte" : date}}, (err, orders) => {
@@ -161,18 +162,20 @@ async function getCashMovementsByDate (req, res) {
     }
   })
 
-  await Client.find({dateOfLastTransaction: {"$gte" : date}}, (err, clients) => {
+  await Client.find({transactions: { $exists: true, $not: {$size: 0}}}, (err, clients) => {
     if (err) error = true;
 
     if (clients) {
       clients.forEach(client => {
         if (client.transactions.length > 0) {
           client.transactions.forEach(transaction => {
-            ingresos.push({
-              paymentType: transaction.paymentMethod, 
-              desc: 'Cobros clientes cta. cte',
-              amount: transaction.amount
-            })
+            if (transaction.date > date) {
+              ingresos.push({
+                paymentType: transaction.paymentMethod, 
+                desc: 'Cobros clientes cta. cte',
+                amount: transaction.amount
+              })
+            }
           })
         }
       })
@@ -180,9 +183,20 @@ async function getCashMovementsByDate (req, res) {
   })
   
   if (error) {
-    return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
+    result = {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: `Error al realizar la búsqueda de movimientos de caja posteriores al arqueo al servidor ${err}`
+    }
+    return result
   } else {
-    res.status(200).send({ ingresos: ingresos, egresos: egresos })
+    arqueo.ingresos = ingresos
+    arqueo.egresos = egresos
+    result = {
+      status: HttpStatus.OK,
+      message: `Se ha guardado el arqueo`
+    }
+
+    return result
   }  
 }
 
@@ -192,7 +206,7 @@ async function getCashMovementsByDate (req, res) {
  * @param req.body Arqueo a insertar.
  * @return {json} arqueo: arqueoStored
  */
-function saveArqueo (req, res) {
+async function saveArqueo (req, res) {
   console.log('POST /api/arqueo')
   console.log(req.body)
 
@@ -206,13 +220,20 @@ function saveArqueo (req, res) {
   arqueo.comment = req.body.comment
   arqueo.deleted = false
 
-  arqueo.save((err, arqueoStored) => {
-    if(err){
-      return res.status(500).send({ message: `Error al querer guardar el arqueo: ${err}.` })
-    }
+  let result = await setCashMovementsByDateToCashCount(arqueo);
 
-    res.status(200).send({ arqueo: arqueoStored })
-  })
+  if (result.status === HttpStatus.OK) {
+    arqueo.save((err, arqueoStored) => {
+      if(err){
+        return res.status(500).send({ message: `Error al querer guardar el arqueo: ${err}.` })
+      }
+
+      res.status(200).send({ arqueo: arqueoStored })
+    })
+  }
+  else {
+    res.status(result.status).send({message: result.message})
+  }
 }
 
 /** 
@@ -260,7 +281,6 @@ module.exports = {
   getArqueosByCashRegister,
   getArqueoOpenByCashRegister,
   getLastArqueoByCashRegister,
-  getCashMovementsByDate,
   saveArqueo,
   updateArqueo,
   deleteArqueo
