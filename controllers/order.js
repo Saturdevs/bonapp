@@ -14,7 +14,9 @@ function getOrders (req, res) {
 function getOrder (req, res) {
   let orderId = req.params.orderId
 
-  Order.findById(orderId, (err, order) => {
+  Order.findById(orderId)
+    .populate('cashRegister')
+    .exec((err, order) => {
     if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
     if (!order) return res.status(404).send({ message: `La orden ${orderId} no existe`})
 

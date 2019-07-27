@@ -30,7 +30,7 @@ const orderSchema = Schema({
    * Delivered: Pedido enviado. Solo para pedidos de tipo Delivery
    * Not Received: Pedido no recibido. Solo para pedidos de tipo Delivery
    */
-  status: { type: String, required: true, enum: ['Open', 'Closed', 'Delivered', 'Not Received'] },
+  status: { type: String, required: true, enum: ['Open', 'Closed', 'Delivered', 'Not Received', 'Deleted'] },
   /**True si el pedido fue hecho por la app. False si fue hecho por el sistema */
   app: { type: Boolean, required: true },
   /**Usuarios que participan es este pedido. Si el pedido se realiza en el bar/restaurant usar el
