@@ -12,8 +12,6 @@ const clientSchema = Schema({
   addressNumber: { type: Number },
   addressDpto: {type: String },
   enabledTransactions: { type: Boolean, required: true }, //Determina si tiene cuenta corriente o no  
-  dateOfLastTransaction: { type: Date },  //se actualiza cada vez que se hace una transacción. Sirve para buscar las transacciones
-                                          //a agregar a un arqueo cuando este es abierto con una fecha y hs anterior a la actual.
   balance: { type: Number, required: true }, //saldo del cliente a la fecha de realizada la transacción. 
                                              //Debe actualizarse cada vez que se realiza una transacción
   transactions: [{
