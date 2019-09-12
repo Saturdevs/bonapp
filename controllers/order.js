@@ -2,34 +2,34 @@
 
 const Order = require('../models/order')
 
-function getOrders (req, res) {
+function getOrders(req, res) {
   Order.find({}, (err, orders) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!orders) return res.status(404).send({ message: `No existen órdenes registradas en la base de datos.`})
+    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` })
+    if (!orders) return res.status(404).send({ message: `No existen órdenes registradas en la base de datos.` })
 
     res.status(200).send({ orders })
   })
 }
 
-function getOrder (req, res) {
+function getOrder(req, res) {
   let orderId = req.params.orderId
 
   Order.findById(orderId)
     .populate('cashRegister')
     .exec((err, order) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!order) return res.status(404).send({ message: `La orden ${orderId} no existe`})
+      if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` })
+      if (!order) return res.status(404).send({ message: `La orden ${orderId} no existe` })
 
-    res.status(200).send({ order }) //Cuando la clave y el valor son iguales
-  })
+      res.status(200).send({ order }) //Cuando la clave y el valor son iguales
+    })
 }
 
-function getOrdersByUser (req, res) {
+function getOrdersByUser(req, res) {
   let userId = req.params.userId
 
   Order.find({ 'users.id': userId }, (err, orders) => {
-    if(err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})    
-    if (!orders) return res.status(404).send({ message: `No existen pedidos hechos por el usuario ${userId}`})
+    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` })
+    if (!orders) return res.status(404).send({ message: `No existen pedidos hechos por el usuario ${userId}` })
 
     res.status(200).send({ orders })
   })
@@ -46,24 +46,19 @@ function getOrderByTableByStatus(req, res) {
     .populate('waiter')
     .populate('cashRegister')
     .exec((err, orders) => {
-      if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})      
+      if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` })
 
       res.status(200).send({ orders })
     })
 }
 
-function getLastOrder(req, res) {
-  Order.find().sort({orderNumber:-1}).limit(1).exec((err, orders) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-  
-    res.status(200).send({ lastOrder: orders[0] })
-  })
+function getLastOrder() {
+  return Order.find().sort({ orderNumber: -1 }).limit(1).exec();
 }
 
-function saveOrder (req, res) {
+async function saveOrder(req, res) {
   let order = new Order()
 
-  order.orderNumber = req.body.orderNumber
   order.type = req.body.type
   order.table = req.body.table
   order.waiter = req.body.waiter
@@ -74,10 +69,24 @@ function saveOrder (req, res) {
   //completed_at vacío hasta que se cierra el pedido (se hace en update)
   //discountPercentage idem anterior  
   //totalPrice idem anterior  
-  console.log(order)
 
+  try {
+    let orderedOrders = await getLastOrder();
+    let lastOrder = orderedOrders [0];
+
+    if (lastOrder === null || lastOrder === undefined) {
+      order.orderNumber = 1;
+    }
+    else {
+      order.orderNumber = lastOrder.orderNumber +1;
+    }
+  }
+  catch (err) {
+    return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` })
+  }
+  
   order.save((err, orderStored) => {
-    if(err){      
+    if (err) {
       return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` })
     }
 
@@ -85,35 +94,35 @@ function saveOrder (req, res) {
   })
 }
 
-function updateOrder (req, res) {
+function updateOrder(req, res) {
   let orderId = req.params.orderId
   let bodyUpdate = req.body
 
-  Order.findByIdAndUpdate(orderId, bodyUpdate, {new: true}, (err, orderUpdated) => {
-    if (err) return res.status(500).send({ message: `Error al querer actualizar la orden: ${err}`})
+  Order.findByIdAndUpdate(orderId, bodyUpdate, { new: true }, (err, orderUpdated) => {
+    if (err) return res.status(500).send({ message: `Error al querer actualizar la orden: ${err}` })
 
     res.status(200).send({ order: orderUpdated })
   })
 }
 
-function deleteOrder (req, res) {
+function deleteOrder(req, res) {
   let orderId = req.params.orderId
 
   Order.findById(orderId, (err, order) => {
-    if (err) return res.status(500).send({ message: `Error al querer eliminar el pedido: ${err}`})
+    if (err) return res.status(500).send({ message: `Error al querer eliminar el pedido: ${err}` })
 
     Order.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer eliminar el pedido: ${err}`})
-      res.status(200).send({message: `El pedido ha sido eliminado`})
+      if (err) return res.status(500).send({ message: `Error al querer eliminar el pedido: ${err}` })
+      res.status(200).send({ message: `El pedido ha sido eliminado` })
     })
   })
 }
 
-function unSetTable (req, res) {
+function unSetTable(req, res) {
   let tableNumber = req.params.tableNumber
-  Order.updateMany({ table: tableNumber }, { $set: { table: null }}, (err, raw) => {
-    if (err) return res.status(500).send({ message: `Error al eliminar la mesa del pedido: ${err}`});
-    res.status(200).send({message: `Todos los pedidos con número de mesa ${tableNumber} han quedado sin una mesa asignada`})
+  Order.updateMany({ table: tableNumber }, { $set: { table: null } }, (err, raw) => {
+    if (err) return res.status(500).send({ message: `Error al eliminar la mesa del pedido: ${err}` });
+    res.status(200).send({ message: `Todos los pedidos con número de mesa ${tableNumber} han quedado sin una mesa asignada` })
   });
 }
 
@@ -122,7 +131,6 @@ module.exports = {
   getOrdersByUser,
   getOrders,
   getOrderByTableByStatus,
-  getLastOrder,
   saveOrder,
   updateOrder,
   deleteOrder,
