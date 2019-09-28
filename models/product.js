@@ -18,7 +18,8 @@ const productSchema = Schema({
   }],
   sizes: [{
     name: { type: String, required: true },
-    price: { type: Number, required: true }
+    price: { type: Number, required: true },
+    default: { type: Boolean, required: true}
   }],
   available: { type: Boolean, required: true },
   tags: [{ type: String }]
