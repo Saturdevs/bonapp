@@ -42,7 +42,10 @@ const orderSchema = Schema({
      * Si el pedido se realiza por la app usar los id de usuarios correspondientes que se encuentran
      * en la coleccion users de la base de datos general.
     */
-    user: { type: Schema.Types.ObjectId, ref: User },
+    user: { 
+      id: { type: String, required: true },
+      username: { type: String, required: true }
+    },
     /**Productos pedidos por UN usuario */
     products: [{
       /**Id del producto que se encuentra en la coleccion products */

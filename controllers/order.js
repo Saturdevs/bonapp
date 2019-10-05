@@ -1,6 +1,8 @@
 'use strict'
 
-const Order = require('../models/order')
+const Order = require('../models/order');
+const OrderService = require('../services/order');
+const orderStatus = require('../shared/enums/orderStatus');
 
 function getOrders(req, res) {
   Order.find({}, (err, orders) => {
@@ -24,85 +26,105 @@ function getOrder(req, res) {
     })
 }
 
-function getOrdersByUser(req, res) {
-  let userId = req.params.userId
-
-  Order.find({ 'users.id': userId }, (err, orders) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` })
-    if (!orders) return res.status(404).send({ message: `No existen pedidos hechos por el usuario ${userId}` })
-
-    res.status(200).send({ orders })
-  })
-}
-
 //Devuelve los pedidos abiertos o cerrados (segun query) para la mesa que se recibe como parametro
-function getOrderByTableByStatus(req, res) {
-  let tableNro = parseInt(req.params.table)
-  let status = req.query.open
+async function getOrderByTableByStatus(req, res) {
+  let tableNro = parseInt(req.params.table);
+  let status = req.query.open;
+  let data = {};
 
-  Order.find({ table: tableNro, status: status })
-    .populate('users.user')
-    .populate('users.products.product')
-    .populate('waiter')
-    .populate('cashRegister')
-    .exec((err, orders) => {
-      if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` })
+  try {
+    if (status === orderStatus.OPEN) {
+      data = await OrderService.getOpenedOrderForTable(tableNro);
+    }
+    else {
+      data = await OrderService.getOrdersByTableByStatus(tableNro, status);
+    }
 
-      res.status(200).send({ orders })
-    })
-}
-
-function getLastOrder() {
-  return Order.find().sort({ orderNumber: -1 }).limit(1).exec();
+    res.status(200).send({ order: data });
+  }
+  catch (err) {
+    throw new Error(err);
+  }
 }
 
 async function saveOrder(req, res) {
-  let order = new Order()
-
-  order.type = req.body.type
-  order.table = req.body.table
-  order.waiter = req.body.waiter
-  order.status = 'Open'
-  order.users = req.body.users
-  order.app = req.body.app
-  order.created_at = new Date()
-  //completed_at vacío hasta que se cierra el pedido (se hace en update)
-  //discountPercentage idem anterior  
-  //totalPrice idem anterior  
-
   try {
-    let orderedOrders = await getLastOrder();
-    let lastOrder = orderedOrders [0];
+    const orderDTO = req.body;
 
-    if (lastOrder === null || lastOrder === undefined) {
-      order.orderNumber = 1;
+    let order = await OrderService.createOrder(orderDTO);
+ 
+    if (order !== null && order !== 'undefined')
+    {
+      res.status(200).send({ order: order });
     }
-    else {
-      order.orderNumber = lastOrder.orderNumber +1;
+    else 
+    {
+      res.status(500).send({ message: `Error al guardar en la base de datos` });  
     }
   }
   catch (err) {
-    return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` })
+    res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` });
   }
-  
-  order.save((err, orderStored) => {
-    if (err) {
-      return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` })
-    }
-
-    res.status(200).send({ order: orderStored })
-  })
 }
 
-function updateOrder(req, res) {
-  let orderId = req.params.orderId
-  let bodyUpdate = req.body
+async function updateOrderProducts(req, res) {
+  try {
+    let orderDTO = req.body;    
 
-  Order.findByIdAndUpdate(orderId, bodyUpdate, { new: true }, (err, orderUpdated) => {
-    if (err) return res.status(500).send({ message: `Error al querer actualizar la orden: ${err}` })
+    const orderUpdated = await OrderService.updateOrderProducts(orderDTO);
 
-    res.status(200).send({ order: orderUpdated })
-  })
+    if (orderUpdated !== null && orderUpdated !== 'undefined')
+    {
+      res.status(200).send({ order: orderUpdated });
+    }
+    else 
+    {
+      res.status(500).send({ message: `Error al actualizar los productos del pedido en la base de datos` });  
+    }
+  }
+  catch (err) {
+    res.status(500).send({ message: `Error al actualizar los productos del pedido en la base de datos: ${err}` });
+  }
+}
+
+async function updateOrder(req, res) {
+  try {
+    let orderDTO = req.body;
+
+    const orderUpdated = await OrderService.updateOrder(orderDTO);
+
+    if (orderUpdated !== null && orderUpdated !== 'undefined')
+    {
+      res.status(200).send({ order: orderUpdated });
+    }
+    else 
+    {
+      res.status(500).send({ message: `Error al querer actualizar la orden: orderUpdated es null o undefined` });  
+    }
+  }
+  catch (err) {
+    res.status(500).send({ message: `Error al querer actualizar la orden: ${err}` });  
+  }
+}
+
+async function closeOrder(req, res) {
+  try {
+    let orderDTO = req.body;
+
+    const orderUpdated = await OrderService.closeOrder(orderDTO);
+
+    if (orderUpdated !== null && orderUpdated !== 'undefined')
+    {
+      res.status(200).send({ order: orderUpdated });
+    }
+    else 
+    {
+      res.status(500).send({ message: `Error al querer cerrar el pedido: orderUpdated es null o undefined` });  
+    }
+  }
+  catch (err) {
+    res.status(500).send({ message: `Error al querer cerrar el pedido: ${err}` });  
+  }
 }
 
 function deleteOrder(req, res) {
@@ -123,16 +145,17 @@ function unSetTable(req, res) {
   Order.updateMany({ table: tableNumber }, { $set: { table: null } }, (err, raw) => {
     if (err) return res.status(500).send({ message: `Error al eliminar la mesa del pedido: ${err}` });
     res.status(200).send({ message: `Todos los pedidos con número de mesa ${tableNumber} han quedado sin una mesa asignada` })
-  });
+  });  
 }
 
 module.exports = {
   getOrder,
-  getOrdersByUser,
   getOrders,
   getOrderByTableByStatus,
   saveOrder,
+  updateOrderProducts,
   updateOrder,
+  closeOrder,
   deleteOrder,
   unSetTable
 }

@@ -5,6 +5,7 @@ const cashRegisterCtrl = require('../controllers/cashRegister')
 const cashRegisterRouter = express.Router()
 
 cashRegisterRouter.get('/', cashRegisterCtrl.getCashRegisters)
+cashRegisterRouter.get('/default', cashRegisterCtrl.getDefaultCashRegister)
 cashRegisterRouter.get('/availables', cashRegisterCtrl.getAvailableCashRegisters)
 cashRegisterRouter.get('/:cashRegisterId', cashRegisterCtrl.getCashRegister)
 cashRegisterRouter.post('/', cashRegisterCtrl.saveCashRegister)

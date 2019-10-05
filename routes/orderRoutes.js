@@ -6,10 +6,11 @@ const orderRouter = express.Router()
 
 orderRouter.get('/', orderCtrl.getOrders)
 orderRouter.get('/:orderId', orderCtrl.getOrder)
-orderRouter.get('/:userId', orderCtrl.getOrdersByUser)
 orderRouter.get('/status/:table', orderCtrl.getOrderByTableByStatus)
 orderRouter.post('/', orderCtrl.saveOrder)
 orderRouter.put('/unsettable/:tableNumber', orderCtrl.unSetTable)
+orderRouter.put('/products/', orderCtrl.updateOrderProducts)
+orderRouter.put('/close/:orderId', orderCtrl.closeOrder)
 orderRouter.put('/:orderId', orderCtrl.updateOrder)
 orderRouter.delete('/:orderId', orderCtrl.deleteOrder)
 

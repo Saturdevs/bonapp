@@ -35,6 +35,15 @@ function getCashRegister (req, res) {
   })
 }
 
+function getDefaultCashRegister (req, res) {
+  CashRegister.find({default: true}, (err, cashRegister) => {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
+    if (!cashRegister) return res.status(404).send({ message: `No existe una caja registradora por default.`})
+
+    res.status(200).send({ cashRegister })
+  })
+}
+
 function saveCashRegister (req, res) {
   console.log('POST /api/cashRegister')
   console.log(req.body)
@@ -154,6 +163,7 @@ module.exports = {
   getCashRegister,  
   getCashRegisters,
   getAvailableCashRegisters,
+  getDefaultCashRegister,
   saveCashRegister,
   updateCashRegister,
   unSetDefaultCashRegister,
