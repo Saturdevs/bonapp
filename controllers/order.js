@@ -69,11 +69,14 @@ async function saveOrder(req, res) {
 
 async function updateOrderProducts(req, res) {
   try {
-    let orderDTO = req.body;    
+    let orderDTO = req.body.order;
+    let userName = req.body.username;
+    let productsToAdd = req.body.products;
+    let totalToAdd = req.body.total;
 
-    const orderUpdated = await OrderService.updateOrderProducts(orderDTO);
+    const orderUpdated = await OrderService.updateOrderProducts(orderDTO, productsToAdd, userName, totalToAdd);
 
-    if (orderUpdated !== null && orderUpdated !== 'undefined')
+    if (orderUpdated !== null && orderUpdated !== undefined)
     {
       res.status(200).send({ order: orderUpdated });
     }
@@ -84,6 +87,28 @@ async function updateOrderProducts(req, res) {
   }
   catch (err) {
     res.status(500).send({ message: `Error al actualizar los productos del pedido en la base de datos: ${err}` });
+  }
+}
+
+async function deleteProductOrder(req, res) {
+  try {
+    let orderDTO = req.body.order;
+    let userName = req.body.username;
+    let productToRemove = req.body.productToRemove;
+
+    const orderUpdated = await OrderService.deleteProduct(orderDTO, productToRemove, userName);
+
+    if (orderUpdated !== null && orderUpdated !== undefined)
+    {
+      res.status(200).send({ order: orderUpdated });
+    }
+    else 
+    {
+      res.status(500).send({ message: `Error al eliminar el producto del pedido en la base de datos` });  
+    }
+  }
+  catch (err) {
+    res.status(500).send({ message: `Error al eliminar el producto del pedido en la base de datos: ${err}` });
   }
 }
 
@@ -154,6 +179,7 @@ module.exports = {
   getOrderByTableByStatus,
   saveOrder,
   updateOrderProducts,
+  deleteProductOrder,
   updateOrder,
   closeOrder,
   deleteOrder,

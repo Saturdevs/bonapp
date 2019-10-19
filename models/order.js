@@ -37,15 +37,11 @@ const orderSchema = Schema({
    * usuario admin. Sino es un array con los distintos usuarios que ordenen productos dentro de este pedido.
    */
   users: [{
-    /**Id del usuario. Si el pedido se realiza en el bar/restaurant usar el id del
-     * usuario admin que se encuentra en la colección users de la base de datos del bar.
-     * Si el pedido se realiza por la app usar los id de usuarios correspondientes que se encuentran
+    /**Username. Si el pedido se realiza en el bar/restaurant usar "admin".
+     * Si el pedido se realiza por la app usar el username del usuario correspondientes que se encuentran
      * en la coleccion users de la base de datos general.
     */
-    user: { 
-      id: { type: String, required: true },
-      username: { type: String, required: true }
-    },
+    username: { type: String, required: true },
     /**Productos pedidos por UN usuario */
     products: [{
       /**Id del producto que se encuentra en la coleccion products */
