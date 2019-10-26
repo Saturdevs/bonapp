@@ -5,6 +5,7 @@
  */
 
 const ArqueoService = require('../services/arqueoCaja');
+const HttpStatus = require('http-status-codes');
 
 /** 
  * @method
@@ -16,13 +17,13 @@ async function getArqueos(req, res) {
     let arqueos = await ArqueoService.getNotDeletedArqueos();
 
     if (arqueos !== null && arqueos !== undefined) {
-      res.status(200).send({ arqueos });
+      res.status(HttpStatus.OK).send({ arqueos });
     }
     else {
-      res.status(404).send({ message: `No existen arqueos no eliminados en la base de datos.` })
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen arqueos no eliminados en la base de datos.` })
     }
   } catch (err) {
-    res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }
 
@@ -38,14 +39,14 @@ async function getArqueo(req, res) {
     let arqueo = await ArqueoService.getArqueo(arqueoId);
 
     if (arqueo !== null && arqueo !== undefined) {
-      res.status(200).send({ arqueo });
+      res.status(HttpStatus.OK).send({ arqueo });
     }
     else {
-      res.status(500).send({ message: `El arqueo ${arqueoId} no existe en la base da datos` });
+      res.status(HttpStatus.NOT_FOUND).send({ message: `El arqueo ${arqueoId} no existe en la base da datos` });
     }
   }
   catch (err) {
-    res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }
 
@@ -60,10 +61,10 @@ async function getArqueoOpenByCashRegister(req, res) {
     let cashRegisterId = req.params.cashRegisterId
     let arqueo = await ArqueoService.getArqueoOpenByCashRegister(cashRegisterId);
 
-    res.status(200).send({ arqueo });
+    res.status(HttpStatus.OK).send({ arqueo });
   }
   catch (err) {
-    res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }
 
@@ -78,10 +79,10 @@ async function saveArqueo(req, res) {
     let arqueo = req.arqueo;
     let arqueoSaved = await ArqueoService.save(arqueo);
 
-    res.status(200).send({ arqueo: arqueoSaved });
+    res.status(HttpStatus.OK).send({ arqueo: arqueoSaved });
   } 
   catch (err) {
-    res.status(500).send({ message: `Error al querer guardar el arqueo: ${err}.` });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer guardar el arqueo: ${err}.` });
   }
 }
 
@@ -98,9 +99,9 @@ async function updateArqueo(req, res) {
     let bodyUpdate = req.body;
 
     let arqueoUpdated = await ArqueoService.update(arqueoId, bodyUpdate);
-    res.status(200).send({ arqueo: arqueoUpdated });
+    res.status(HttpStatus.OK).send({ arqueo: arqueoUpdated });
   } catch (err) {
-    res.status(500).send({ message: `Error al querer actualizar el arqueo: ${err}.` });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar el arqueo: ${err}.` });
   }
 }
 
@@ -113,9 +114,9 @@ function deleteArqueo(req, res) {
   try {
     let arqueoId = req.params.arqueoId;
     ArqueoService.deleteArqueo(arqueoId);
-    res.status(200).send({ message: `El arqueo ha sido eliminado` });
+    res.status(HttpStatus.OK).send({ message: `El arqueo ha sido eliminado` });
   } catch (err) {
-    res.status(500).send({ message: `Error al querer borrar el arqueo: ${err}` })    
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el arqueo: ${err}` })    
   }
 }
 
