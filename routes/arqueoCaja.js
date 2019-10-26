@@ -1,17 +1,16 @@
 'use strict'
 
-const express = require('express')
-const arqueoCajaCtrl = require('../controllers/arqueoCaja')
-const arqueoCajaRouter = express.Router()
+const express = require('express');
+const arqueoCajaCtrl = require('../controllers/arqueoCaja');
+const arqueoCajaRouter = express.Router();
+const validators = require('../middlewares/arqueo/validations');
+const businessRules = require('../middlewares/arqueo/businessRules');
 
-arqueoCajaRouter.get('/', arqueoCajaCtrl.getArqueos)
-arqueoCajaRouter.get('/all', arqueoCajaCtrl.getAll)
-arqueoCajaRouter.get('/:arqueoId', arqueoCajaCtrl.getArqueo)   
-arqueoCajaRouter.get('/:cashRegisterId/cashRegister', arqueoCajaCtrl.getArqueosByCashRegister)
-arqueoCajaRouter.get('/:cashRegisterId/cashRegister/open', arqueoCajaCtrl.getArqueoOpenByCashRegister)
-arqueoCajaRouter.get('/:cashRegisterId/cashRegister/last', arqueoCajaCtrl.getLastArqueoByCashRegister)
-arqueoCajaRouter.post('/', arqueoCajaCtrl.saveArqueo)
-arqueoCajaRouter.put('/:arqueoId', arqueoCajaCtrl.updateArqueo)
-arqueoCajaRouter.delete('/:arqueoId', arqueoCajaCtrl.deleteArqueo)
+arqueoCajaRouter.get('/', arqueoCajaCtrl.getArqueos);
+arqueoCajaRouter.get('/:arqueoId', arqueoCajaCtrl.getArqueo);
+arqueoCajaRouter.get('/:cashRegisterId/cashRegister/open', arqueoCajaCtrl.getArqueoOpenByCashRegister);
+arqueoCajaRouter.post('/', validators.validateCreate, businessRules.setCashMovementsByDateToCashCount, arqueoCajaCtrl.saveArqueo);
+arqueoCajaRouter.put('/:arqueoId', arqueoCajaCtrl.updateArqueo);
+arqueoCajaRouter.delete('/:arqueoId', arqueoCajaCtrl.deleteArqueo);
 
-module.exports = arqueoCajaRouter
+module.exports = arqueoCajaRouter;

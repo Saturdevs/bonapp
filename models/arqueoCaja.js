@@ -10,7 +10,7 @@ const arqueoSchema = Schema({
   cashRegisterId: { type: Schema.Types.ObjectId, ref: CashRegister, required: true },
   createdAt: { type: Date, required: true },
   closedAt: { type: Date },
-  createdBy: { type: Schema.Types.ObjectId, ref: User },
+  createdBy: { type: Schema.Types.ObjectId, ref: User, required: true },
   closeBy: { type: Schema.Types.ObjectId, ref: User },
   initialAmount: { type: Number, required: true },
   ingresos: [{ 
