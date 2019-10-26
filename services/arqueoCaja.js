@@ -108,7 +108,7 @@ async function transformToBusinessObject(arqueoEntity) {
     let totalEgresos = 0;
     let realAmount = 0;
 
-    let arqueoReturned = JSON.parse(JSON.stringify(arqueoEntity));;
+    let arqueoReturned = JSON.parse(JSON.stringify(arqueoEntity));
     let cashRegister = await CashRegisterService.getCashRegisterById(arqueoEntity.cashRegisterId);    
     
     arqueoEntity.ingresos.map(ingreso => {
