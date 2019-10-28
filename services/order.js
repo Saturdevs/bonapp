@@ -448,14 +448,15 @@ async function transformToBusinessObject(orderEntity) {
     let order = {};
     let users = [];
 
-    orderEntity.users.forEach(user => {
+    for (let i = 0; i < orderEntity.users.length; i++) {
+      const user = orderEntity.users[i];
       let usr = {};
       let products = [];
 
-      user.products.forEach(async product => {
+      for (let j = 0; j < user.products.length; j++) {
+        const product = user.products[j];
         let prod = {};
-
-        let productStored = await productService.getProductById(product.product);
+        const productStored = await productService.getProductById(product.product);
 
         prod._id = product._id.toString();
         prod.product = productStored._id;
@@ -469,7 +470,7 @@ async function transformToBusinessObject(orderEntity) {
         prod.deletedReason = product.deletedReason;
 
         products.push(prod);
-      })
+      }
 
       usr.username = user.username;
       usr.products = products;
@@ -478,7 +479,7 @@ async function transformToBusinessObject(orderEntity) {
       usr.owner = user.owner
 
       users.push(usr);
-    })
+    }
 
     order._id = orderEntity._id;
     order.orderNumber = orderEntity.orderNumber;
