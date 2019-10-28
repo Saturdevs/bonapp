@@ -139,6 +139,8 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
     usr.username = username;
     usr.products = products;
     usr.owner = !ownerFound;
+
+    order.users.push(usr);
   }
 
   return order.users;
