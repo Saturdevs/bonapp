@@ -369,7 +369,7 @@ async function updateOrder(order) {
 }
 
 async function closeOrder(order) {
-  if (order.cashRegister === null || order.cashRegister === 'undefined') {
+  if (order.cashRegister === null || order.cashRegister === undefined) {
     throw new Error("Se debe seleccionar una caja registradora para hacer el cierre del pedido");
   }
 
@@ -380,7 +380,7 @@ async function closeOrder(order) {
   users = [];
 
   order.users.forEach(user => {
-    if (user.payments !== null && user.payments !== 'undefined' && !paymentFound) {
+    if (user.payments !== null && user.payments !== undefined && !paymentFound) {
       paymentFound = true;
     }
 
@@ -421,12 +421,32 @@ async function closeOrder(order) {
 }
 
 /**
+ * Recupera de la base de datos los pedidos segun el estado dado como parámetro 
+ * para la caja registradora dada como parámetro con fecha de cierre mayor a la fecha dada.
+ * @param {ObjectId} cashRegisterId 
+ * @param {String} status 
+ * @param {Date} completedDate 
+ * @returns {Order[]} array de pedidos recuperados del backend. No se usa el tranform porque no se va a enviar al frontend
+ */
+async function getOrdersByCashRegisterByStatusAndCompletedDate(cashRegisterId, status, completedDate) {
+  try {
+    let query = { cashRegister: cashRegisterId, status: status, completed_at: { "$gte": completedDate } };
+    let orders = await getOrderByQuery(query);
+
+    return orders;
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**
  * Transforma el pedido recuperado de la base de datos en el objeto pedido usado en el front end.
  * @param {*} orderEntity 
  * @returns el pedido con el formato usaro en el front end
  */
 async function transformToBusinessObject(orderEntity) {
-  if (orderEntity !== null && orderEntity !== 'undefined') {
+  if (orderEntity !== null && orderEntity !== undefined) {
     let order = {};
     let users = [];
 
@@ -477,11 +497,11 @@ async function transformToBusinessObject(orderEntity) {
     order.discount = orderEntity.discount;
     order.totalPrice = orderEntity.totalPrice;
 
-    order.cashRegister = (orderEntity.cashRegister !== null && orderEntity.cashRegister !== 'undefined') ?
+    order.cashRegister = (orderEntity.cashRegister !== null && orderEntity.cashRegister !== undefined) ?
       await cashRegisterService.getCashRegisterById(orderEntity.cashRegister) :
       null;
 
-    order.waiter = (orderEntity.waiter !== null && orderEntity.waiter !== 'undefined') ?
+    order.waiter = (orderEntity.waiter !== null && orderEntity.waiter !== undefined) ?
       await userService.getUserById(orderEntity.waiter) :
       null;
 
@@ -542,5 +562,6 @@ module.exports = {
   updateOrder,
   closeOrder,
   getOrdersByTableByStatus,
-  getOpenedOrderForTable
+  getOpenedOrderForTable,
+  getOrdersByCashRegisterByStatusAndCompletedDate
 }
