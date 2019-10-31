@@ -30,7 +30,8 @@ const arqueoSchema = Schema({
                                //por la persona encargada de hacer el cierre del arqueo. hay que validar desde el front end que sea obligatorio
                                //ingrsarlo al momento de cerrar el arqueo.
   comment: { type: String },
-  deleted: { type: Boolean, required: true}
+  deleted: { type: Boolean, required: true},
+  deletedBy: { type: Schema.Types.ObjectId, ref: User }
 });
 
 module.exports = mongoose.model('Arqueo', arqueoSchema);
