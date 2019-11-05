@@ -7,10 +7,19 @@ const Client = require('../models/client');
  * @param {Date} date 
  * @returns {Client[]} clientes recuperados de la base de datos
  */
-async function getClientsWithTransactionsByDate(date) {
+async function getTransactionsByDate(date) {
   try {
-    let query = {"transactions.date": { "$gte": date }};
-    let clients = await getClientByQuery(query);
+    let query = [
+      {$match: {"transactions.date": { "$gte": date }}}, 
+      {$project: {
+        transactions: {$filter: { 
+          input: "$transactions",
+          as: "transactions",
+          cond: {$gt: ["$$transactions.date", date]}
+        }}
+      }}
+    ];
+    let clients = await getUsingAggregate(query);
 
     return clients;
   }
@@ -37,6 +46,15 @@ async function getClientByQuery(query) {
   }
 }
 
+async function getUsingAggregate(query) {
+  try {
+    let result = await Client.aggregate(query);
+    return result    
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
 module.exports = {
-  getClientsWithTransactionsByDate
+  getTransactionsByDate
 }

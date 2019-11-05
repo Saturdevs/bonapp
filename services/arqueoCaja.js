@@ -77,10 +77,14 @@ async function getLastArqueoByCashRegister(cashRegisterId) {
  */
 async function update(arqueoId, bodyUpdate) {
   try {
+    if (arqueoId === null || arqueoId === undefined ||
+        bodyUpdate === null || bodyUpdate === undefined) {
+          throw new Error("El arqueo a actualizar no puede ser nulo");
+        }
     let arqueoUpdated = await updateArqueoById(arqueoId, bodyUpdate);
     return transformToBusinessObject(arqueoUpdated);
   } catch (err) {
-    throw new Error(err);
+    throw new Error(err.message);
   }
 }
 

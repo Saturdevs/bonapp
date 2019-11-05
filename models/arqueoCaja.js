@@ -5,6 +5,8 @@ const Schema = mongoose.Schema;
 const User = require('../models/user');
 const PaymentType = require('../models/paymentType');
 const CashRegister = require('../models/cashRegister');
+const CashInTypes = require('../shared/enums/cashInTypes');
+const CashOutTypes = require('../shared/enums/cashOutTypes');
 
 const arqueoSchema = Schema({
   cashRegisterId: { type: Schema.Types.ObjectId, ref: CashRegister, required: true },
@@ -15,13 +17,15 @@ const arqueoSchema = Schema({
   initialAmount: { type: Number, required: true },
   ingresos: [{ 
     paymentType: { type: Schema.Types.ObjectId, ref: PaymentType, required: true }, 
-    desc: { type: String, enum: ['Movimiento de Caja', 'Ventas', 'Cobros clientes cta. cte'], required: true},
-    amount: { type: Number, required: true } 
+    desc: { type: String, enum: [CashInTypes.MOVIMIENTO_DE_CAJA, CashInTypes.VENTAS, CashInTypes.COBROS_CLIENTES_CTA_CTE], required: true},
+    amount: { type: Number, required: true },
+    date: { type: Date, required: true } 
   }],
   egresos: [{ 
     paymentType: { type: Schema.Types.ObjectId, ref: PaymentType, required: true }, 
-    desc: { type: String, enum: ['Movimiento de Caja', 'Pagos proveedores cta. cte'], required: true},
-    amount: { type: Number, required: true } 
+    desc: { type: String, enum: [CashOutTypes.MOVIMIENTO_DE_CAJA, CashOutTypes.PAGOS_PROVEEDORES_CTA_CTE], required: true},
+    amount: { type: Number, required: true },
+    date: { type: Date, required: true }
   }],
   realAmount: [{ 
     paymentType: { type: Schema.Types.ObjectId, ref: PaymentType, required: true },

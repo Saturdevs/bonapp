@@ -5,6 +5,9 @@ const CashFlow = require('../../services/cashFlow');
 const Client = require('../../services/client');
 const OrderStatus = require('../../shared/enums/orderStatus');
 const HttpStatus = require('http-status-codes');
+const CashInTypes = require('../../shared/enums/cashInTypes');
+const CashOutTypes = require('../../shared/enums/cashOutTypes');
+const CashFlowTypes = require('../../shared/enums/cashFlowTypes');
 
 /**
  * Setea los movimientos de la caja registradora para la cual se creó el nuevo arqueo que se realizaron
@@ -24,7 +27,7 @@ async function setCashMovementsByDateToCashCount(req, res, next) {
     try {
       let orders = await OrderService.getOrdersByCashRegisterByStatusAndCompletedDate(cashRegisterId, OrderStatus.CLOSED, date);
       let cashFlows = await CashFlow.getCashFlowByCashRegisterAndDate(cashRegisterId, date);
-      let clients = await Client.getClientsWithTransactionsByDate(date);
+      let clients = await Client.getTransactionsByDate(date);
 
       if (orders !== null && orders !== undefined) {
         orders.forEach(order => {
@@ -33,8 +36,9 @@ async function setCashMovementsByDateToCashCount(req, res, next) {
               if (payment !== null && payment !== undefined) {
                 ingresos.push({
                   paymentType: payment.methodId,
-                  desc: 'Ventas',
-                  amount: payment.amount
+                  desc: CashInTypes.VENTAS,
+                  amount: payment.amount,
+                  date: order.created_at
                 })
               }
             })
@@ -44,34 +48,36 @@ async function setCashMovementsByDateToCashCount(req, res, next) {
 
       if (cashFlows !== null && cashFlows !== undefined) {
         cashFlows.forEach(cashFlow => {
-          if (cashFlow.type === 'Ingreso') {
+          if (cashFlow.type === CashFlowTypes.INGRESO) {
             ingresos.push({
               paymentType: cashFlow.paymentType,
-              desc: 'Movimiento de Caja',
-              amount: cashFlow.totalAmount
+              desc: CashInTypes.MOVIMIENTO_DE_CAJA,
+              amount: cashFlow.totalAmount,
+              date: cashFlow.date
             })
-          } else if (cashFlow.type === 'Egreso') {
+          } else if (cashFlow.type === CashFlowTypes.EGRESO) {
             egresos.push({
               paymentType: cashFlow.paymentType,
-              desc: 'Movimiento de Caja',
-              amount: cashFlow.totalAmount
+              desc: CashOutTypes.MOVIMIENTO_DE_CAJA,
+              amount: cashFlow.totalAmount,
+              date: cashFlow.date
             })
           }
         })
       }
 
-      if (clients !== null && clients !== undefined) {
-        if (clients) {
-          clients.forEach(client => {
-            client.transactions.forEach(transaction => {
-                ingresos.push({
-                  paymentType: transaction.paymentMethod,
-                  desc: 'Cobros clientes cta. cte',
-                  amount: transaction.amount
-                })
+      if (clients !== null && clients !== undefined && clients.length > 0) {
+        for (let i = 0; i < clients.length; i++) {
+          const client = clients[i];
+          for (let j = 0; j < client.transactions.length; j++) {
+            const transaction = client.transactions[j];
+            ingresos.push({
+              paymentType: transaction.paymentMethod,
+              desc: CashInTypes.COBROS_CLIENTES_CTA_CTE,
+              amount: transaction.amount,
+              date: transaction.date
             })
-
-          })
+          }
         }
       }
 
@@ -89,6 +95,6 @@ async function setCashMovementsByDateToCashCount(req, res, next) {
   }
 }
 
-module.exports = { 
-  setCashMovementsByDateToCashCount 
+module.exports = {
+  setCashMovementsByDateToCashCount
 }
