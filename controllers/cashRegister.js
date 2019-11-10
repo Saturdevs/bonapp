@@ -1,171 +1,100 @@
 'use strict'
 
-const CashRegister = require('../models/cashRegister')
-const Client = require('../models/client')
-const CashFlow = require('../models/cashFlow')
-const Order = require('../models/order')
-const CashCount = require('../models/arqueoCaja')
+const CashRegisterService = require('../services/cashRegister');
+const HttpStatus = require('http-status-codes');
 
-function getCashRegisters (req, res) {
-  CashRegister.find({}, (err, cashRegisters) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!cashRegisters) return res.status(404).send({ message: `No existen cajas registradas en la base de datos.`})
+async function getCashRegisters(req, res) {
+  try {
+    let cashRegisters = await CashRegisterService.getAll();
 
-    res.status(200).send({ cashRegisters })
-  })
-}
-
-function getAvailableCashRegisters (req, res) {
-  CashRegister.find({available: true}, (err, cashRegisters) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!cashRegisters) return res.status(404).send({ message: `No existen cajas habilitadas en la base de datos.`})
-
-    res.status(200).send({ cashRegisters })
-  })
-}
-
-function getCashRegister (req, res) {
-  let cashRegisterId = req.params.cashRegisterId
-
-  CashRegister.findById(cashRegisterId, (err, cashRegister) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!cashRegister) return res.status(404).send({ message: `La caja ${cashRegisterId} no existe`})
-
-    res.status(200).send({ cashRegister })
-  })
-}
-
-function getDefaultCashRegister (req, res) {
-  CashRegister.find({default: true}, (err, cashRegister) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!cashRegister) return res.status(404).send({ message: `No existe una caja registradora por default.`})
-
-    res.status(200).send({ cashRegister })
-  })
-}
-
-function saveCashRegister (req, res) {
-  console.log('POST /api/cashRegister')
-  console.log(req.body)
-
-  let cashRegister = new CashRegister()
-  cashRegister.name = req.body.name
-  cashRegister.available = true
-  cashRegister.default = false
-
-  cashRegister.save((err, cashRegisterStored) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una caja con ese nombre. Ingrese otro nombre.` })
+    if (cashRegisters !== null && cashRegisters !== undefined) {
+      res.status(HttpStatus.OK).send({ cashRegisters });
     }
-
-    res.status(200).send({ cashRegister: cashRegisterStored })
-  })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cajas registradoras almacenadas en la base de datos.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-function updateCashRegister (req, res) {
-  let cashRegisterId = req.params.cashRegisterId
-  let bodyUpdate = req.body
+async function getAvailableCashRegisters(req, res) {
+  try {
+    let cashRegisters = await CashRegisterService.getAvailableCashRegisters();
 
-  CashRegister.findByIdAndUpdate(cashRegisterId, bodyUpdate, (err, cashRegisterUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una caja con ese nombre. Ingrese otro nombre.` })
+    if (cashRegisters !== null && cashRegisters !== undefined) {
+      res.status(HttpStatus.OK).send({ cashRegisters });
     }
-
-    res.status(200).send({ cashRegister: cashRegisterUpdated })
-  })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cajas habilitadas.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-function unSetDefaultCashRegister (req, res) {
-  console.log('unset,back')
-  let cashRegisterId = req.params.cashRegisterId
-  CashRegister.updateMany({ default: true, _id: {"$ne": cashRegisterId} }, { $set: { default: false }}, (err, raw) => {
-    if (err) return handleError(err);
-    res.status(200).send({message: `La caja por default ha sido cambiada`})
-  });
+async function getCashRegister(req, res) {
+  try {
+    let cashRegisterId = req.params.cashRegisterId
+    let cashRegister = await CashRegisterService.getCashRegister(cashRegisterId);
+
+    if (cashRegister !== null && cashRegister !== undefined) {
+      res.status(HttpStatus.OK).send({ cashRegister });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `La caja ${cashRegisterId} no existe en la base de datos.` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-async function deleteCashRegister (req, res) {
-  let cashRegisterId = req.params.cashRegisterId
+async function saveCashRegister(req, res) {
+  try {
+    let cashRegisterSaved = await CashRegisterService.saveCashRegister(req.body);
 
-  await CashRegister.findById(cashRegisterId, async (err, cashRegister) => {    
-    if (err) return res.status(500).send({ message: `Error al intentar borrar la caja: ${err}`})
-
-    if (cashRegister !== 'undefined' && cashRegister !== null) {
-      let validationMessages = [];
-      let validationError;
-      validationMessages = await validateDelete(cashRegisterId)
-      if (validationMessages.length === 0) {
-        cashRegister.remove(err => {
-          if (err) return res.status(500).send({ message: `Error al intentar borrar la caja: ${err}`})
-          res.status(200).send({message: `La caja ha sido eliminada`})
-        })
-      } else {
-        validationError = `Esta caja (${cashRegister.name}) no puede ser eliminada debido a que:`
-
-        validationMessages.forEach(message => {
-          validationError += '\n\r\t- ' + message;            
-        });
-
-        validationError += '\n\rMárquela como inactiva en su lugar.'
-        return res.status(500).send({ message: validationError})        
-      } 
-    }
-  })
+    res.status(HttpStatus.OK).send({ cashRegister: cashRegisterSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
 }
 
-async function validateDelete(cashRegisterId) {
+async function updateCashRegister(req, res) {
+  try {
+    let cashRegisterId = req.params.cashRegisterId;
+    let bodyUpdate = req.body;
 
-  let validationErrors = [];
-  await Client.find({}, (err, clients) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de transacciones de clientes) ${err}`})
+    let cashRegisterUpdated = await CashRegisterService.update(cashRegisterId, bodyUpdate);
+    res.status(HttpStatus.OK).send({ cashRegister: cashRegisterUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar la caja registradora: ${err}.` });
+  }
+}
 
-    let found = false;
-    for (let i = 0; i < clients.length && !found; i++) {
-      for (let j = 0; j < clients[i].transactions.length && !found; j++) {                
-        if (clients[i].transactions[j].cashRegister.toString() === cashRegisterId) {          
-          validationErrors.push('Tiene TRANSACCIONES asociadas')
-          found = true;
-        }
-      }
-    }
-  })
+async function deleteCashRegister(req, res) {
+  let cashRegister = req.cashRegister;
 
-  await CashFlow.find({cashRegisterId: cashRegisterId}, (err, cashFlows) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de movimientos de caja) ${err}`})
+  if (cashRegister === null && cashRegister === undefined) {
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+      message: `No se encontró la caja que se desea borrar en la base de datos. Intente nuevamente`
+    })
+  }
 
-    if (cashFlows !== null && cashFlows !== 'undefined' && cashFlows.length > 0) {
-      validationErrors.push('Tiene MOVIMIENTOS DE CAJA asociados')
-    }
-  })
-
-  await Order.find({cashRegister: cashRegisterId}, (err, orders) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de pedidos) ${err}`})
-
-    if (orders !== null && orders !== 'undefined' && orders.length > 0) {
-      validationErrors.push('Tiene PEDIDOS asociados')
-    }
-  })
-
-  await CashCount.find({cashRegisterId: cashRegisterId}, (err, cashCounts) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar la caja (validación de arqueos) ${err}`})
-
-    if (cashCounts !== null && cashCounts !== 'undefined' && cashCounts.length > 0) {
-      validationErrors.push('Tiene ARQUEOS asociados')
-    }
-  })
-
-  return validationErrors
+  try {
+    CashRegisterService.removeCashRegister(cashRegister);
+    res.status(HttpStatus.OK).send({ message: `La caja ha sido eliminado` });    
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar la caja registradora: ${err}` })        
+  }
 }
 
 module.exports = {
-  getCashRegister,  
+  getCashRegister,
   getCashRegisters,
   getAvailableCashRegisters,
-  getDefaultCashRegister,
   saveCashRegister,
   updateCashRegister,
-  unSetDefaultCashRegister,
   deleteCashRegister
 }

@@ -32,7 +32,7 @@ async function getCashFlow(cashFlowId) {
 async function getAll() {
   try {
     let cashFlowsReturned = [];
-    let cashFlows = await getCashFlowByQuery({});
+    let cashFlows = await getCashFlowsByQuery({});
 
     for (let i = 0; i < cashFlows.length; i++) {
       const cashFlowTransformed = await transformToBusinessObject(cashFlows[i]);
@@ -55,11 +55,28 @@ async function getAll() {
 async function getCashFlowByCashRegisterAndDate(cashRegisterId, date) {
   try {
     let query = { cashRegisterId: cashRegisterId, deleted: false, date: { "$gte": date } };
-    let cashFlows = await getCashFlowByQuery(query);
+    let cashFlows = await getCashFlowsByQuery(query);
 
     return cashFlows;
   }
   catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
+ * @description Recupera un unico cashFlow con cashRegisterId igual al dado como parametro. Si hay mas de uno
+ * devuelve el primero que encuentra.
+ * @param {string} cashRegisterId 
+ * @returns primer cashFlow encontrado con cashRegisterId igual al dado como parametro.
+ */
+async function retrieveOneCashFlowForCashRegister(cashRegisterId) {
+  try {
+    let query = { cashRegisterId: cashRegisterId };
+    let cashFlow = await getOneCashFlowByQuery(query);
+    
+    return cashFlow;
+  } catch (err) {
     throw new Error(err.message);
   }
 }
@@ -295,10 +312,25 @@ async function getCashFlowById(cashFlowId) {
  * @description Recupera los movimientos de cajas que cumplan con la query dada.
  * @param {JSON} query 
  */
-async function getCashFlowByQuery(query) {
+async function getCashFlowsByQuery(query) {
   try {
     let cashFlows = await CashFlow.find(query);
     return cashFlows;
+  }
+  catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
+ * @description Recupera un unico cashFlow que cumpla con la query dada como parametro. Si hay mas de uno devuelve el primero
+ * encuentra.
+ * @param {JSON} query 
+ */
+async function getOneCashFlowByQuery(query) {
+  try {
+    let cashFlow = await CashFlow.findOne(query);
+    return cashFlow;
   }
   catch (err) {
     throw new Error(err.message);
@@ -351,5 +383,6 @@ module.exports = {
   getCashFlowByCashRegisterAndDate,
   saveCashFlow,
   update,
-  deleteCashFlow
+  deleteCashFlow,
+  retrieveOneCashFlowForCashRegister
 }

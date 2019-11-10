@@ -6,6 +6,23 @@ const cashRegisterService = require('../services/cashRegister');
 const userService = require('../services/user');
 
 /**
+ * @description Recupera un único order con cashRegisterId igual al dado como parametro. Si hay mas de uno
+ * devuelve el primero que encuentra.
+ * @param {string} cashRegisterId 
+ * @returns primer pedido encontrado con cashRegisterId igual al dado como parametro.
+ */
+async function retrieveOneOrderForCashRegister(cashRegisterId) {
+  try {
+    let query = { cashRegister: cashRegisterId };
+    let order = await getOneOrderByQuery(query);
+    
+    return order;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
  * Crea y guarda en la base de datos un pedido nuevo a partir del objeto recibido 
  * desde el front-end.
  * @param {*} order pedido a crear recibido desde el front end
@@ -529,6 +546,22 @@ async function getOrderByQuery(query) {
 }
 
 /**
+ * @description Recupera un unico pedido que cumpla con la query dada como parametro. Si hay mas de uno devuelve el primero
+ * encuentra.
+ * @param {JSON} query 
+ * @returns primer pedido encontrado que cumple con la query dada.
+ */
+async function getOneOrderByQuery(query) {
+  try {
+    let order = await Order.findOne(query);
+    return order;
+  }
+  catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
  * Recupera el último pedido de la base de datos.
  */
 async function getLastOrder() {
@@ -564,5 +597,6 @@ module.exports = {
   closeOrder,
   getOrdersByTableByStatus,
   getOpenedOrderForTable,
-  getOrdersByCashRegisterByStatusAndCompletedDate
+  getOrdersByCashRegisterByStatusAndCompletedDate,
+  retrieveOneOrderForCashRegister
 }

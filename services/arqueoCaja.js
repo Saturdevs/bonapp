@@ -71,6 +71,23 @@ async function getLastArqueoByCashRegister(cashRegisterId) {
 }
 
 /**
+ * @description Recupera un unico arqueo con cashRegisterId igual al dado como parametro. Si hay mas de uno
+ * devuelve el primero que encuentra.
+ * @param {string} cashRegisterId 
+ * @returns primer arqueo encontrado con cashRegisterId igual al dado como parametro.
+ */
+async function retrieveOneCashCountForCashRegister(cashRegisterId) {
+  try {
+    let query = { cashRegisterId: cashRegisterId };
+    let cashCount = await getOneCashCountByQuery(query);
+    
+    return cashCount;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
  * Actualiza el arqueo con id igual al dado como parametro en la base de datos.
  * @param {ObjectId} arqueoId 
  * @param {JSON} bodyUpdate 
@@ -183,6 +200,22 @@ async function getArqueoSortByQuery(query, sortCondition) {
 }
 
 /**
+ * @description Recupera un unico arqueo que cumpla con la query dada como parametro. Si hay mas de uno devuelve el primero
+ * encuentra.
+ * @param {JSON} query 
+ * @returns primer arqueo encontrado que cumple con la query dada.
+ */
+async function getOneCashCountByQuery(query) {
+  try {
+    let cashCount = await Arqueo.findOne(query);
+    return cashCount;
+  }
+  catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
  * Updetea el arqueo en la base de datos segun el id dado.
  * @param {ObjectID} arqueoId 
  * @param {JSON} bodyUpdate 
@@ -214,6 +247,7 @@ module.exports = {
   getNotDeletedArqueos,
   getArqueoOpenByCashRegister,
   getLastArqueoByCashRegister,
+  retrieveOneCashCountForCashRegister,
   deleteArqueo,
   save,
   update

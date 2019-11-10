@@ -1,16 +1,15 @@
 'use strict'
 
-const express = require('express')
-const cashRegisterCtrl = require('../controllers/cashRegister')
-const cashRegisterRouter = express.Router()
+const express = require('express');
+const cashRegisterCtrl = require('../controllers/cashRegister');
+const cashRegisterRouter = express.Router();
+const validators = require('../middlewares/cashRegister/validations');
 
-cashRegisterRouter.get('/', cashRegisterCtrl.getCashRegisters)
-cashRegisterRouter.get('/default', cashRegisterCtrl.getDefaultCashRegister)
-cashRegisterRouter.get('/availables', cashRegisterCtrl.getAvailableCashRegisters)
-cashRegisterRouter.get('/:cashRegisterId', cashRegisterCtrl.getCashRegister)
-cashRegisterRouter.post('/', cashRegisterCtrl.saveCashRegister)
-cashRegisterRouter.put('/unSetDefaultCashRegister/:cashRegisterId', cashRegisterCtrl.unSetDefaultCashRegister)
-cashRegisterRouter.put('/:cashRegisterId', cashRegisterCtrl.updateCashRegister)
-cashRegisterRouter.delete('/:cashRegisterId', cashRegisterCtrl.deleteCashRegister)
+cashRegisterRouter.get('/', cashRegisterCtrl.getCashRegisters);
+cashRegisterRouter.get('/availables', cashRegisterCtrl.getAvailableCashRegisters);
+cashRegisterRouter.get('/:cashRegisterId', cashRegisterCtrl.getCashRegister);
+cashRegisterRouter.post('/', cashRegisterCtrl.saveCashRegister);
+cashRegisterRouter.put('/:cashRegisterId', validators.validateUpdate, cashRegisterCtrl.updateCashRegister);
+cashRegisterRouter.delete('/:cashRegisterId', validators.validateDelete, cashRegisterCtrl.deleteCashRegister);
 
-module.exports = cashRegisterRouter
+module.exports = cashRegisterRouter;
