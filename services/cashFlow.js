@@ -1,6 +1,7 @@
 'use strict'
 
 const CashFlow = require('../models/cashFlow');
+const CashFlowTransform = require('../transformers/cashFlow');
 const CashRegisterService = require('../services/cashRegister');
 const CashCountService = require('../services/arqueoCaja');
 const PaymentTypeService = require('../services/paymentType');
@@ -17,7 +18,7 @@ async function getCashFlow(cashFlowId) {
   try {
     let cashFlow = await getCashFlowById(cashFlowId);
 
-    return transformToBusinessObject(cashFlow);
+    return CashFlowTransform.transformToBusinessObject(cashFlow);
   }
   catch (err) {
     throw new Error(err.message);
@@ -35,7 +36,7 @@ async function getAll() {
     let cashFlows = await getCashFlowsByQuery({});
 
     for (let i = 0; i < cashFlows.length; i++) {
-      const cashFlowTransformed = await transformToBusinessObject(cashFlows[i]);
+      const cashFlowTransformed = await CashFlowTransform.transformToBusinessObject(cashFlows[i]);
       cashFlowsReturned.push(cashFlowTransformed);
     }
 
@@ -94,7 +95,7 @@ async function update(cashFlowId, bodyUpdate) {
       await removeCashFlowFromCashCount(cashFlowUpdated);
     }
 
-    return transformToBusinessObject(cashFlowUpdated);
+    return CashFlowTransform.transformToBusinessObject(cashFlowUpdated);
   } catch (err) {
     throw new Error(err.message);
   }
@@ -113,7 +114,7 @@ async function saveCashFlow(cashFlowReq) {
     let cashFlowSaved = await save(cashFlow);
     await saveCashFlowIntoCashCount(cashFlow);
 
-    return transformToBusinessObject(cashFlowSaved);
+    return CashFlowTransform.transformToBusinessObject(cashFlowSaved);
   } catch (err) {
     throw new Error(err.message);
   }
@@ -269,24 +270,6 @@ async function deleteCashFlow(cashFlowId) {
     await remove(cashFlow);
   } catch (err) {
     throw new Error(err.message);
-  }
-}
-
-/**
- * @description Transforma el cash flow recuperado de la base de datos en el objeto cash flow usado en el front end.
- * Ver modelo en front end
- * @param {CashFlow} cashFlowEntity 
- */
-async function transformToBusinessObject(cashFlowEntity) {
-  if (cashFlowEntity !== null && cashFlowEntity !== undefined) {
-    let cashFlowReturned = JSON.parse(JSON.stringify(cashFlowEntity));
-    let cashRegister = await CashRegisterService.getCashRegisterById(cashFlowEntity.cashRegisterId);
-    let paymentType = await PaymentTypeService.getPaymentTypeById(cashFlowEntity.paymentType);
-
-    cashFlowReturned.cashRegister = cashRegister.name;
-    cashFlowReturned.paymentTypeName = paymentType.name;
-
-    return cashFlowReturned;
   }
 }
 

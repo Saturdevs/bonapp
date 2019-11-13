@@ -6,7 +6,6 @@ const CashRegister = require('../../models/cashRegister');
 const ClientService = require('../../services/client');
 const CashFlowService = require('../../services/cashFlow');
 const OrderService = require('../../services/order');
-const mongoose = require('mongoose');
 const HttpStatus = require('http-status-codes');
 
 async function validateUpdate(req, res, next) {

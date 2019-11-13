@@ -1,5 +1,7 @@
 'use strict'
+
 const CashRegister = require('../models/cashRegister');
+const CashRegisterTransform = require('../transformers/cashRegister');
 
 /**
  * @description Recupera todas las cajas registradoras de la base de datos.
@@ -12,7 +14,7 @@ async function getAll() {
     let cashRegisters = await getCashRegisterByQuery(query);
 
     for (let i = 0; i < cashRegisters.length; i++) {
-      const cashRegisterransformed = await transformToBusinessObject(cashRegisters[i]);
+      const cashRegisterransformed = await CashRegisterTransform.transformToBusinessObject(cashRegisters[i]);
       cashRegistersToReturn.push(cashRegisterransformed);
     }
 
@@ -33,7 +35,7 @@ async function getAvailableCashRegisters() {
     let cashRegisters = await getCashRegisterByQuery(query);
 
     for (let i = 0; i < cashRegisters.length; i++) {
-      const cashRegisterransformed = await transformToBusinessObject(cashRegisters[i]);
+      const cashRegisterransformed = await CashRegisterTransform.transformToBusinessObject(cashRegisters[i]);
       cashRegistersToReturn.push(cashRegisterransformed);
     }
 
@@ -52,7 +54,7 @@ async function getCashRegister(cashRegisterId) {
   try {
     let cashRegister = await getCashRegisterById(cashRegisterId);
 
-    return transformToBusinessObject(cashRegister);
+    return CashRegisterTransform.transformToBusinessObject(cashRegister);
   }
   catch (err) {
     throw new Error(err);
@@ -68,7 +70,7 @@ async function saveCashRegister(reqBody) {
   let cashRegister = createCashRegister(reqBody.name, false);
   let cashRegisterSaved = await save(cashRegister);
 
-  return transformToBusinessObject(cashRegisterSaved);
+  return CashRegisterTransform.transformToBusinessObject(cashRegisterSaved);
 }
 
 /**
@@ -114,7 +116,7 @@ async function update(cashRegisterId, dataToUpdate) {
     }
 
     let cashRegisterUpdated = await updateCashRegisterById(cashRegisterId, dataToUpdate);
-    return transformToBusinessObject(cashRegisterUpdated);
+    return CashRegisterTransform.transformToBusinessObject(cashRegisterUpdated);
   } catch (err) {
     //Si el update de la caja registradora falla, pero el unset de las cajas registradoras por defecto se hizo bien
     //volver a actualizar la caja registradora por defecto a la que era antes
@@ -146,25 +148,6 @@ async function deleteCashRegister(cashRegisterId) {
     await removeCashRegister(cashRegister);
   } catch (err) {
     throw new Error(err.message);
-  }
-}
-
-/**
- * Transforma el objeto cashRegister recuperado de la base de datos en el objeto cashRegister usado en el front end.
- * Ver modelo en front end
- * @param {CashRegister} cashRegisterEntity 
- */
-async function transformToBusinessObject(cashRegisterEntity) {
-  if(cashRegisterEntity !== null && cashRegisterEntity !== undefined) {    
-    let cashRegisterToReturn = JSON.parse(JSON.stringify(cashRegisterEntity));
-    
-    if (cashRegisterToReturn.available) {
-      cashRegisterToReturn.availableDescription = "Si";
-    } else {
-      cashRegisterToReturn.availableDescription = "No";
-    }
-
-    return cashRegisterToReturn;
   }
 }
 

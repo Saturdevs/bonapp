@@ -3,7 +3,7 @@
 const express = require('express');
 const cashRegisterCtrl = require('../controllers/cashRegister');
 const cashRegisterRouter = express.Router();
-const validators = require('../middlewares/cashRegister/validations');
+const validators = require('../middlewares/cashRegister/validators');
 
 cashRegisterRouter.get('/', cashRegisterCtrl.getCashRegisters);
 cashRegisterRouter.get('/availables', cashRegisterCtrl.getAvailableCashRegisters);

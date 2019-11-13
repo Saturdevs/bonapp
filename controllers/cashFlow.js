@@ -55,7 +55,7 @@ async function updateCashFlow (req, res) {
     let cashFlowUpdated = await CashFlowService.update(cashFlowId, bodyUpdate);
     res.status(HttpStatus.OK).send({ cashFlow: cashFlowUpdated });
   } catch (err) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar el arqueo: ${err}.` });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar movimiento de caja: ${err}.` });
   }
 }
 
