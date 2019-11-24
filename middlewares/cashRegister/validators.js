@@ -3,7 +3,7 @@
 const CashRegisterService = require('../../services/cashRegister');
 const CashCountService = require('../../services/arqueoCaja');
 const CashRegister = require('../../models/cashRegister');
-const ClientService = require('../../services/client');
+const TransactionService = require('../../services/transaction');
 const CashFlowService = require('../../services/cashFlow');
 const OrderService = require('../../services/order');
 const HttpStatus = require('http-status-codes');
@@ -60,14 +60,14 @@ async function validateDelete(req, res, next) {
 
       //Si existe alguna transacción que se haya realizado en esa caja, esta no puede ser eliminada
       try {
-        let client = await ClientService.getFirstTransactionByCashRegister(cashRegisterId);
+        let transaction = await TransactionService.getFirstTransactionByCashRegister(cashRegisterId);
 
-        if (client !== null && client !== undefined) {
+        if (transaction !== null && transaction !== undefined && transaction.length > 0) {
           validationErrors.push('Tiene TRANSACCIONES asociadas')
         }
       } catch (err) {
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
-          message: `Hubo un error al querer eliminar la caja en la validación de transacciones de clientes: ${err}`
+          message: `Hubo un error al querer eliminar la caja en la validación de transacciones: ${err}`
         })
       }
 

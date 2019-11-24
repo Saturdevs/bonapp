@@ -19,6 +19,8 @@ const arqueoCajaRouter = require('./routes/arqueoCaja')
 const clientRouter = require('./routes/clientRoutes')
 const genericValidationsRouter = require('./routes/genericValidationsRoutes')
 const supplierRouter = require('./routes/supplierRoutes')
+const transactionRouter = require('./routes/transactionRoutes')
+
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
 app.use(bodyParser.json({limit: '50mb'}))
 app.use(function (req, res, next) {
@@ -44,6 +46,8 @@ app.use('/api/client', clientRouter)
 app.use('/api/file',fileRouter)
 app.use('/api/genericValidations', genericValidationsRouter)
 app.use('/api/supplier', supplierRouter)
+app.use('/api/transaction', transactionRouter)
+
 //Middleware to handle error
 app.use(function errorHandler(err, req, res, next) {
   if(err.name === 'ValidationError'){

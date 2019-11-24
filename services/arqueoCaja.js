@@ -2,7 +2,6 @@
 
 const Arqueo = require('../models/arqueoCaja');
 const ArqueoTransform = require('../transformers/arqueoCaja');
-const CashRegisterService = require('../services/cashRegister');
 
 /**
  * Devuelve el arqueo con id igual al dado como parametro
@@ -92,14 +91,15 @@ async function retrieveOneCashCountForCashRegister(cashRegisterId) {
  * Actualiza el arqueo con id igual al dado como parametro en la base de datos.
  * @param {ObjectId} arqueoId 
  * @param {JSON} bodyUpdate 
+ * @param {JSON} opts
  */
-async function update(arqueoId, bodyUpdate) {
+async function update(arqueoId, bodyUpdate, opts = {}) {
   try {
     if (arqueoId === null || arqueoId === undefined ||
         bodyUpdate === null || bodyUpdate === undefined) {
           throw new Error("El arqueo a actualizar no puede ser nulo");
         }
-    let arqueoUpdated = await updateArqueoById(arqueoId, bodyUpdate);
+    let arqueoUpdated = await updateArqueoById(arqueoId, bodyUpdate, opts);
     return ArqueoTransform.transformToBusinessObject(arqueoUpdated);
   } catch (err) {
     throw new Error(err.message);
@@ -186,10 +186,11 @@ async function getOneCashCountByQuery(query) {
  * Updetea el arqueo en la base de datos segun el id dado.
  * @param {ObjectID} arqueoId 
  * @param {JSON} bodyUpdate 
+ * @param {JSON} opts
  */
-async function updateArqueoById(arqueoId, bodyUpdate) {
+async function updateArqueoById(arqueoId, bodyUpdate, opts = {}) {
   try {
-    let arqueoUpdated = await Arqueo.findByIdAndUpdate(arqueoId, bodyUpdate);
+    let arqueoUpdated = await Arqueo.findByIdAndUpdate(arqueoId, bodyUpdate, opts);
     return arqueoUpdated;
   } catch (err) {
     throw new Error(err);

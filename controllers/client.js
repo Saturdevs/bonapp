@@ -1,189 +1,102 @@
 'use strict'
 
-const Client = require('../models/client')
+const ClientService = require('../services/client');
+const Client = require('../models/client');
+const HttpStatus = require('http-status-codes');
 
-function getClients (req, res) {
-  Client.find({}, null, {sort: {name: 1}}, (err, clients) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!clients) return res.status(404).send({ message: `No existen clientes registrados en la base de datos.`})
+async function getClients(req, res) {
+  try {
+    let clients = await ClientService.getAll();
 
-    res.status(200).send({ clients })
-  })
-}
-
-function getWithCurrentAccountEnabled (req, res) {
-  Client.find({enabledTransactions: true}, (err, clients) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!clients) return res.status(404).send({ message: `No existen clientes con cuentas corrientes habilitadas.`})
-
-    res.status(200).send({ clients })
-  })
-}
-
-function getClient (req, res) {
-  let clientId = req.params.clientId
-
-  Client.findById(clientId, (err, client) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!client) return res.status(404).send({ message: `El cliente ${clientId} no existe`})
-
-    res.status(200).send({ client })
-  })
-}
-
-function getClientsWithTransactions (req, res) {
-  Client.find({}, null, {sort: {name: 1}}, (err, clients) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!clients) return res.status(404).send({ message: `No existen clientes registrados en la base de datos.`})
-
-    let clientsWithTransactions = new Array()
-    clients.map(client => {
-      if (client.transactions.length > 0) {
-        clientsWithTransactions.push(client)
-      }
-    })
-
-    res.status(200).send({ clients: clientsWithTransactions })
-  })
-}
-
-function getTransactions (req, res) {
-  Client.find({}, (err, clients) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!clients) return res.status(404).send({ message: `No existen clientes registrados en la base de datos.`})
-
-    let transactions = new Array()
-    clients.forEach(client => {
-      client.transactions.forEach(transaction => {
-        transactions.push({ 
-          _id: transaction._id,
-          clientId: client._id,
-          clientName: client.name, 
-          date: transaction.date, 
-          amount: transaction.amount,
-          balance: transaction.balance, 
-          deleted: transaction.deleted 
-        })   
-      })
-    })
-
-    res.status(200).send({ transactions })
-  })  
-}
-
-function getTransactionByClientById (req, res) {
-  let clientId = req.params.clientId
-  let transactionId = req.params.transactionId
-
-  Client.findById(clientId, (err, client) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!client) return res.status(404).send({ message: `El cliente ${clientId} no existe`})
-
-    let transact = {}    
-    client.transactions.forEach(transaction => {      
-      if (String(transaction._id) === transactionId) {
-        transact = {          
-          _id: transaction._id,
-          clientId: client._id,
-          clientName: client.name, 
-          paymentMethod: transaction.paymentMethod,
-          cashRegister: transaction.cashRegister,
-          date: transaction.date, 
-          amount: transaction.amount,
-          comment: transaction.comment, 
-          deleted: transaction.deleted 
-        }                
-      }
-    })
-
-    res.status(200).send({ transaction: transact })
-  })
-}
-
-function getTransactionsByClient (req, res) {
-  let clientId = req.params.clientId
-
-  Client.findById(clientId, (err, client) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!client) return res.status(404).send({ message: `El cliente ${clientId} no existe`})
-
-    let transactions = new Array()
-    client.transactions.forEach(transaction => {
-      transactions.push({ 
-        _id: transaction._id,
-        clientId: client._id,
-        clientName: client.name, 
-        date: transaction.date, 
-        amount: transaction.amount,
-        balance: transaction.balance, 
-        deleted: transaction.deleted 
-      })      
-    });
-
-    res.status(200).send({ transactions })
-  })
-}
-
-function saveClient (req, res) {
-  console.log('POST /api/client')
-  console.log(req.body)
-
-  let client = new Client()
-  client.name = req.body.name
-  client.tel = req.body.tel || null
-  client.addressStreet = req.body.addressStreet || null
-  client.addressNumber = req.body.addressNumber || null
-  client.addressDpto = req.body.addressDpto || null
-  client.enabledTransactions = req.body.enabledTransactions
-  client.balance = 0
-
-  client.save((err, clientStored) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `${err}.` })
-      return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` });
+    if (clients !== null && clients !== undefined) {
+      res.status(HttpStatus.OK).send({ clients });
     }
-
-    res.status(200).send({ client: clientStored })
-  })
-}
-
-function updateClient (req, res) {
-  let clientId = req.params.clientId
-  let bodyUpdate = req.body
-
-  Client.findByIdAndUpdate(clientId, bodyUpdate, (err, clientUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe un cliente con ese teléfono. Ingrese otro teléfono.` })
-      return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` });
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen clientes registrados en la base de datos.` })
     }
-
-    res.status(200).send({ client: clientUpdated })
-  })
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-function deleteClient (req, res) {
-  let clientId = req.params.clientId
+async function getWithCurrentAccountEnabled(req, res) {
+  try {
+    let clients = await ClientService.getWithCurrentAccountEnabled();
 
-  Client.findById(clientId, (err, client) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar el cliente: ${err}`})
+    if (clients !== null && clients !== undefined) {
+      res.status(HttpStatus.OK).send({ clients });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen clientes con cuentas corrientes habilitadas.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
 
-    client.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer borrar el cliente: ${err}`})
-      res.status(200).send({message: `El cliente ha sido eliminado`})
-    })
-  })
+async function getClient(req, res) {
+  try {
+    let clientId = req.params.clientId;
+    let client = await ClientService.getClient(clientId);
+
+    if (client !== null && client !== undefined) {
+      res.status(HttpStatus.OK).send({ client });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `El cliente con id ${clientId} no existe en la base de datos` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
+async function saveClient(req, res) {
+  try {
+    let client = new Client();
+    client.name = req.body.name;
+    client.tel = req.body.tel || null;
+    client.addressStreet = req.body.addressStreet || null;
+    client.addressNumber = req.body.addressNumber || null;
+    client.addressDpto = req.body.addressDpto || null;
+    client.enabledTransactions = req.body.enabledTransactions;
+    client.balance = 0;
+
+    let clientSaved = await ClientService.saveClient(client);
+
+    res.status(HttpStatus.OK).send({ client: clientSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
+}
+
+async function updateClient(req, res) {
+  try {
+    let clientId = req.params.clientId;
+    let bodyUpdate = req.body;
+
+    let clientUpdated = await ClientService.updateClient(clientId, bodyUpdate);
+    res.status(HttpStatus.OK).send({ client: clientUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar el cliente: ${err.message}.` });
+  }
+}
+
+async function deleteClient(req, res) {
+  try {
+    let clientId = req.params.clientId;
+    ClientService.deleteClient(clientId);
+    res.status(HttpStatus.OK).send({ message: `El cliente ha sido eliminado de la base de datos correctamente.` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el cliente de la base de datos: ${err.message}` })
+  }
 }
 
 module.exports = {
-  getClient,  
+  getClient,
   getClients,
   getWithCurrentAccountEnabled,
-  getClientsWithTransactions,
-  getTransactions,
-  getTransactionByClientById,
-  getTransactionsByClient,
   saveClient,
   updateClient,
   deleteClient
