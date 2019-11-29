@@ -68,7 +68,7 @@ const orderSchema = Schema({
       deletedReason: { type: String },
       /**Estado del pago del pedido, para imprimir si se pago completo o parcial
        * cuando se inicia un pedido tiene que estar en Pending.*/
-      status: {type: string, enum: ['Pending', 'Partial', 'Payed']} //Todavia no puse que es required = true porque tengo una duda para implementar esto. No se como hacer para darme cuenta de cuales payments son nuevos.
+      status: {type: String, enum: ['Pending', 'Partial', 'Payed']} //Todavia no puse que es required = true porque tengo una duda para implementar esto. No se como hacer para darme cuenta de cuales payments son nuevos.
     }],
     /**Atributo para verificar si el usuario esta bloqueado. Se utiliza cuando se realiza un pago,
      * cuando alguien realiza un pago para ese usuario, este se bloquea para menter la integridad de los datos
