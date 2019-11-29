@@ -1,7 +1,7 @@
 'use strict'
 
-const CashRegisterService = require('../services/cashRegister');
-const PaymentTypeService = require('../services/paymentType');
+const CashRegisterDAO = require('../dataAccess/cashRegister');
+const PaymentTypeDAO = require('../dataAccess/paymentType');
 
 /**
  * Transforma el cashFlow dado como parámetro al objeto cashFlow usado en el front end.
@@ -11,8 +11,8 @@ const PaymentTypeService = require('../services/paymentType');
 async function transformToBusinessObject(cashFlowEntity) {
   if (cashFlowEntity !== null && cashFlowEntity !== undefined) {
     let cashFlowReturned = JSON.parse(JSON.stringify(cashFlowEntity));
-    let cashRegister = await CashRegisterService.getCashRegisterById(cashFlowEntity.cashRegisterId);
-    let paymentType = await PaymentTypeService.getPaymentTypeById(cashFlowEntity.paymentType);
+    let cashRegister = await CashRegisterDAO.getCashRegisterById(cashFlowEntity.cashRegisterId);
+    let paymentType = await PaymentTypeDAO.getPaymentTypeById(cashFlowEntity.paymentType);
 
     cashFlowReturned.cashRegister = cashRegister.name;
     cashFlowReturned.paymentTypeName = paymentType.name;

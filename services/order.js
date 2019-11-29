@@ -1,9 +1,10 @@
 'use strict'
 const Order = require('../models/order');
-const orderStatus = require('../shared/enums/orderStatus');
-const productService = require('../services/product');
-const cashRegisterService = require('../services/cashRegister');
-const userService = require('../services/user');
+const OrderStatus = require('../shared/enums/orderStatus');
+const CashRegisterDAO = require('../dataAccess/cashRegister');
+const OrderDAO = require('../dataAccess/order');
+const ProductDAO = require('../dataAccess/product');
+const UserDAO = require('../dataAccess/user');
 
 /**
  * @description Recupera un único order con cashRegisterId igual al dado como parametro. Si hay mas de uno
@@ -14,7 +15,7 @@ const userService = require('../services/user');
 async function retrieveOneOrderForCashRegister(cashRegisterId) {
   try {
     let query = { cashRegister: cashRegisterId };
-    let order = await getOneOrderByQuery(query);
+    let order = await OrderDAO.getOneOrderByQuery(query);
     
     return order;
   } catch (err) {
@@ -30,7 +31,7 @@ async function retrieveOneOrderForCashRegister(cashRegisterId) {
 async function createOrder(order) {
   try {
     let newOrder = new Order();
-    let lastOrder = await getLastOrder();
+    let lastOrder = await OrderDAO.getLastOrder();
 
     if (lastOrder === null || lastOrder === undefined) {
       newOrder.orderNumber = 1;
@@ -42,7 +43,7 @@ async function createOrder(order) {
     newOrder.type = order.type;
     newOrder.table = order.table;
     newOrder.waiter = order.waiter;
-    newOrder.status = orderStatus.OPEN;
+    newOrder.status = OrderStatus.OPEN;
     newOrder.users = order.users;
     newOrder.app = order.app;
     newOrder.created_at = new Date();
@@ -77,7 +78,7 @@ async function updateOrderProducts(order, productsToAdd, username, totalToAdd) {
 
     ord.totalPrice = order.totalPrice + totalToAdd;
 
-    orderUpdated = await update(ord);
+    orderUpdated = await OrderDAO.update(ord);
 
     return transformToBusinessObject(orderUpdated);
   }
@@ -253,7 +254,7 @@ async function deleteProduct(order, productToRemove, username) {
     ord.users = removeProduct(order, productToRemove, username);
     ord.totalPrice = order.totalPrice;
 
-    orderUpdated = await update(ord);
+    orderUpdated = await OrderDAO.update(ord);
 
     return transformToBusinessObject(orderUpdated);
   }
@@ -330,7 +331,7 @@ async function getOrdersByTableByStatus(tableNro, status) {
   try {
     let ordersReturned = [];
     let query = { table: tableNro, status: status };
-    let orders = await getOrderByQuery(query);
+    let orders = await OrderDAO.getOrderByQuery(query);
 
     orders.forEach(order => {
       ordersReturned.push(transformToBusinessObject(order));
@@ -351,8 +352,8 @@ async function getOrdersByTableByStatus(tableNro, status) {
  */
 async function getOpenedOrderForTable(tableNro) {
   try {
-    let query = { table: tableNro, status: orderStatus.OPEN };
-    let order = await getOrderByQuery(query);
+    let query = { table: tableNro, status: OrderStatus.OPEN };
+    let order = await OrderDAO.getOrderByQuery(query);
 
     if (order.length > 1) {
       throw new Error(`Existe mas de un pedido abierto para la mesa número ${tableNro}`);
@@ -376,7 +377,7 @@ async function getOpenedOrderForTable(tableNro) {
  */
 async function updateOrder(order) {
   try {
-    let orderUpdated = await update(order);
+    let orderUpdated = await OrderDAO.update(order);
 
     return transformToBusinessObject(orderUpdated);
   }
@@ -433,7 +434,7 @@ async function closeOrder(order) {
   ord.discount = order.discount;
   ord.totalPrice = order.totalPrice;
 
-  orderUpdated = await update(order);
+  orderUpdated = await OrderDAO.update(order);
   return transformToBusinessObject(orderUpdated);
 }
 
@@ -448,7 +449,7 @@ async function closeOrder(order) {
 async function getOrdersByCashRegisterByStatusAndCompletedDate(cashRegisterId, status, completedDate) {
   try {
     let query = { cashRegister: cashRegisterId, status: status, completed_at: { "$gte": completedDate } };
-    let orders = await getOrderByQuery(query);
+    let orders = await OrderDAO.getOrderByQuery(query);
 
     return orders;
   }
@@ -475,7 +476,7 @@ async function transformToBusinessObject(orderEntity) {
       for (let j = 0; j < user.products.length; j++) {
         const product = user.products[j];
         let prod = {};
-        const productStored = await productService.getProductById(product.product);
+        const productStored = await ProductDAO.getProductById(product.product);
 
         prod._id = product._id.toString();
         prod.product = productStored._id;
@@ -516,76 +517,14 @@ async function transformToBusinessObject(orderEntity) {
     order.totalPrice = orderEntity.totalPrice;
 
     order.cashRegister = (orderEntity.cashRegister !== null && orderEntity.cashRegister !== undefined) ?
-      await cashRegisterService.getCashRegisterById(orderEntity.cashRegister) :
+      await CashRegisterDAO.getCashRegisterById(orderEntity.cashRegister) :
       null;
 
     order.waiter = (orderEntity.waiter !== null && orderEntity.waiter !== undefined) ?
-      await userService.getUserById(orderEntity.waiter) :
+      await UserDAO.getUserById(orderEntity.waiter) :
       null;
 
     return order;
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////DATA ACCESS METHODS///////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Recupera el pedido de la base de datos según la query dada.
- * @param {JSON} query 
- */
-async function getOrderByQuery(query) {
-  try {
-    let orders = await Order.find(query);
-    return orders;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * @description Recupera un unico pedido que cumpla con la query dada como parametro. Si hay mas de uno devuelve el primero
- * encuentra.
- * @param {JSON} query 
- * @returns primer pedido encontrado que cumple con la query dada.
- */
-async function getOneOrderByQuery(query) {
-  try {
-    let order = await Order.findOne(query);
-    return order;
-  }
-  catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-/**
- * Recupera el último pedido de la base de datos.
- */
-async function getLastOrder() {
-  try {
-    let orders = await Order.find().sort({ orderNumber: -1 }).limit(1).exec();
-    return orders[0];
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Actualiza el pedido dado como parámetro en la base de datos
- * @param {*} orderToUpdate 
- */
-async function update(orderToUpdate) {
-  try {
-    let orderUpdated = new Order();
-    orderUpdated = await Order.findByIdAndUpdate(orderToUpdate._id, orderToUpdate, { new: true });
-    return orderUpdated;
-  }
-  catch (err) {
-    throw new Error(err);
   }
 }
 

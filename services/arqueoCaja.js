@@ -1,6 +1,6 @@
 'use strict'
 
-const Arqueo = require('../models/arqueoCaja');
+const ArqueoDAO = require('../dataAccess/arqueoCaja');
 const ArqueoTransform = require('../transformers/arqueoCaja');
 
 /**
@@ -9,7 +9,7 @@ const ArqueoTransform = require('../transformers/arqueoCaja');
  */
 async function getArqueo(arqueoId) {
   try {
-    let arqueo = await getArqueoById(arqueoId);
+    let arqueo = await ArqueoDAO.getArqueoById(arqueoId);
 
     return ArqueoTransform.transformToBusinessObject(arqueo);
   }
@@ -25,7 +25,7 @@ async function getNotDeletedArqueos() {
   try {
     let arqueosReturned = [];
     let query = { deleted: false };
-    let arqueos = await getArqueoByQuery(query);    
+    let arqueos = await ArqueoDAO.getArqueoByQuery(query);    
 
     for (let i = 0; i < arqueos.length; i++) {
       const arqueoTransformed = await ArqueoTransform.transformToBusinessObject(arqueos[i]);
@@ -45,7 +45,7 @@ async function getNotDeletedArqueos() {
 async function getArqueoOpenByCashRegister(cashRegisterId) {
   try {
     let query = { cashRegisterId: cashRegisterId, closedAt: null, deleted: false };
-    let arqueoOpen = await getArqueoByQuery(query);
+    let arqueoOpen = await ArqueoDAO.getArqueoByQuery(query);
 
     return arqueoOpen[0];
   } catch (err) {
@@ -62,7 +62,7 @@ async function getLastArqueoByCashRegister(cashRegisterId) {
     let query = { cashRegisterId: cashRegisterId, deleted: false };
     let sortCondition = { closedAt: -1 };
 
-    let arqueos = await getArqueoSortByQuery(query, sortCondition);
+    let arqueos = await ArqueoDAO.getArqueoSortByQuery(query, sortCondition);
 
     return arqueos[0];
   } catch (err) {
@@ -79,7 +79,7 @@ async function getLastArqueoByCashRegister(cashRegisterId) {
 async function retrieveOneCashCountForCashRegister(cashRegisterId) {
   try {
     let query = { cashRegisterId: cashRegisterId };
-    let cashCount = await getOneCashCountByQuery(query);
+    let cashCount = await ArqueoDAO.getOneCashCountByQuery(query);
     
     return cashCount;
   } catch (err) {
@@ -99,7 +99,7 @@ async function update(arqueoId, bodyUpdate, opts = {}) {
         bodyUpdate === null || bodyUpdate === undefined) {
           throw new Error("El arqueo a actualizar no puede ser nulo");
         }
-    let arqueoUpdated = await updateArqueoById(arqueoId, bodyUpdate, opts);
+    let arqueoUpdated = await ArqueoDAO.updateArqueoById(arqueoId, bodyUpdate, opts);
     return ArqueoTransform.transformToBusinessObject(arqueoUpdated);
   } catch (err) {
     throw new Error(err.message);
@@ -112,86 +112,8 @@ async function update(arqueoId, bodyUpdate, opts = {}) {
  */
 async function deleteArqueo(arqueoId) {
   try {
-    let arqueo = await getArqueoById(arqueoId);
+    let arqueo = await ArqueoDAO.getArqueoById(arqueoId);
     arqueo.remove();
-  } catch (err) {
-    throw new Error(err);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////DATA ACCESS METHODS//////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Recupera de la base de datos el arqueo con id igual al dado como parametro
- * @param {*} arqueoId id del arqueo que se quiere recuperar de la base de datos
- */
-async function getArqueoById(arqueoId) {
-  try {
-    let arqueo = await Arqueo.findById(arqueoId);
-    return arqueo;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Recupera el arqueo de la base de datos según la query dada.
- * @param {JSON} query 
- */
-async function getArqueoByQuery(query) {
-  try {
-    let arqueos = await Arqueo.find(query);
-    return arqueos;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Recupera el/los arqueo/s de la base de datos segun la query dada y ordenados por la condicion dada
- * @param {JSON} query query para realizar la busqueda
- * @param {JSON} sortCondition condiciones para ordenar los resultados
- */
-async function getArqueoSortByQuery(query, sortCondition) {
-  try {
-    let arqueos = await Arqueo.find(query).sort(sortCondition);
-    return arqueos;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * @description Recupera un unico arqueo que cumpla con la query dada como parametro. Si hay mas de uno devuelve el primero
- * encuentra.
- * @param {JSON} query 
- * @returns primer arqueo encontrado que cumple con la query dada.
- */
-async function getOneCashCountByQuery(query) {
-  try {
-    let cashCount = await Arqueo.findOne(query);
-    return cashCount;
-  }
-  catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-/**
- * Updetea el arqueo en la base de datos segun el id dado.
- * @param {ObjectID} arqueoId 
- * @param {JSON} bodyUpdate 
- * @param {JSON} opts
- */
-async function updateArqueoById(arqueoId, bodyUpdate, opts = {}) {
-  try {
-    let arqueoUpdated = await Arqueo.findByIdAndUpdate(arqueoId, bodyUpdate, opts);
-    return arqueoUpdated;
   } catch (err) {
     throw new Error(err);
   }
@@ -203,7 +125,7 @@ async function updateArqueoById(arqueoId, bodyUpdate, opts = {}) {
  */
 async function save(arqueo) {
   try {
-    let arqueoSaved = await arqueo.save(arqueo);
+    let arqueoSaved = await ArqueoDAO.save(arqueo);
     return arqueoSaved;
   } catch (err) {
     throw new Error(err);

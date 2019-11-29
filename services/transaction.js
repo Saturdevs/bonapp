@@ -3,9 +3,9 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/transaction');
 const TransactionTransform = require('../transformers/transaction');
-const ClientService = require('../services/client');
 const CashCountService = require('../services/arqueoCaja');
 const CashInTypes = require('../shared/enums/cashInTypes');
+const ClientDAO = require('../dataAccess/client');
 
 async function getAll() {
   try {
@@ -123,14 +123,14 @@ async function saveTransaction(transaction) {
       await CashCountService.update(cashCount._id, { ingresos: cashCount.ingresos }, opts);
     }
 
-    let client = await ClientService.getClientById(transaction.client);
+    let client = await ClientDAO.getClientById(transaction.client);
     if (client !== null && client !== undefined) {
       if (client.balance === null || client.balance === undefined) {
         client.balance = 0;
       }
 
       client.balance += transaction.amount;
-      await ClientService.updateClientById(client._id, { balance: client.balance }, opts);
+      await ClientDAO.updateClientById(client._id, { balance: client.balance }, opts);
     } else {
       throw new Error('El cliente para el que se quiere agregar una nueva transacción no se ha podido encontrar en la base de datos.');
     }
@@ -182,14 +182,14 @@ async function deleteTransaction(transactionId) {
       await CashCountService.update(cashCount._id, { ingresos: cashCount.ingresos }, opts);
     }
 
-    let client = await ClientService.getClientById(transaction.client);
+    let client = await ClientDAO.getClientById(transaction.client);
     if (client !== null && client !== undefined) {
       if (client.balance === null || client.balance === undefined) {
         client.balance = 0;
       }
 
       client.balance -= transaction.amount;
-      await ClientService.updateClientById(client._id, { balance: client.balance }, opts);
+      await ClientDAO.updateClientById(client._id, { balance: client.balance }, opts);
     } else {
       throw new Error('El cliente de la transacción que se desea elimnar no se ha podido encontrar en la base de datos.');
     }

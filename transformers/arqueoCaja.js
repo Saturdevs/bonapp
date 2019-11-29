@@ -1,6 +1,6 @@
 'use strict'
 
-const CashRegisterService = require('../services/cashRegister');
+const CashRegisterDAO = require('../dataAccess/cashRegister');
 
 /**
  * Transforma el arqueo dado como parámetro al objeto arqueo usado en el front end.
@@ -14,7 +14,7 @@ async function transformToBusinessObject(arqueoEntity) {
     let realAmount = 0;
 
     let arqueoReturned = JSON.parse(JSON.stringify(arqueoEntity));
-    let cashRegister = await CashRegisterService.getCashRegisterById(arqueoEntity.cashRegisterId);    
+    let cashRegister = await CashRegisterDAO.getCashRegisterById(arqueoEntity.cashRegisterId);    
     
     arqueoEntity.ingresos.map(ingreso => {
       totalIngresos += ingreso.amount;

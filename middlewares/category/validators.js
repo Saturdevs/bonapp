@@ -1,13 +1,13 @@
 'use strict'
 
-const ProductService = require('../../services/product');
+const CategoryService = require('../../services/category');
 const HttpStatus = require('http-status-codes');
 
 async function validateDelete(req, res, next) {
   try {
     let categoryId = req.params.categoryId;
 
-    let product = await ProductService.getOneProductByCategory(categoryId);
+    let product = await CategoryService.hasAtLeastOneProduct(categoryId);
 
     //Si hay al menos un producto para esta categoria, la misma no puede ser eliminada.
     if (product !== null && product !== undefined) {

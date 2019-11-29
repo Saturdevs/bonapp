@@ -2,13 +2,14 @@
 
 const Category = require('../models/category');
 const CategoryTransform = require('../transformers/category');
-const ProductService = require('../services/product');
+const CategoryDAO = require('../dataAccess/category');
+const ProductDAO = require('../dataAccess/product');
 
 async function getAll() {
   try {
     let categoriesToReturn = [];
     let sortCondition = { name: 1 };
-    let categories = await getCategoriesSortedByQuery({}, sortCondition);
+    let categories = await CategoryDAO.getCategoriesSortedByQuery({}, sortCondition);
 
     if (categories !== null && categories !== undefined) {
       for (let i = 0; i < categories.length; i++) {
@@ -34,7 +35,7 @@ async function getCategory(categoryId) {
       throw new Error('Se debe especificar el id de la categoría que se quiere obtener de la base de datos');
     }
 
-    category = await getCategoryById(categoryId);
+    category = await CategoryDAO.getCategoryById(categoryId);
 
     if (category !== null && category !== undefined) {
       category = CategoryTransform.transformToBusinessObject(category);
@@ -55,7 +56,7 @@ async function getCategoriesByMenu(menuId) {
     let categoriesToReturn = [];
     let query = { menuId: menuId };
     let sortCondition = { name: 1 };
-    let categories = await getCategoriesSortedByQuery(query, sortCondition);
+    let categories = await CategoryDAO.getCategoriesSortedByQuery(query, sortCondition);
 
     if (categories !== null && categories !== undefined) {
       for (let i = 0; i < categories.length; i++) {
@@ -78,7 +79,8 @@ async function getCategoriesByMenu(menuId) {
  */
 async function hasAtLeastOneProduct(categoryId) {
   try {
-    let product = await ProductService.getOneProductByCategory(categoryId);
+    let query = { category: categoryId };
+    let product = await ProductDAO.getOneProductByQuery(query);
 
     return product;
   } catch (err) {
@@ -92,7 +94,7 @@ async function hasAtLeastOneProduct(categoryId) {
  * @returns categorySaved guardada en la base de datos.
  */
 async function saveCategory(category) {
-  let categorySaved = await save(category);
+  let categorySaved = await CategoryDAO.save(category);
 
   if (categorySaved !== null && categorySaved !== undefined) {
     categorySaved = CategoryTransform.transformToBusinessObject(categorySaved);
@@ -109,7 +111,7 @@ async function saveCategory(category) {
  */
 async function update(categoryId, bodyUpdate) {
   try {
-    let categoryUpdated = await updateCategoryById(categoryId, bodyUpdate);
+    let categoryUpdated = await CategoryDAO.updateCategoryById(categoryId, bodyUpdate);
 
     if (categoryUpdated !== null && categoryUpdated !== undefined) {
       categoryUpdated = CategoryTransform.transformToBusinessObject(categoryUpdated);
@@ -127,92 +129,8 @@ async function update(categoryId, bodyUpdate) {
  */
 async function deleteCategory(categoryId) {
   try {
-    let category = await getCategoryById(categoryId);
-    await remove(category);
-  } catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////DATA ACCESS METHODS//////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Recupera de la base de datos la categoria con id igual al dado como parametro
- * @param {*} categoryId id de la categoría que se quiere recuperar de la base de datos
- */
-async function getCategoryById(categoryId) {
-  try {
-    if (categoryId === null || categoryId === undefined) {
-      throw new Error('El id de la categoría no puede ser nulo');
-    }
-    let category = await Category.findById(categoryId);
-    return category;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Recupera las categorías de la base de datos según la query dada.
- * @param {JSON} query query para realizar la busqueda
- * @param {JSON} sortCondition condiciones para ordenar los resultados
- */
-async function getCategoriesSortedByQuery(query, sortCondition) {
-  try {
-    let categories = await Category.find(query).sort(sortCondition);
-    return categories;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * @description Guarda la categoría dada como parametro en la base de datos
- * @param {Category} category
- */
-async function save(category) {
-  try {
-    let categorySaved = await category.save();
-    return categorySaved;
-  } catch (err) {
-    if (err.code === 11000) {
-      throw new Error(`Ya existe una categoria con ese nombre. Ingrese uno distinto por favor.`);
-    } else {
-      throw new Error(err);
-    }
-  }
-}
-
-/**
- * @description Actualiza la categoría en la base de datos segun el id dado.
- * @param {String} categoryId id de la categoría a actualizar en la base de datos.
- * @param {JSON} bodyUpdate propiedades de la categoría que se quieren actualizar.
- * @returns categoría actualizada en la base de datos
- */
-async function updateCategoryById(categoryId, bodyUpdate) {
-  try {
-    let categoryUpdated = await Category.findByIdAndUpdate(categoryId, bodyUpdate, { new: true });
-    return categoryUpdated;
-  } catch (err) {
-    if (err.code === 11000) {
-      throw new Error(`Ya existe una categoria con ese nombre. Ingrese uno distinto por favor.`);
-    } else {
-      throw new Error(err);
-    }
-  }
-}
-
-/**
- * @description Elmina la categoría dada como parametro en la base de datos.
- * @param {Category} category
- */
-async function remove(category) {
-  try {
-    await category.remove();
+    let category = await CategoryDAO.getCategoryById(categoryId);
+    await CategoryDAO.remove(category);
   } catch (err) {
     throw new Error(err.message);
   }

@@ -83,7 +83,7 @@ async function deleteCashRegister(req, res) {
   }
 
   try {
-    CashRegisterService.removeCashRegister(cashRegister);
+    CashRegisterService.deleteCashRegister(cashRegister);
     res.status(HttpStatus.OK).send({ message: `La caja ha sido eliminado` });    
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar la caja registradora: ${err}` })        

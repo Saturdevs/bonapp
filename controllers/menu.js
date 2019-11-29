@@ -1,45 +1,65 @@
 'use strict'
 
-const Menu = require('../models/menu')
-const Category = require('../models/category')
+const Menu = require('../models/menu');
+const MenuService = require('../services/menu');
+const HttpStatus = require('http-status-codes');
 
-function getMenus (req, res) {
-  Menu.find({}, null, {sort: {name: 1}}, (err, menus) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!menus) return res.status(404).send({ message: `No existen cartas registradas en la base de datos.`})
+async function getMenus (req, res) {
+  try {
+    let menus = await MenuService.getAll();
 
-    res.status(200).send({ menus })
-  })
+    if (menus !== null && menus !== undefined) {
+      res.status(HttpStatus.OK).send({ menus });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cartas registradas en la base de datos.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-function getMenu (req, res) {
-  let menuId = req.params.menuId
+async function getMenu (req, res) {
+  try {
+    let menuId = req.params.menuId;
+    let menu = await MenuService.getMenu(menuId);
 
-  Menu.findById(menuId, (err, menu) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!menu) return res.status(404).send({ message: `La carta ${menuId} no existe`})
-
-    res.status(200).send({ menu }) //Cuando la clave y el valor son iguales
-  })
+    if (menu !== null && menu !== undefined) {
+      res.status(HttpStatus.OK).send({ menu: menu });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `La carta ${menuId} no existe en la base da datos` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
+async function hasAtLeastOneCategory(req, res) {
+  try {
+    let menuId = req.params.menuId;
+    let category = await MenuService.hasAtLeastOneCategory(menuId);
 
-function saveMenu (req, res) {
-  console.log('POST /api/menu')
-  console.log(req.body)
+    res.status(HttpStatus.OK).send({ category: category });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
 
-  let menu = new Menu()
-  menu.name = req.body.name
-  menu.picture = req.body.picture
+async function saveMenu (req, res) {
+  try {
+    let menu = new Menu();
+    menu.name = req.body.name
+    menu.picture = req.body.picture
 
-  menu.save((err, menuStored) => {
-    if(err){
-        if(err['code'] == 11000) 
-          return res.status(500).send({ message: `Ya existe un menu con ese nombre. Ingrese otro nombre.` })
-      }
-      
-      res.status(200).send({ menu: menuStored })
-  })
+    let menuSaved = await MenuService.saveMenu(menu);
+
+    res.status(HttpStatus.OK).send({ menu: menuSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
 }
 
 function updateMenu (req, res) {
@@ -56,41 +76,14 @@ function updateMenu (req, res) {
   })
 }
 
-function deleteMenu (req, res) {
-  let menuId = req.params.menuId
-
-  Menu.findById(menuId, (err, menu) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar la carta: ${err}`})
-
-    menu.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer borrar la carta: ${err}`})
-      res.status(200).send({message: `La carta ha sido eliminada`})
-    })
-  })
-}
-
-function hasCategory (req, res) {
-  let menuId = req.params.menuId
-  let hasCategory  
-
-  Menu.findById(menuId, (err, menuFind) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-
-    if (!menuFind) {
-      return res.status(404).send({ message: `La carta ${menuId} no existe`})
-    } else {
-      Category.findOne({menuId: menuId}, (err, category) => {
-        let menu = new Menu()
-        if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-        if (!category) {
-          menu = null
-        } else {
-          menu = menuFind
-        }
-        res.status(200).send({ menu })
-      })
-    }
-  })  
+async function deleteMenu (req, res) {
+  try {
+    let menuId = req.params.menuId;
+    await MenuService.deleteMenu(menuId);
+    res.status(HttpStatus.OK).send({ message: `La carta ha sido eliminada de la base de datos correctamente.` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar la carta de la base de datos: ${err.message}` })
+  }
 }
 
 module.exports = {
@@ -99,5 +92,5 @@ module.exports = {
   saveMenu,
   updateMenu,
   deleteMenu,
-  hasCategory
+  hasAtLeastOneCategory
 }

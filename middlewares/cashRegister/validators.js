@@ -1,6 +1,6 @@
 'use strict'
 
-const CashRegisterService = require('../../services/cashRegister');
+const CashRegisterDAO = require('../../dataAccess/cashRegister');
 const CashCountService = require('../../services/arqueoCaja');
 const CashRegister = require('../../models/cashRegister');
 const TransactionService = require('../../services/transaction');
@@ -14,7 +14,7 @@ async function validateUpdate(req, res, next) {
     let available = req.body.available;
     let def = req.body.default;
 
-    let cashRegister = await CashRegisterService.getCashRegisterById(cashRegisterId);
+    let cashRegister = await CashRegisterDAO.getCashRegisterById(cashRegisterId);
     if (cashRegister.default && (!available || !def)) {
       return res.status(HttpStatus.CONFLICT).send({
         message: `La caja registradora por defecto no puede estar inhabilitada o dejar de ser caja por defecto. 
@@ -43,7 +43,7 @@ async function validateDelete(req, res, next) {
     let cashRegisterId = req.params.cashRegisterId;
     let cashRegister = new CashRegister();
     try {
-      cashRegister = await CashRegisterService.getCashRegisterById(cashRegisterId);
+      cashRegister = await CashRegisterDAO.getCashRegisterById(cashRegisterId);
     } catch (err) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
         message: `No se encontró la caja que se desea borrar en la base de datos: ${err}. Intente nuevamente`

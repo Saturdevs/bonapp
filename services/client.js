@@ -1,6 +1,6 @@
 'use strict'
 
-const Client = require('../models/client');
+const ClientDAO = require('../dataAccess/client');
 
 /**
  * @description Devuelve todos los clientes almacenados en la base de datos.
@@ -9,7 +9,7 @@ const Client = require('../models/client');
 async function getAll() {
   try {
     let sortCondition = { name: 1 };
-    let clients = await getClientsSortedByQuery({}, sortCondition);
+    let clients = await ClientDAO.getClientsSortedByQuery({}, sortCondition);
 
     return clients;
   } catch (err) {
@@ -25,7 +25,7 @@ async function getWithCurrentAccountEnabled() {
   try {
     let query = { enabledTransactions: true };
     let sortCondition = { name: 1 };
-    let clients = await getClientsSortedByQuery(query, sortCondition);
+    let clients = await ClientDAO.getClientsSortedByQuery(query, sortCondition);
 
     return clients;
   } catch (err) {
@@ -45,7 +45,7 @@ async function getClient(clientId) {
       throw new Error('Se debe especificar el id del cliente que se quiere obtener de la base de datos');
     }
 
-    client = await getClientById(clientId);
+    client = await ClientDAO.getClientById(clientId);
 
     return client;
   }
@@ -60,7 +60,7 @@ async function getClient(clientId) {
  * @returns client guardado en la base de datos.
  */
 async function saveClient(client) {
-  let clientSaved = await save(client);
+  let clientSaved = await ClientDAO.save(client);
 
   return clientSaved;
 }
@@ -73,7 +73,7 @@ async function saveClient(client) {
  */
 async function updateClient(clientId, bodyUpdate) {
   try {
-    let clientUpdated = await updateClientById(clientId, bodyUpdate);
+    let clientUpdated = await ClientDAO.updateClientById(clientId, bodyUpdate);
 
     return clientUpdated;
   } catch (err) {
@@ -87,80 +87,10 @@ async function updateClient(clientId, bodyUpdate) {
  */
 async function deleteClient(clientId) {
   try {
-    let client = await getClientById(clientId);
+    let client = await ClientDAO.getClientById(clientId);
     await client.remove();
   } catch (err) {
     throw new Error(err.message);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////DATA ACCESS METHODS///////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Recupera los clientes que cumplan con la query dada.
- * @param {JSON} query query para realizar la busqueda.
- * @param {JSON} sortCondition condiciones para ordenar los resultados de la busqueda.
- * @returns clientes recuperados de la base de datos.
- */
-async function getClientsSortedByQuery(query, sortCondition) {
-  try {
-    let clients = await Client.find(query).sort(sortCondition);
-    return clients;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Recupera de la base de datos el cliente con id igual al dado como parametro.
- * @param {*} clientId id del cliente que se quiere recuperar de la base de datos.
- */
-async function getClientById(clientId) {
-  try {
-    if (clientId === null || clientId === undefined) {
-      throw new Error('El id del cliente que se quiere recuperar no puede ser nulo');
-    }
-    let client = await Client.findById(clientId);
-    return client;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * @description Guarda el cliente dado como parametro en la base de datos.
- * @param {Client} client
- * @returns cliente guardado en la base de datos
- */
-async function save(client) {
-  try {
-    let clientSaved = await client.save();
-    return clientSaved;
-  } catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * @description Actualiza el cliente con id igual al como parámetro en la base de datos.
- * @param {String} clientId id del cliente a actualizar en la base de datos.
- * @param {JSON} bodyUpdate propiedades del cliente que se quieren actualizar.
- * @returns cliente actualizado en la base de datos
- */
-async function updateClientById(clientId, bodyUpdate, opts = { new: true }) {
-  try {
-    if (clientId === null || clientId === undefined) {
-      throw new Error('El id del cliente que se quiere actualizar no puede ser nulo');
-    }
-
-    let clientUpdated = await Client.findByIdAndUpdate(clientId, bodyUpdate, opts);
-    return clientUpdated;
-  } catch (err) {
-    throw new Error(err);
   }
 }
 
@@ -168,9 +98,7 @@ module.exports = {
   getAll,
   getWithCurrentAccountEnabled,
   getClient,
-  getClientById,
   saveClient,
   updateClient,
-  updateClientById,
   deleteClient
 }

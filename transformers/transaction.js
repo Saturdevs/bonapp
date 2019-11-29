@@ -1,8 +1,8 @@
 'use strict'
 
-const PaymentTypeService = require('../services/paymentType');
-const CashRegisterService = require('../services/cashRegister');
-const ClientService = require('../services/client');
+const PaymentTypeDAO = require('../dataAccess/paymentType');
+const CashRegisterDAO = require('../dataAccess/cashRegister');
+const ClientDAO = require('../dataAccess/client');
 
 /**
  * Transforma la transacción dada como parámetro al objeto transaction usado en el front end.
@@ -14,19 +14,19 @@ async function transformToBusinessObject(transactionEntity) {
     let transactionToReturn = JSON.parse(JSON.stringify(transactionEntity));
 
     if (transactionToReturn.paymentMethod !== null && transactionToReturn.paymentMethod !== undefined) {
-      let paymentMethod = await PaymentTypeService.getPaymentTypeById(transactionToReturn.paymentMethod);
+      let paymentMethod = await PaymentTypeDAO.getPaymentTypeById(transactionToReturn.paymentMethod);
       
       transactionToReturn.paymentMethod = { _id: paymentMethod._id, name: paymentMethod.name };
     }
 
     if (transactionToReturn.cashRegister !== null && transactionToReturn.cashRegister !== undefined) {
-      let cashRegister = await CashRegisterService.getCashRegisterById(transactionToReturn.cashRegister);
+      let cashRegister = await CashRegisterDAO.getCashRegisterById(transactionToReturn.cashRegister);
       
       transactionToReturn.cashRegister = { _id: cashRegister._id, name: cashRegister.name };
     }
 
     if (transactionToReturn.client !== null && transactionToReturn.client !== undefined) {          
-      transactionToReturn.client = await ClientService.getClientById(transactionToReturn.client);
+      transactionToReturn.client = await ClientDAO.getClientById(transactionToReturn.client);
     }
 
     return transactionToReturn;

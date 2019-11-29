@@ -1,6 +1,6 @@
 'use strict'
 
-const MenuService = require('../services/menu');
+const MenuDAO = require('../dataAccess/menu');
 
 /**
  * Transforma la categoría dada como parámetro al objeto category usado en el front end.
@@ -12,7 +12,7 @@ async function transformToBusinessObject(categoryEntity) {
     let categoryToReturn = JSON.parse(JSON.stringify(categoryEntity));
 
     categoryToReturn.menu = (categoryEntity.menuId !== null && categoryEntity.menuId !== undefined) ?
-      await MenuService.getMenuById(categoryEntity.menuId) :
+      await MenuDAO.getMenuById(categoryEntity.menuId) :
       null;
 
     return categoryToReturn;
