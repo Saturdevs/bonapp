@@ -10,9 +10,11 @@ orderRouter.get('/status/:table', orderCtrl.getOrderByTableByStatus)
 orderRouter.post('/', orderCtrl.saveOrder)
 orderRouter.put('/unsettable/:tableNumber', orderCtrl.unSetTable)
 orderRouter.put('/products/', orderCtrl.updateOrderProducts)
+orderRouter.put('/blockUsers/', orderCtrl.blockUserForPaymentAndValidateAmounts)
 orderRouter.put('/products/delete', orderCtrl.deleteProductOrder)
 orderRouter.put('/close/:orderId', orderCtrl.closeOrder)
-orderRouter.put('/:orderId', orderCtrl.updateOrder)
-orderRouter.delete('/:orderId', orderCtrl.deleteOrder)
+orderRouter.put('/:orderId', orderCtrl.deleteOrder)
+orderRouter.put('/', orderCtrl.updatePayments)
+orderRouter.delete('/:orderId', orderCtrl.updateDeleteOrder)
 
 module.exports = orderRouter

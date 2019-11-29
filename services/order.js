@@ -359,9 +359,44 @@ async function getOpenedOrderForTable(tableNro) {
  */
 async function updateOrder(order) {
   try {
-    let orderUpdated = await update(order);
+    let orderUpdated = await update(order, { new: true });
 
     return transformToBusinessObject(orderUpdated);
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**Realiza las validaciones correspondientes al pago y luego
+ *  actualiza o cierra la orden segun dorresponda 
+ * @param {*} order 
+ */
+async function updateOrderPayments(order) {
+  try {
+    let totalPayed = 0;
+    let orderUpdated = null;
+    
+    order.users.forEach(user => {
+      let totalPerUser = 0;
+      user.payments.forEach(payment => {
+        totalPerUser += payment.amount
+      });
+
+      totalPayed += totalPerUser;
+
+      if (totalPerUser > user.totalPerUser) {
+        throw new Error("Error al querer actualizar la orden: la suma de los pagos es mayor al total para el usuario " + user.username);
+      }
+    });
+
+    if (totalPayed === order.totalPrice) {
+      orderUpdated = await closeOrder(order);
+    } else {
+      orderUpdated = await updateOrder(order);
+    }
+
+    return orderUpdated
   }
   catch (err) {
     throw new Error(err);
@@ -411,8 +446,7 @@ async function closeOrder(order) {
   ord.cashRegister = order.cashRegister._id;
   ord.status = order.status;
   ord.users = users;
-  ord.sent_at = order.sent_at;
-  ord.completed_at = order.completed_at;
+  ord.completed_at = new Date();
   ord.discount = order.discount;
   ord.totalPrice = order.totalPrice;
 
@@ -478,7 +512,8 @@ async function transformToBusinessObject(orderEntity) {
       usr.products = products;
       usr.totalPerUser = user.totalPerUser;
       usr.payments = user.payments;
-      usr.owner = user.owner
+      usr.owner = user.owner;
+      usr.blocked = user.blocked;
 
       users.push(usr);
     }
@@ -564,5 +599,6 @@ module.exports = {
   closeOrder,
   getOrdersByTableByStatus,
   getOpenedOrderForTable,
+  updateOrderPayments,
   getOrdersByCashRegisterByStatusAndCompletedDate
 }

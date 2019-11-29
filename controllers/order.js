@@ -52,14 +52,12 @@ async function saveOrder(req, res) {
     const orderDTO = req.body;
 
     let order = await OrderService.createOrder(orderDTO);
- 
-    if (order !== null && order !== 'undefined')
-    {
+
+    if (order !== null && order !== undefined) {
       res.status(200).send({ order: order });
     }
-    else 
-    {
-      res.status(500).send({ message: `Error al guardar en la base de datos` });  
+    else {
+      res.status(500).send({ message: `Error al guardar en la base de datos` });
     }
   }
   catch (err) {
@@ -76,13 +74,11 @@ async function updateOrderProducts(req, res) {
 
     const orderUpdated = await OrderService.updateOrderProducts(orderDTO, productsToAdd, userName, totalToAdd);
 
-    if (orderUpdated !== null && orderUpdated !== undefined)
-    {
+    if (orderUpdated !== null && orderUpdated !== undefined) {
       res.status(200).send({ order: orderUpdated });
     }
-    else 
-    {
-      res.status(500).send({ message: `Error al actualizar los productos del pedido en la base de datos` });  
+    else {
+      res.status(500).send({ message: `Error al actualizar los productos del pedido en la base de datos` });
     }
   }
   catch (err) {
@@ -98,13 +94,11 @@ async function deleteProductOrder(req, res) {
 
     const orderUpdated = await OrderService.deleteProduct(orderDTO, productToRemove, userName);
 
-    if (orderUpdated !== null && orderUpdated !== undefined)
-    {
+    if (orderUpdated !== null && orderUpdated !== undefined) {
       res.status(200).send({ order: orderUpdated });
     }
-    else 
-    {
-      res.status(500).send({ message: `Error al eliminar el producto del pedido en la base de datos` });  
+    else {
+      res.status(500).send({ message: `Error al eliminar el producto del pedido en la base de datos` });
     }
   }
   catch (err) {
@@ -112,13 +106,13 @@ async function deleteProductOrder(req, res) {
   }
 }
 
-async function updateOrder(req, res) {
+async function updateDeleteOrder(req, res) {
   try {
     let orderDTO = req.body;
 
     const orderUpdated = await OrderService.updateOrder(orderDTO);
 
-    if (orderUpdated !== null && orderUpdated !== 'undefined')
+    if (orderUpdated !== null && orderUpdated !== undefined)
     {
       res.status(200).send({ order: orderUpdated });
     }
@@ -132,23 +126,40 @@ async function updateOrder(req, res) {
   }
 }
 
+
+async function updatePayments(req, res) {
+  try {
+    let orderDTO = req.body;
+
+    const orderUpdated = await OrderService.updateOrderPayments(orderDTO);
+
+    if (orderUpdated !== null && orderUpdated !== undefined) {
+      res.status(200).send({ order: orderUpdated });
+    }
+    else {
+      res.status(500).send({ message: `Error al querer actualizar la orden: orderUpdated es null o undefined` });
+    }
+  }
+  catch (err) {
+    res.status(500).send({ message: `Error al querer actualizar la orden: ${err}` });
+  }
+}
+
 async function closeOrder(req, res) {
   try {
     let orderDTO = req.body;
 
     const orderUpdated = await OrderService.closeOrder(orderDTO);
 
-    if (orderUpdated !== null && orderUpdated !== 'undefined')
-    {
+    if (orderUpdated !== null && orderUpdated !== undefined) {
       res.status(200).send({ order: orderUpdated });
     }
-    else 
-    {
-      res.status(500).send({ message: `Error al querer cerrar el pedido: orderUpdated es null o undefined` });  
+    else {
+      res.status(500).send({ message: `Error al querer cerrar el pedido: orderUpdated es null o undefined` });
     }
   }
   catch (err) {
-    res.status(500).send({ message: `Error al querer cerrar el pedido: ${err}` });  
+    res.status(500).send({ message: `Error al querer cerrar el pedido: ${err}` });
   }
 }
 
@@ -170,7 +181,24 @@ function unSetTable(req, res) {
   Order.updateMany({ table: tableNumber }, { $set: { table: null } }, (err, raw) => {
     if (err) return res.status(500).send({ message: `Error al eliminar la mesa del pedido: ${err}` });
     res.status(200).send({ message: `Todos los pedidos con número de mesa ${tableNumber} han quedado sin una mesa asignada` })
-  });  
+  });
+}
+
+async function blockUserForPaymentAndValidateAmounts(req, res) {
+  try {
+    let orderDTO = req.body;
+    const orderUpdated = await OrderService.updateOrder(orderDTO);
+
+    if (orderUpdated !== null && orderUpdated !== 'undefined') {
+      res.status(200).send({ order: orderUpdated });
+    }
+    else {
+      res.status(500).send({ message: `Error al querer actualizar la orden: orderUpdated es null o undefined` });
+    }
+  }
+  catch (err) {
+    res.status(500).send({ message: `Error al querer actualizar la orden: ${err}` });
+  }
 }
 
 module.exports = {
@@ -180,8 +208,10 @@ module.exports = {
   saveOrder,
   updateOrderProducts,
   deleteProductOrder,
-  updateOrder,
+  updateDeleteOrder,
+  updatePayments,
   closeOrder,
   deleteOrder,
-  unSetTable
+  unSetTable,
+  blockUserForPaymentAndValidateAmounts
 }
