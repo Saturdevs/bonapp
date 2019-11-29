@@ -2,8 +2,6 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const User = require('../models/user');
-const PaymentType = require('../models/paymentType');
 
 const cashRegisterSchema = Schema({
   name:  { type: String, unique: true, required: true }, 

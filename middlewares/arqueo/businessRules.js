@@ -1,8 +1,8 @@
 'use strict'
 
 const OrderService = require('../../services/order');
-const CashFlow = require('../../services/cashFlow');
-const Client = require('../../services/client');
+const CashFlowService = require('../../services/cashFlow');
+const TransactionService = require('../../services/transaction');
 const OrderStatus = require('../../shared/enums/orderStatus');
 const HttpStatus = require('http-status-codes');
 const CashInTypes = require('../../shared/enums/cashInTypes');
@@ -26,8 +26,8 @@ async function setCashMovementsByDateToCashCount(req, res, next) {
 
     try {
       let orders = await OrderService.getOrdersByCashRegisterByStatusAndCompletedDate(cashRegisterId, OrderStatus.CLOSED, date);
-      let cashFlows = await CashFlow.getCashFlowByCashRegisterAndDate(cashRegisterId, date);
-      let clients = await Client.getTransactionsByDate(date);
+      let cashFlows = await CashFlowService.getCashFlowByCashRegisterAndDate(cashRegisterId, date);
+      let transactions = await TransactionService.getTransactionsByDate(date);
 
       if (orders !== null && orders !== undefined) {
         orders.forEach(order => {
@@ -66,18 +66,15 @@ async function setCashMovementsByDateToCashCount(req, res, next) {
         })
       }
 
-      if (clients !== null && clients !== undefined && clients.length > 0) {
-        for (let i = 0; i < clients.length; i++) {
-          const client = clients[i];
-          for (let j = 0; j < client.transactions.length; j++) {
-            const transaction = client.transactions[j];
-            ingresos.push({
-              paymentType: transaction.paymentMethod,
-              desc: CashInTypes.COBROS_CLIENTES_CTA_CTE,
-              amount: transaction.amount,
-              date: transaction.date
-            })
-          }
+      if (transactions !== null && transactions !== undefined && transactions.length > 0) {
+        for (let i = 0; i < transactions.length; i++) {
+          const transaction = transactions[i];
+          ingresos.push({
+            paymentType: transaction.paymentMethod,
+            desc: CashInTypes.COBROS_CLIENTES_CTA_CTE,
+            amount: transaction.amount,
+            date: transaction.date
+          })
         }
       }
 

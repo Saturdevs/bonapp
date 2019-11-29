@@ -3,7 +3,7 @@
 const express = require('express');
 const arqueoCajaCtrl = require('../controllers/arqueoCaja');
 const arqueoCajaRouter = express.Router();
-const validators = require('../middlewares/arqueo/validations');
+const validators = require('../middlewares/arqueo/validators');
 const businessRules = require('../middlewares/arqueo/businessRules');
 
 arqueoCajaRouter.get('/', arqueoCajaCtrl.getArqueos);

@@ -1,9 +1,9 @@
 'use strict'
 
 const CashFlow = require('../models/cashFlow');
-const CashRegisterService = require('../services/cashRegister');
+const CashFlowDAO = require('../dataAccess/cashFlow');
+const CashFlowTransform = require('../transformers/cashFlow');
 const CashCountService = require('../services/arqueoCaja');
-const PaymentTypeService = require('../services/paymentType');
 const CashFlowTypes = require('../shared/enums/cashFlowTypes');
 const CashInTypes = require('../shared/enums/cashInTypes');
 const CashOutTypes = require('../shared/enums/cashOutTypes');
@@ -15,9 +15,9 @@ const CashOutTypes = require('../shared/enums/cashOutTypes');
  */
 async function getCashFlow(cashFlowId) {
   try {
-    let cashFlow = await getCashFlowById(cashFlowId);
+    let cashFlow = await CashFlowDAO.getCashFlowById(cashFlowId);
 
-    return transformToBusinessObject(cashFlow);
+    return CashFlowTransform.transformToBusinessObject(cashFlow);
   }
   catch (err) {
     throw new Error(err.message);
@@ -32,10 +32,10 @@ async function getCashFlow(cashFlowId) {
 async function getAll() {
   try {
     let cashFlowsReturned = [];
-    let cashFlows = await getCashFlowByQuery({});
+    let cashFlows = await CashFlowDAO.getCashFlowsByQuery({});
 
     for (let i = 0; i < cashFlows.length; i++) {
-      const cashFlowTransformed = await transformToBusinessObject(cashFlows[i]);
+      const cashFlowTransformed = await CashFlowTransform.transformToBusinessObject(cashFlows[i]);
       cashFlowsReturned.push(cashFlowTransformed);
     }
 
@@ -55,11 +55,28 @@ async function getAll() {
 async function getCashFlowByCashRegisterAndDate(cashRegisterId, date) {
   try {
     let query = { cashRegisterId: cashRegisterId, deleted: false, date: { "$gte": date } };
-    let cashFlows = await getCashFlowByQuery(query);
+    let cashFlows = await CashFlowDAO.getCashFlowsByQuery(query);
 
     return cashFlows;
   }
   catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
+ * @description Recupera un unico cashFlow con cashRegisterId igual al dado como parametro. Si hay mas de uno
+ * devuelve el primero que encuentra.
+ * @param {string} cashRegisterId 
+ * @returns primer cashFlow encontrado con cashRegisterId igual al dado como parametro.
+ */
+async function retrieveOneCashFlowForCashRegister(cashRegisterId) {
+  try {
+    let query = { cashRegisterId: cashRegisterId };
+    let cashFlow = await CashFlowDAO.getOneCashFlowByQuery(query);
+    
+    return cashFlow;
+  } catch (err) {
     throw new Error(err.message);
   }
 }
@@ -71,13 +88,13 @@ async function getCashFlowByCashRegisterAndDate(cashRegisterId, date) {
  */
 async function update(cashFlowId, bodyUpdate) {
   try {
-    let cashFlowUpdated = await updateCashFlowById(cashFlowId, bodyUpdate);
+    let cashFlowUpdated = await CashFlowDAO.updateCashFlowById(cashFlowId, bodyUpdate);
 
     if (cashFlowUpdated.deleted === true) {
       await removeCashFlowFromCashCount(cashFlowUpdated);
     }
 
-    return transformToBusinessObject(cashFlowUpdated);
+    return CashFlowTransform.transformToBusinessObject(cashFlowUpdated);
   } catch (err) {
     throw new Error(err.message);
   }
@@ -93,10 +110,10 @@ async function saveCashFlow(cashFlowReq) {
   try {
     let cashFlow = createCashFlow(cashFlowReq);
 
-    let cashFlowSaved = await save(cashFlow);
+    let cashFlowSaved = await CashFlowDAO.save(cashFlow);
     await saveCashFlowIntoCashCount(cashFlow);
 
-    return transformToBusinessObject(cashFlowSaved);
+    return CashFlowTransform.transformToBusinessObject(cashFlowSaved);
   } catch (err) {
     throw new Error(err.message);
   }
@@ -196,7 +213,7 @@ async function removeCashFlowFromCashCount(cashFlow) {
 
   } catch (err) {
     let cashFlowToRestore = { deleted: false };
-    await updateCashFlowById(cashFlow.id, cashFlowToRestore);
+    await CashFlowDAO.updateCashFlowById(cashFlow.id, cashFlowToRestore);
     throw new Error(`El movimiento de caja no pudo ser eliminado (${err.message})`);
   }
 }
@@ -248,98 +265,8 @@ function createCashFlow(cashFlowObject) {
  */
 async function deleteCashFlow(cashFlowId) {
   try {
-    let cashFlow = await getCashFlowById(cashFlowId);
-    await remove(cashFlow);
-  } catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-/**
- * @description Transforma el cash flow recuperado de la base de datos en el objeto cash flow usado en el front end.
- * Ver modelo en front end
- * @param {CashFlow} cashFlowEntity 
- */
-async function transformToBusinessObject(cashFlowEntity) {
-  if (cashFlowEntity !== null && cashFlowEntity !== undefined) {
-    let cashFlowReturned = JSON.parse(JSON.stringify(cashFlowEntity));
-    let cashRegister = await CashRegisterService.getCashRegisterById(cashFlowEntity.cashRegisterId);
-    let paymentType = await PaymentTypeService.getPaymentTypeById(cashFlowEntity.paymentType);
-
-    cashFlowReturned.cashRegister = cashRegister.name;
-    cashFlowReturned.paymentTypeName = paymentType.name;
-
-    return cashFlowReturned;
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////DATA ACCESS METHODS///////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @description Recupera de la base de datos el cash flow con id igual al dado como parametro
- * @param {ObjectId} cashFlowId id del cash flow que se quiere recuperar de la base de datos
- */
-async function getCashFlowById(cashFlowId) {
-  try {
-    let cashFlow = await CashFlow.findById(cashFlowId);
-    return cashFlow;
-  }
-  catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-/**
- * @description Recupera los movimientos de cajas que cumplan con la query dada.
- * @param {JSON} query 
- */
-async function getCashFlowByQuery(query) {
-  try {
-    let cashFlows = await CashFlow.find(query);
-    return cashFlows;
-  }
-  catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-/**
- * @description Updetea el cashFlow en la base de datos segun el id dado.
- * @param {ObjectID} cashFlowId 
- * @param {JSON} bodyUpdate 
- */
-async function updateCashFlowById(cashFlowId, bodyUpdate) {
-  try {
-    let cashFlowUpdated = await CashFlow.findByIdAndUpdate(cashFlowId, bodyUpdate, { new: true });
-    return cashFlowUpdated;
-  } catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-/**
- * @description guarda el cashFlow dado como parametro en la base de datos.
- * @param {CashFlow} cashFlow 
- * @returns cashFlowSaved cashFlow guardado en la base de datos.
- */
-async function save(cashFlow) {
-  try {
-    let cashFlowSaved = await cashFlow.save();
-    return cashFlowSaved;
-  } catch (err) {
-    throw new Error(err.message);
-  }
-}
-
-/**
- * @description Elmina el cashFlow dado como parametro en la base de datos.
- * @param {CashFlow} cashFlow 
- */
-async function remove(cashFlow) {
-  try {
-    await cashFlow.remove();
+    let cashFlow = await CashFlowDAO.getCashFlowById(cashFlowId);
+    await CashFlowDAO.remove(cashFlow);
   } catch (err) {
     throw new Error(err.message);
   }
@@ -351,5 +278,6 @@ module.exports = {
   getCashFlowByCashRegisterAndDate,
   saveCashFlow,
   update,
-  deleteCashFlow
+  deleteCashFlow,
+  retrieveOneCashFlowForCashRegister
 }

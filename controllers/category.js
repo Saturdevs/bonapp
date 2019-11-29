@@ -1,94 +1,104 @@
 'use strict'
 
 const Category = require('../models/category')
+const CategoryService = require('../services/category');
+const HttpStatus = require('http-status-codes');
 
-function getCategories (req, res) {
-  Category.find({}, null, {sort: {name: 1}}, (err, categories) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!categories) return res.status(404).send({ message: `No existen cateogrías registradas en la base de datos.`})
+async function getCategories(req, res) {
+  try {
+    let categories = await CategoryService.getAll();
 
-    res.status(200).send({ categories })
-  })
-}
-
-function getCategory (req, res) {
-  let categoryId = req.params.categoryId
-
-  Category.findById(categoryId, (err, category) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!category) return res.status(404).send({ message: `La categoría ${categoryId} no existe`})
-
-    res.status(200).send({ category }) //Cuando la clave y el valor son iguales
-  })
-}
-
-function getCategoryWithMenu (req, res) {
-  Category.find({}, null, {sort: {name: 1}}).populate('menuId')
-    .exec((err, categories) => {
-      if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-      if (!categories) return res.status(404).send({ message: `No existen cateogrías registradas en la base de datos.`})
-
-      res.status(200).send({ categories })
-    })
-}
-
-function getCategoryByMenu (req, res) {
-  let menuId = req.params.menuId
-
-  Category.find({menuId: menuId}, null, {sort: {name: 1}}).populate('menuId')
-    .exec((err, categories) => {
-      if(err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})    
-      if (!categories) return res.status(404).send({ message: `No existen categorías dentro del menú ${menuId}`})
-
-      res.status(200).send({ categories })
-  })
-}
-
-function saveCategory (req, res) {
-  console.log('POST /api/category')
-  console.log(req.body)
-
-  let category = new Category()
-  category.name = req.body.name
-  category.number_of_items = req.body.number_of_items
-  category.menuId = req.body.menuId
-  category.picture = req.body.picture
-
-  category.save((err, categoryStored) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una categoria con ese nombre. Ingrese otro nombre.` })
+    if (categories !== null && categories !== undefined) {
+      res.status(HttpStatus.OK).send({ categories });
     }
-
-    res.status(200).send({ category: categoryStored })
-  })
-}
-
-function updateCategory (req, res) {
-  let categoryId = req.params.categoryId
-  let bodyUpdate = req.body
-
-  Category.findByIdAndUpdate(categoryId, bodyUpdate, (err, categoryUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una categoria con ese nombre. Ingrese otro nombre.` })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cateogrías registradas en la base de datos.` })
     }
-
-    res.status(200).send({ category: categoryUpdated })
-  })
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-function deleteCategory (req, res) {
-  let categoryId = req.params.categoryId
+async function getCategory(req, res) {
+  try {
+    let categoryId = req.params.categoryId;
+    let category = await CategoryService.getCategory(categoryId);
 
-  Category.findById(categoryId, (err, category) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar la categoría: ${err}`})
+    if (category !== null && category !== undefined) {
+      res.status(HttpStatus.OK).send({ category });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `La categoría ${categoryId} no existe en la base da datos` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
 
-    category.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer borrar la categoría: ${err}`})
-      res.status(200).send({message: `La categoría ha sido eliminada`})
-    })
-  })
+async function getCategoryByMenu(req, res) {
+  try {
+    let menuId = req.params.menuId;
+    let categories = await CategoryService.getCategoriesByMenu(menuId);
+
+    if (categories !== null && categories !== undefined) {
+      res.status(HttpStatus.OK).send({ categories });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cateogrías registradas en la base de datos para el menu seleccionado.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
+async function hasAtLeastOneProduct(req, res) {
+  try {
+    let categoryId = req.params.categoryId;
+    let product = await CategoryService.hasAtLeastOneProduct(categoryId);
+
+    res.status(HttpStatus.OK).send({ product: product });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
+async function saveCategory(req, res) {
+  try {
+    let category = new Category()
+    category.name = req.body.name
+    category.menuId = req.body.menu._id
+    category.picture = req.body.picture
+
+    let categoryrSaved = await CategoryService.saveCategory(category);
+
+    res.status(HttpStatus.OK).send({ category: categoryrSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
+}
+
+async function updateCategory(req, res) {
+  try {
+    let categoryId = req.params.categoryId
+    let bodyUpdate = req.body
+
+    let categoryUpdated = await CategoryService.update(categoryId, bodyUpdate);
+    res.status(HttpStatus.OK).send({ category: categoryUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar la categoría: ${err.message}.` });
+  }
+}
+
+async function deleteCategory(req, res) {
+  try {
+    let categoryId = req.params.categoryId
+    CategoryService.deleteCategory(categoryId);
+    res.status(HttpStatus.OK).send({ message: `La categoría ha sido eliminada de la base de datos correctamente.` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar la categoría de la base de datos: ${err.message}` })
+  }
 }
 
 module.exports = {
@@ -98,5 +108,5 @@ module.exports = {
   saveCategory,
   updateCategory,
   deleteCategory,
-  getCategoryWithMenu
+  hasAtLeastOneProduct
 }
