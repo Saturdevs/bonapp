@@ -16,7 +16,7 @@ async function retrieveOneOrderForCashRegister(cashRegisterId) {
   try {
     let query = { cashRegister: cashRegisterId };
     let order = await OrderDAO.getOneOrderByQuery(query);
-    
+
     return order;
   } catch (err) {
     throw new Error(err.message);
@@ -195,18 +195,28 @@ function compareProductOptions(productOptions1, productOptions2) {
   //se setea la variable found en true para que entre al primer bucle
   let found = true;
 
-  //Me fijo que todas las opciones del primer array esten en el 2. Si encuentro al menos una que no lo este
-  //no sigue el bucle. La primera vez entra al bucle porque la variable found fue seteada en true. Si una opcion
-  //no se encuentra en el 2do array la variable found sera false y no seguira ejecutandose este bucle.
-  for (let i = 0; i < productOptions1.length && found; i++) {
-    //Se setea la varialbe found en false para que entre al 2do bucle
-    found = false;
-    for (let j = 0; j < productOptions2.length && !found; j++) {
-      found = compareOptions(productOptions1[i], productOptions2[j])
-    }
-  }
+  if ((productOptions1 === null || productOptions1 === undefined) &&
+    (productOptions2 === null || productOptions2 === undefined)) {
+    return true;
+  } else if (productOptions1 === null || productOptions1 === undefined) {
+    return false;
+  } else if (productOptions2 === null || productOptions2 === undefined) {
+    return false;
+  } else {
 
-  return found;
+    //Me fijo que todas las opciones del primer array esten en el 2. Si encuentro al menos una que no lo este
+    //no sigue el bucle. La primera vez entra al bucle porque la variable found fue seteada en true. Si una opcion
+    //no se encuentra en el 2do array la variable found sera false y no seguira ejecutandose este bucle.
+    for (let i = 0; i < productOptions1.length && found; i++) {
+      //Se setea la varialbe found en false para que entre al 2do bucle
+      found = false;
+      for (let j = 0; j < productOptions2.length && !found; j++) {
+        found = compareOptions(productOptions1[i], productOptions2[j])
+      }
+    }
+
+    return found;
+  }
 }
 
 /**
@@ -290,7 +300,7 @@ function removeProduct(order, productToRemove, username) {
       }
 
       if (!prodFound) {
-        throw new Error(`No se encontró el producto a eliminar en el array de productos del usuario ${username}`); 
+        throw new Error(`No se encontró el producto a eliminar en el array de productos del usuario ${username}`);
       }
     }
   }
@@ -394,7 +404,7 @@ async function updateOrderPayments(order) {
   try {
     let totalPayed = 0;
     let orderUpdated = null;
-    
+
     order.users.forEach(user => {
       let totalPerUser = 0;
       user.payments.forEach(payment => {
