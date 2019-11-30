@@ -44,7 +44,8 @@ async function saveTransaction(req, res) {
     transaction.cashRegister = req.body.cashRegister;
     transaction.comment = req.body.comment;
     transaction.deleted = false;
-    transaction.client = req.body.client;    
+    transaction.client = req.body.client;
+    transaction.date = new Date(); 
 
     let transactionSaved = await TransactionService.saveTransaction(transaction);
 

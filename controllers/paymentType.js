@@ -1,186 +1,101 @@
 'use strict'
 
-const PaymentType = require('../models/paymentType')
-const Client = require('../models/client')
-const CashFlow = require('../models/cashFlow')
-const Order = require('../models/order')
-const CashCount = require('../models/arqueoCaja')
+const PaymentType = require('../models/paymentType');
+const PaymentTypeService = require('../services/paymentType');
+const HttpStatus = require('http-status-codes');
 
-function getPaymentTypes (req, res) {
-  PaymentType.find({}, null, {sort: {name: 1}}, (err, paymentTypes) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!paymentTypes) return res.status(404).send({ message: `No existen medios de pagos registrados en la base de datos.`})
+async function getPaymentTypes(req, res) {
+  try {
+    let paymentTypes = await PaymentTypeService.getAll();
 
-    res.status(200).send({ paymentTypes })
-  })
-}
-
-function getAvailablePaymentTypes (req, res) {
-  PaymentType.find({available: true}, null, {sort: {name: 1}}, (err, paymentTypes) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!paymentTypes) return res.status(404).send({ message: `No existen medios de pagos disponibles en la base de datos.`})
-
-    res.status(200).send({ paymentTypes })
-  })
-}
-
-function getDefaultPaymentType (req, res) {
-  PaymentType.find({default: true}, (err, paymentType) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!paymentType) return res.status(404).send({ message: `No existen medios de pagos por default en la base de datos.`})
-
-    res.status(200).send({ paymentType })
-  })
-}
-
-function getPaymentType (req, res) {
-  let paymentTypeId = req.params.paymentTypeId
-
-  PaymentType.findById(paymentTypeId, (err, paymentType) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!paymentType) return res.status(404).send({ message: `El medio de pago ${paymentTypeId} no existe`})
-
-    res.status(200).send({ paymentType }) //Cuando la clave y el valor son iguales
-  })
-}
-
-function savePaymentType (req, res) {
-  console.log('POST /api/paymentType')
-  console.log(req.body)
-
-  let paymentType = new PaymentType()
-  paymentType.name = req.body.name
-  paymentType.available = req.body.available  
-  paymentType.default = false
-  paymentType.currentAccount = false
-
-  paymentType.save((err, paymentTypeStored) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe un medio de pago con ese nombre. Ingrese otro nombre.` })
+    if (paymentTypes !== null && paymentTypes !== undefined) {
+      res.status(HttpStatus.OK).send({ paymentTypes: paymentTypes });
     }
-
-    res.status(200).send({ paymentType: paymentTypeStored })
-  })
-}
-
-function updatePaymentType (req, res) {
-  let paymentTypeId = req.params.paymentTypeId
-  let bodyUpdate = req.body
-
-  PaymentType.findByIdAndUpdate(paymentTypeId, bodyUpdate, (err, paymentTypeUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe un medio de pago con ese nombre. Ingrese otro nombre.` })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen medios de pagos almacenadas en la base de datos.` })
     }
-
-    res.status(200).send({ paymentType: paymentTypeUpdated })
-  })
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-async function deletePaymentType (req, res) {
-  let paymentTypeId = req.params.paymentTypeId
+async function getAvailablePaymentTypes(req, res) {
+  try {
+    let paymentTypes = await PaymentTypeService.getAvailablePaymentTypes();
 
-  await PaymentType.findById(paymentTypeId, async (err, paymentType) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar el medio de pago: ${err}`})
-
-    if (paymentType !== 'undefined' && paymentType !== null) {
-      let validationMessages = [];
-      let validationError;
-      validationMessages = await validateDelete(paymentTypeId)
-      if (validationMessages.length === 0) {
-        paymentType.remove(err => {
-          if (err) return res.status(500).send({ message: `Error al querer borrar el medio de pago: ${err}`})
-          res.status(200).send({message: `El medio de pago ha sido eliminado`})
-        })
-      } else {
-        validationError = `Este medio de pago (${paymentType.name}) no puede ser eliminado debido a que:`
-
-        validationMessages.forEach(message => {
-          validationError += '\n\r\t- ' + message;            
-        });
-
-        validationError += '\n\rMárquelo como inactivo en su lugar.'
-        return res.status(500).send({ message: validationError})        
-      } 
-    }    
-  })
-}
-
-function unSetDefaultPaymentType (req, res) {
-  let paymentTypeId = req.params.paymentTypeId
-  PaymentType.updateMany({ default: true, _id: {"$ne": paymentTypeId} }, { $set: { default: false }}, (err, raw) => {
-    if (err) return handleError(err);
-    res.status(200).send({message: `El tipo de pago por defecto ha sido cambiado`})
-  });
-}
-
-async function validateDelete(paymentMethodId) {
-
-  let validationErrors = [];
-  
-  await CashFlow.find({paymentType: paymentMethodId}, (err, cashFlows) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar el tipo de pago (falló ka validación de movimientos de caja) ${err}`})
-
-    if (cashFlows !== null && cashFlows !== 'undefined' && cashFlows.length > 0) {
-      validationErrors.push('Tiene MOVIMIENTOS DE CAJA asociados')
+    if (paymentTypes !== null && paymentTypes !== undefined) {
+      res.status(HttpStatus.OK).send({ paymentTypes: paymentTypes });
     }
-  })
-  
-  await Client.find({}, (err, clients) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar el tipo de pago (falló la validación de transacciones de clientes) ${err}`})
-
-    let foundClient = false;
-    for (let i = 0; i < clients.length && !foundClient; i++) {
-      for (let j = 0; j < clients[i].transactions.length && !foundClient; j++) {                
-        if (clients[i].transactions[j].paymentMethod.toString() === paymentMethodId) {          
-          validationErrors.push('Tiene TRANSACCIONES asociadas')
-          foundClient = true;
-        }
-      }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen medios de pagos habilitadas.` })
     }
-  })  
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
 
-  await Order.find({}, (err, orders) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar el tipo de pago (falló la validación de pedidos) ${err}`})
+async function getPaymentType(req, res) {
+  try {
+    let paymentTypeId = req.params.paymentTypeId
+    let paymentType = await PaymentTypeService.getPaymentType(paymentTypeId);
 
-    let foundOrder = false;
-    for (let i = 0; i < orders.length && !foundOrder; i++) {
-      for (let j = 0; j < orders[i].users.length && !foundOrder; j++) {
-        for (let k = 0; k < orders[i].users[j].payments.length && !foundOrder; k++) {
-          if (orders[i].users[j].payments[k].methodId.toString() === paymentMethodId) {
-            validationErrors.push('Tiene PEDIDOS asociados')
-            foundOrder = true;
-          }
-        }
-      }
-    }    
-  })
+    if (paymentType !== null && paymentType !== undefined) {
+      res.status(HttpStatus.OK).send({ paymentType });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `El medio de pago ${paymentTypeId} no pudo ser recuperado de la base de datos.` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
 
-  await CashCount.find({}, (err, cashCounts) => {
-    if (err) return res.status(500).send({ message: `Hubo un error al querer eliminar el tipo de pago (falló la validación de arqueos) ${err}`})
+async function savePaymentType(req, res) {
+  try {
+    let paymentType = new PaymentType()
+    paymentType.name = req.body.name
+    paymentType.available = req.body.available
+    paymentType.default = false
+    paymentType.currentAccount = false
 
-    let foundCashCount = false;
-    for (let i = 0; i < cashCounts.length && !foundCashCount; i++) {
-      for (let j = 0; j < cashCounts[i].realAmount.length && !foundCashCount; j++) {
-        if (cashCounts[i].realAmount[j].paymentType.toString() === paymentMethodId) {
-          validationErrors.push('Tiene ARQUEOS asociados')
-          foundCashCount = true;
-        }
-      }
-    }    
-  })
+    let paymentTypeSaved = await PaymentTypeService.savePaymentType(paymentType);
 
-  return validationErrors
+    res.status(HttpStatus.OK).send({ paymentType: paymentTypeSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
+}
+
+async function updatePaymentType(req, res) {
+  try {
+    let paymentTypeId = req.params.paymentTypeId;
+    let bodyUpdate = req.body;
+
+    let paymentTypeUpdated = await PaymentTypeService.update(paymentTypeId, bodyUpdate);
+    res.status(HttpStatus.OK).send({ paymentType: paymentTypeUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar el medio de pago: ${err}.` });
+  }
+}
+
+async function deletePaymentType(req, res) {
+  let paymentType = req.paymentType;
+
+  try {
+    PaymentTypeService.deletePaymentType(paymentType);
+    res.status(HttpStatus.OK).send({ message: `El medio de pago ha sido eliminado` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el medio de pago: ${err}` })
+  }
 }
 
 module.exports = {
-  getPaymentType,  
+  getPaymentType,
   getPaymentTypes,
   getAvailablePaymentTypes,
-  getDefaultPaymentType,
   savePaymentType,
   updatePaymentType,
-  deletePaymentType,
-  unSetDefaultPaymentType
+  deletePaymentType
 }

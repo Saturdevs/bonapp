@@ -6,12 +6,13 @@ const TransactionTransform = require('../transformers/transaction');
 const CashCountService = require('../services/arqueoCaja');
 const CashInTypes = require('../shared/enums/cashInTypes');
 const ClientDAO = require('../dataAccess/client');
+const TransactionDAO = require('../dataAccess/transaction');
 
 async function getAll() {
   try {
     let transactionsToReturn = [];
     let sortCondition = { date: -1 };
-    let transactions = await getTransactionsSortedByQuery({ deleted: false }, sortCondition);
+    let transactions = await TransactionDAO.getTransactionsSortedByQuery({ deleted: false }, sortCondition);
 
     if (transactions !== null && transactions !== undefined) {
       for (let i = 0; i < transactions.length; i++) {
@@ -34,7 +35,7 @@ async function getAll() {
 async function getTransactionsByDate(date) {
   try {
     let query = { date: { "$gte": date } };
-    let transactions = await getTransactionsSortedByQuery(query, { date: -1 });
+    let transactions = await TransactionDAO.getTransactionsSortedByQuery(query, { date: -1 });
 
     return transactions;
   }
@@ -52,7 +53,7 @@ async function getTransactionsByDate(date) {
 async function getFirstTransactionByCashRegister(cashRegisterId) {
   try {
     let query = { cashRegister: mongoose.Types.ObjectId(cashRegisterId) };
-    let transaccion = await getTransactionsLimitByQuery(query, {}, 1);
+    let transaccion = await TransactionDAO.getTransactionsLimitByQuery(query, {}, 1);
 
     return transaccion;
   }
@@ -73,7 +74,7 @@ async function getTransaction(transactionId) {
       throw new Error('Se debe especificar el id de la transacción que se quiere obtener de la base de datos');
     }
 
-    transaction = await getTransactionById(transactionId);
+    transaction = await TransactionDAO.getTransactionById(transactionId);
 
     return TransactionTransform.transformToBusinessObject(transaction);
   }
@@ -90,7 +91,7 @@ async function getDistinctClientsWithTransactions() {
   let field = "client._id";
   let query = { deleted: false };
 
-  let clientIds = await getDistinctOnTransactions(field, query);
+  let clientIds = await TransactionDAO.getDistinctOnTransactions(field, query);
 
   return clientIds;
 }
@@ -135,7 +136,7 @@ async function saveTransaction(transaction) {
       throw new Error('El cliente para el que se quiere agregar una nueva transacción no se ha podido encontrar en la base de datos.');
     }
 
-    await save(transaction, opts);
+    await TransactionDAO.save(transaction, opts);
 
     await session.commitTransaction();
     session.endSession();
@@ -158,7 +159,7 @@ async function deleteTransaction(transactionId) {
   session.startTransaction();
   try {
     const opts = { session: session, new: true };    
-    let transaction = await getTransactionById(transactionId);
+    let transaction = await TransactionDAO.getTransactionById(transactionId);
 
     if (transaction === null || transaction === undefined) {
       throw new Error('La transacción que desea eliminar no se ha podido encontrar en la base de datos. Intente nuevamente.');
@@ -194,7 +195,7 @@ async function deleteTransaction(transactionId) {
       throw new Error('El cliente de la transacción que se desea elimnar no se ha podido encontrar en la base de datos.');
     }
 
-    await updateTransactionById(transactionId, { deleted: true }, opts);
+    await TransactionDAO.updateTransactionById(transactionId, { deleted: true }, opts);
     await session.commitTransaction();
     session.endSession();
   } catch (err) {
@@ -225,107 +226,6 @@ async function ingresoIndex(cashCountIngresos, ingreso) {
   }
 
   return index;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////DATA ACCESS METHODS//////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Recupera de la base de datos la transacción con id igual al dado como parametro
- * @param {*} transactionId id de la transacción que se quiere recuperar de la base de datos
- */
-async function getTransactionById(transactionId) {
-  try {
-    if (transactionId === null || transactionId === undefined) {
-      throw new Error('El id de la transacción no puede ser nulo');
-    }
-    let transaction = await Transaction.findById(transactionId);
-    return transaction;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Recupera las transacciones de la base de datos según la query dada.
- * @param {JSON} query query para realizar la busqueda.
- * @param {JSON} sortCondition condiciones para ordenar los resultados.
- */
-async function getTransactionsSortedByQuery(query, sortCondition) {
-  try {
-    let transactions = await Transaction.find(query).sort(sortCondition);
-    return transactions;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Recupera el número especificado de transacciones de la base de datos según la query dada.
- * @param {JSON} query query para realizar la busqueda.
- * @param {JSON} sortCondition condiciones para ordenar los resultados.
- * @param {number} qty cantidad de transacciones a recuperar.
- */
-async function getTransactionsLimitByQuery(query, sortCondition, qty) {
-  try {
-    let transactions = await Transaction.find(query).sort(sortCondition).limit(qty);
-    return transactions;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * Encuentra los distintos valores para el campo dado como parámetro.
- * @param {string} field campo para el que se quieren buscar los distintos valores.
- * @param {JSON} query query que especifica en que documentos buscar los valores del campo.
- * @returns los distintos valores del campo dado como parámetro.
- */
-async function getDistinctOnTransactions(field, query) {
-  try {
-    let data = await Transaction.distinct(field, query);
-    return data;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * @description Guarda la transacción dada como parámetro en la base de datos
- * @param {Transaction} transaction
- * @param {JSON} opts
- */
-async function save(transaction, opts = {}) {
-  try {
-    let transactionSaved = await transaction.save(opts);
-    return transactionSaved;
-  } catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
- * @description Actualiza la transacción con id igual al como parámetro en la base de datos.
- * @param {String} transactionId id de la transacción a actualizar en la base de datos.
- * @param {JSON} bodyUpdate propiedades de la transacción que se quieren actualizar.
- * @returns transacción actualizada en la base de datos
- */
-async function updateTransactionById(transactionId, bodyUpdate, opts = { new: true }) {
-  try {
-    if (transactionId === null || transactionId === undefined) {
-      throw new Error('El id de la transacción que se quiere actualizar no puede ser nulo');
-    }
-
-    let transactionUpdated = await Transaction.findByIdAndUpdate(transactionId, bodyUpdate, opts);
-    return transactionUpdated;
-  } catch (err) {
-    throw new Error(err);
-  }
 }
 
 module.exports = {
