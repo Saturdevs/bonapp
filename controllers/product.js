@@ -110,10 +110,10 @@ async function updatePrice (req, res) {
   }
 }
 
-function deleteProduct (req, res) {
+async function deleteProduct (req, res) {
   try {
     let productId = req.params.productId;
-    CategoryService.deleteCategory(productId);
+    ProductService.deleteProduct(productId);
     res.status(HttpStatus.OK).send({ message: `El producto ha sido eliminado de la base de datos correctamente.` });
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el producto de la base de datos: ${err.message}` })
