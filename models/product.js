@@ -1,23 +1,25 @@
 'use strict'
 
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const Category = require('../models/category');
+const Size = require('../models/size');
 
 const productSchema = Schema({
   code: { type: String, required: true, unique: true },
   name: { type: String, required: true, unique: true },
   //Pictures must start with "http://"
-  category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  category: { type: Schema.Types.ObjectId, ref: Category, required: true },
   pictures: { type: String, required: true },
   description: { type: String, required: true },
-  price: { type: Number, required: true },  //Si hay distintos tamaños este precio se correspondera con el precio del tamaño mas chico
+  //Si hay distintos tamaños este precio se correspondera con el precio del tamaño por default
+  price: { type: Number, required: true },  
   options: [{ 
     name: { type: String, required: true },
     price: { type: Number, required: true }
   }],
   sizes: [{
-    name: { type: String, required: true },
+    sizeId: { type: Schema.Types.ObjectId, ref: Size, required: true },
     price: { type: Number, required: true },
     default: { type: Boolean, required: true}
   }],
@@ -25,4 +27,4 @@ const productSchema = Schema({
   tags: [{ type: String }]
 })
 
-module.exports = mongoose.model('Product', productSchema)
+module.exports = mongoose.model('Product', productSchema);
