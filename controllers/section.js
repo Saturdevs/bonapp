@@ -1,70 +1,75 @@
 'use strict'
 
 const Section = require('../models/section')
+const SectionService = require('../services/section');
+const HttpStatus = require('http-status-codes');
 
-function getSections (req, res) {
-  Section.find({}, (err, sections) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!sections) return res.status(404).send({ message: `No existen secciones registradas en la base de datos.`})
+async function getSections (req, res) {
+  try {
+    let sections = await SectionService.getAll();
 
-    res.status(200).send({ sections })
-  })
-}
-
-function getSection (req, res) {
-  let sectionId = req.params.sectionId
-
-  Section.findById(sectionId, (err, section) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!section) return res.status(404).send({ message: `La sección ${sectionId} no existe`})
-
-    res.status(200).send({ section }) //Cuando la clave y el valor son iguales
-  })
-}
-
-function saveSection (req, res) {
-  console.log('POST /api/section')
-  console.log(req.body)
-
-  let section = new Section()
-  section.name = req.body.name
-
-  section.save((err, sectionStored) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una sección con ese nombre. Ingrese otro nombre.` })
-      return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` })
+    if (sections !== null && sections !== undefined) {
+      res.status(HttpStatus.OK).send({ sections });
     }
-
-    res.status(200).send({ section: sectionStored })
-  })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen salas almacenadas en la base de datos.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-function updateSection (req, res) {
-  let sectionId = req.params.sectionId
-  let bodyUpdate = req.body
+async function getSection (req, res) {
+  try {
+    let sectionId = req.params.sectionId;
+    let section = await SectionService.getSection(sectionId);
 
-  Section.findByIdAndUpdate(sectionId, bodyUpdate, (err, sectionUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una sección con ese nombre. Ingrese otro nombre.` })
+    if (section !== null && section !== undefined) {
+      res.status(HttpStatus.OK).send({ section });
     }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `La sala con id ${sectionId} no existe en la base da datos` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
 
-    res.status(200).send({ section: sectionUpdated })
-  })
+async function saveSection (req, res) {
+  try {
+    let section = new Section();
+    section.name = req.body.name;
+
+    let sectionSaved = await SectionService.saveSection(section);
+
+    res.status(HttpStatus.OK).send({ section: sectionSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  } 
+}
+
+async function updateSection (req, res) {
+  try {
+    let sectionId = req.params.sectionId;
+    let bodyUpdate = req.body
+
+    let sectionUpdated = await SectionService.update(sectionId, bodyUpdate);
+    res.status(HttpStatus.OK).send({ section: sectionUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar la sala: ${err.message}.` });
+  }
 }
 
 function deleteSection (req, res) {
-  let sectionId = req.params.sectionId
-
-  Section.findById(sectionId, (err, section) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar la sección: ${err}`})
-
-    section.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer borrar la sección: ${err}`})
-      res.status(200).send({message: `La sección ha sido eliminada`})
-    })
-  })
+  try {
+    let sectionId = req.params.sectionId;
+    SectionService.deleteSection(sectionId);
+    res.status(HttpStatus.OK).send({ message: `La sala ha sido eliminada de la base de datos correctamente.` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el producto de la base de datos: ${err.message}` })
+  }
 }
 
 module.exports = {

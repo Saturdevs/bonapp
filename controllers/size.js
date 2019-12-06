@@ -1,74 +1,80 @@
 'use strict'
 
 const Size = require('../models/size')
+const SizeService = require('../services/size');
+const HttpStatus = require('http-status-codes');
 
-function getSizes (req, res) {
-  Size.find({}, null, {sort: {name: 1}}, (err, sizes) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!sizes) return res.status(404).send({ message: `No existen tamaños registrados en la base de datos.`})
+async function getSizes(req, res) {
+  try {
+    let sizes = await SizeService.getAll();
 
-    res.status(200).send({ sizes })
-  })
-}
-
-function getSize (req, res) {
-  let sizeId = req.params.sizeId
-
-  Size.findById(sizeId, (err, size) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!size) return res.status(404).send({ message: `El tamaño ${sizeId} no existe`})
-
-    res.status(200).send({ size }) //Cuando la clave y el valor son iguales
-  })
-}
-
-function saveSize (req, res) {
-  console.log('POST /api/Size')
-  console.log(req.body)
-
-  let size = new Size()
-  size.name = req.body.name
-  size.available = req.body.available  
-
-  size.save((err, sizeStored) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe un tamaño con ese nombre. Ingrese otro nombre.` })
+    if (sizes !== null && sizes !== undefined) {
+      res.status(HttpStatus.OK).send({ sizes });
     }
-
-    res.status(200).send({ size: sizeStored })
-  })
-}
-
-function updateSize (req, res) {
-  let sizeId = req.params.sizeId
-  let bodyUpdate = req.body
-
-  Size.findByIdAndUpdate(sizeId, bodyUpdate, (err, sizeUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe un tamaño con ese nombre. Ingrese otro nombre.` })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen tamaños almacenadas en la base de datos.` })
     }
-
-    res.status(200).send({ size: sizeUpdated })
-  })
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
 }
 
-function deleteSize (req, res) {
-  let sizeId = req.params.sizeId
+async function getSize(req, res) {
+  try {
+    let sizeId = req.params.sizeId;
+    let size = await SizeService.getSize(sizeId);
 
-  Size.findById(sizeId, (err, size) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar el tamaño: ${err}`})
+    if (size !== null && size !== undefined) {
+      res.status(HttpStatus.OK).send({ size });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `El tamaño con id ${sizeId} no existe en la base da datos` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
 
-    size.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al querer borrar el tamaño: ${err}`})
-      res.status(200).send({message: `El tamaño ha sido eliminado`})
-    })
-  })
+async function saveSize(req, res) {
+  try {
+    let size = new Size();
+    size.name = req.body.name;
+    size.available = req.body.available;
+
+    let sizeSaved = await SizeService.saveSize(size);
+
+    res.status(HttpStatus.OK).send({ size: sizeSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+  }
+}
+
+async function updateSize(req, res) {
+  try {
+    let sizeId = req.params.sizeId;
+    let bodyUpdate = req.body
+
+    let sizeUpdated = await SizeService.update(sizeId, bodyUpdate);
+    res.status(HttpStatus.OK).send({ size: sizeUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar el tamaño: ${err.message}.` });
+  }
+}
+
+async function deleteSize(req, res) {
+  try {
+    let sizeId = req.params.sizeId;
+    SizeService.deleteSize(sizeId);
+    res.status(HttpStatus.OK).send({ message: `El tamaño ha sido eliminado de la base de datos correctamente.` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el tamaño de la base de datos: ${err.message}` })
+  }
 }
 
 module.exports = {
-  getSizes,  
+  getSizes,
   getSize,
   saveSize,
   updateSize,

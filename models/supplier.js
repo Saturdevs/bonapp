@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const supplierSchema = Schema({
   tel: { type: Number },
   name: { type: String, required: true },
-  email: { type: String },
+  email: { type: String, unique: true },
   addressStreet: { type: String },
   addressNumber: { type: Number },
   addressDpto: {type: String },
