@@ -390,7 +390,7 @@ async function updateOrder(order) {
  *  actualiza o cierra la orden segun dorresponda 
  * @param {*} order 
  */
-async function updateOrderPayments(order) {
+async function updateOrderPayments(order, unblockUsers) {
   try {
     let totalPayed = 0;
     let orderUpdated = null;
@@ -405,6 +405,10 @@ async function updateOrderPayments(order) {
 
       if (totalPerUser > user.totalPerUser) {
         throw new Error("Error al querer actualizar la orden: la suma de los pagos es mayor al total para el usuario " + user.username);
+      }
+
+      if(unblockUsers){
+        user.blocked = false;
       }
     });
 

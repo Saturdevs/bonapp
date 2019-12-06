@@ -131,7 +131,7 @@ async function updatePayments(req, res) {
   try {
     let orderDTO = req.body;
 
-    const orderUpdated = await OrderService.updateOrderPayments(orderDTO);
+    const orderUpdated = await OrderService.updateOrderPayments(orderDTO, false);
 
     if (orderUpdated !== null && orderUpdated !== undefined) {
       res.status(200).send({ order: orderUpdated });
