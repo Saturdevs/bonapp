@@ -69,7 +69,7 @@ async function deleteSize(req, res) {
     SizeService.deleteSize(sizeId);
     res.status(HttpStatus.OK).send({ message: `El tamaño ha sido eliminado de la base de datos correctamente.` });
   } catch (err) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el producto de la base de datos: ${err.message}` })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el tamaño de la base de datos: ${err.message}` })
   }
 }
 
