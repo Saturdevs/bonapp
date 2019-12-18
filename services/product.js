@@ -33,6 +33,20 @@ async function getProductsByCategory(categoryId) {
 }
 
 /**
+ * @description Recupera todos los productos disponibles para la categoría dada como parámetro.
+ * @param categoryId id de la categoría para la que se quieren recuperar los productos disponibles.
+ * @returns productos disponibles para la categoría recuperados de la base de datos.
+ */
+async function getProductsAvailablesByCategory(categoryId) {
+  try {
+    let productsToReturn = getProductsByQuery({ category: categoryId, available:true });  
+    return productsToReturn;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**
  * @description Recupera todos los productos según la query dada.
  * @param query query para recuperar los productos.
  * @returns productos recuperados de la base de datos.
@@ -174,6 +188,7 @@ async function deleteProduct(productId) {
 module.exports = {
   getAll,
   getProductsByCategory,
+  getProductsAvailablesByCategory,
   getProduct,
   existInAnOrder,
   updatePrice,

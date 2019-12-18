@@ -8,6 +8,7 @@ const validators = require('../middlewares/product/validators');
 productRouter.get('/', productCtrl.getProducts);
 productRouter.get('/:productId', productCtrl.getProduct);
 productRouter.get('/category/:categoryId', productCtrl.getProductsByCategory);
+productRouter.get('/availables/category/:categoryId', productCtrl.getProductsAvailablesByCategory);
 productRouter.get('/existInAnOrder/:productId', productCtrl.existInAnOrder);
 productRouter.post('/', productCtrl.saveProduct);
 productRouter.put('/updatePrice', productCtrl.updatePrice);

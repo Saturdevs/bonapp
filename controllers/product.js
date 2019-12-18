@@ -53,6 +53,23 @@ async function getProductsByCategory (req, res) {
   }  
 }
 
+async function getProductsAvailablesByCategory (req, res) {
+  try {
+    let categoryId = req.params.categoryId;
+    let products = await ProductService.getProductsAvailablesByCategory(categoryId);
+
+    if (products !== null && products !== undefined) {
+      res.status(HttpStatus.OK).send({ products });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen productos habilitados registrados en la base de datos.` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }  
+}
+
 async function existInAnOrder(req, res) {
   try {
     let productId = req.params.productId;
@@ -123,6 +140,7 @@ async function deleteProduct (req, res) {
 module.exports = {
   getProduct,
   getProductsByCategory,
+  getProductsAvailablesByCategory,
   getProducts,
   existInAnOrder,
   saveProduct,
