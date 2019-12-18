@@ -2,7 +2,8 @@
 
 const mongoose = require('mongoose')
 const app = require('./app')
-const config = require('./config')                                                      
+const config = require('./config')
+const socketIo = require('./services/socket-io')
 
 mongoose.connect(config.db, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {
   if (err) {
@@ -10,7 +11,9 @@ mongoose.connect(config.db, { useNewUrlParser: true, useCreateIndex: true }, (er
   }
   console.log('Conexión a la base de datos establecida...')
 
-  app.listen(config.port, () => {
+  var server = app.listen(config.port, () => {
     console.log(`API REST corriendo en http://localhost:${config.port}`)
   })
+
+  socketIo.initialize(server)
 })
