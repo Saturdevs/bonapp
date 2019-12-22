@@ -64,9 +64,18 @@ async function update(orderToUpdate) {
   }
 }
 
+async function updateMany(query, set, opts = { new: true }) {
+  try {
+    await Order.updateMany(query, { $set: set}, opts);
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
 module.exports = {
   getOrderByQuery,
   getOneOrderByQuery,
   getLastOrder,
-  update
+  update,
+  updateMany
 }

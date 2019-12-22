@@ -1,219 +1,149 @@
 'use strict'
 
-const validationStatus = require('../shared/enums/validationStatus')
+const validationStatus = require('../shared/enums/validationTableStatus')
+const TableService = require('../services/table');
 const HttpStatus = require('http-status-codes')
 const Table = require('../models/table')
 const Order = require('../models/order')
 
-function getTables (req, res) {
-  Table.find({}).sort( 'number' ).exec((err, tables) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!tables) return res.status(404).send({ message: `No existen mesas registradas en la base de datos.`})
+async function getTables(req, res) {
+  try {
+    let tables = await TableService.getAll();
 
-    res.status(200).send({ tables })
-  })
-}
-
-function getTableBySection (req, res) {
-  let sectionId = req.params.sectionId
-  Table.find({ section: sectionId }).sort( 'number' ).exec((err, tables) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    
-    res.status(200).send({ tables })
-  })
-}
-
-function getTable (req, res) {
-  let tableId = req.params.tableId
-
-  Table.findById(tableId, (err, table) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-    if (!table) return res.status(404).send({ message: `La mesa ${tableId} no existe`})
-
-    res.status(200).send({ table }) //Cuando la clave y el valor son iguales
-  })
-}
-
-function getTableByNumber (req, res) {
-  let tableNumber = req.params.tableNumber
-  Table.findOne({ number: tableNumber }, (err, table) => {
-    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
-
-    if (!table) return res.status(404).send({ message: `No se encontró la mesa número ${tableNumber}`})
-
-    res.status(200).send({ table })  
-  })
-}
-
-function saveTable (req, res) {
-  console.log('POST /api/table')
-  console.log(req.body)
-
-  let table = new Table()
-  table.number = req.body.number
-  table.section = req.body.section
-  table.col = req.body.col
-  table.row = req.body.row
-  table.sizex = req.body.sizex
-  table.sizey = req.body.sizey
-  table.status = req.body.status
-
-  table.save((err, tableStored) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una mesa con ese nombre. Ingrese otro nombre.` })
-      return res.status(500).send({ message: `Error al guardar en la base de datos: ${err}` })
+    if (tables !== null && tables !== undefined) {
+      res.status(HttpStatus.OK).send({ tables });
     }
-
-    res.status(200).send({ table: tableStored })
-  })
-}
-
-function updateTable (req, res) {
-  let tableId = req.params.tableId
-  let bodyUpdate = req.body
-
-  Table.findByIdAndUpdate(tableId, bodyUpdate, (err, tableUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una mesa con ese nombre. Ingrese otro nombre.` })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen mesas almacenadas en la base de datos.` })
     }
-
-    res.status(200).send({ table: tableUpdated })
-  })
-}
-
-function updateTableByNumber (req, res) {
-  let tableNumber = req.params.tableNumber
-  let bodyUpdate = req.body
-
-  Table.findOneAndUpdate({number: tableNumber}, bodyUpdate, {new: true}, (err, tableUpdated) => {
-    if(err){
-      if(err['code'] == 11000) 
-        return res.status(500).send({ message: `Ya existe una mesa con ese nombre. Ingrese otro nombre.` })
-    }
-
-    res.status(200).send({ table: tableUpdated })
-  })
-}
-
-function deleteTableById (req, res) {
-  let tableId = req.params.tableId
-
-  Table.findById(tableId, async (err, table) => {
-    if (err) return res.status(500).send({ message: `Error al buscar una mesa con id ${tableId} para eliminarla: ${err}`})
-
-    if (table !== null && table !== 'undefined') {
-      let result = await deleteTable(table.number);
-
-      if (result.status === HttpStatus.OK) {
-        res.status(HttpStatus.OK).send({message: result.message})
-      } else if (result.status !== HttpStatus.OK ) {
-        res.status(result.status).send({message: result.message})
-      }
-    }    
-  })
-}
-
-function deleteTablesBySection (req, res) {
-  let sectionId = req.params.sectionId;
-
-  Table.deleteMany({ section: sectionId }, (err) => {
-    if (err) return res.status(500).send({ message: `Error al querer borrar las mesas de la sala ${sectionId}: ${err}`})
-    res.status(200).send({message: `Las mesas han sido borradas`})
-  })
-}
-
-async function deleteTableByNumber (req, res) {
-  let tableNumber = req.params.tableNumber;
-
-  let result = await deleteTable(tableNumber);
-  
-  if (result.status === HttpStatus.OK) {
-    res.status(HttpStatus.OK).send({message: result.message})
-  } else if (result.status !== HttpStatus.OK ) {
-    res.status(result.status).send({message: result.message})
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }
 
-async function deleteTable (tableNumber) {
-  let result = {};
-  let validationStatusReturned = await validateDelete(tableNumber)
+async function getTablesBySection(req, res) {
+  try {
+    let sectionId = req.params.sectionId;
+    let tables = await TableService.getTablesBySection(sectionId);
 
-  switch (validationStatusReturned) {
-    case validationStatus.OK:
-      await Table.deleteOne({ number: tableNumber }, (err) => {
-        if (err) {
-          result = {
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: `Error al querer borrar la mesa número ${tableNumber}: ${err}`
-          }
-        } else {
-          result = {
-            status: HttpStatus.OK,
-            message: `La mesa número ${tableNumber} ha sido borrada`
-          } 
-        }
-      })
-      break;
-  
-    case validationStatus.FAIL_OPEN_ORDER:
-      result = {
-        status: HttpStatus.METHOD_NOT_ALLOWED,
-        message: `La mesa ${tableNumber} no puede ser eliminada por que tiene una venta en curso.`
-      }
-      break;
-
-    case validationStatus.HAS_CLOSE_ORDER:
-      result = {
-        status: HttpStatus.CONFLICT,
-        message: `La mesa ${tableNumber} tiene ventas asociadas.\n\n\r¿Deseas eliminarla de 
-        todas formas?\n\n\rTodas las ventas asociadas quedarán sin una mesa asignada.`
-      }
-      break;
-
-    default:
-      result = {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error al querer borrar la mesa número ${tableNumber}: ${err}`
-      }
-      break;  
+    if (tables !== null && tables !== undefined) {
+      res.status(HttpStatus.OK).send({ tables });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen mesas almacenadas para la sección seleccionada en la base de datos.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
-
-  return result
 }
 
-async function validateDelete(tableNumber) {  
-  let statusResult = validationStatus.OK;
-  await Order.findOne({ table: tableNumber, status: 'Open' }, (err, orderOpen) => {    
-    if (err) return res.status(500).send({ message: `Error al querer recuperar un pedido abierto para la mesa ${tableNumber}: ${err}`})
+async function getTable(req, res) {
+  try {
+    let tableId = req.params.tableId;
+    let table = await TableService.getTable(tableId);
 
-    if (orderOpen !== null && orderOpen !== 'undefined') {          
-      statusResult = validationStatus.FAIL_OPEN_ORDER;
+    if (table !== null && table !== undefined) {
+      res.status(HttpStatus.OK).send({ table });
     }
-  })  
-
-  if (statusResult === validationStatus.OK)
-  {
-    await Order.findOne({ table: tableNumber, status: 'Closed' }, (err, orderClosed) => {
-      if (orderClosed !== null && orderClosed !== 'undefined') {
-        statusResult = validationStatus.HAS_CLOSE_ORDER
-      }
-    })
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `La mesa con id ${tableId} no existe en la base da datos` });
+    }
   }
-  
-  return statusResult;
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
+async function getTableByNumber(req, res) {
+  try {
+    let tableNumber = req.params.tableNumber;
+    let table = await TableService.getTableByNumber(tableNumber);
+
+    if (table !== null && table !== undefined) {
+      res.status(HttpStatus.OK).send({ table });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No se encontró la mesa número ${tableNumber} en la base da datos` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
+async function saveTable(req, res) {
+  try {
+    let table = new Table();
+    table.number = req.body.number;
+    table.section = req.body.section;
+    table.col = req.body.col;
+    table.row = req.body.row;
+    table.sizex = req.body.sizex;
+    table.sizey = req.body.sizey;
+    table.status = req.body.status;
+
+    let tableSaved = await TableService.saveTable(table);
+
+    res.status(HttpStatus.OK).send({ table: tableSaved });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al guardar en la base de datos: ${err.message}` });
+  }
+}
+
+async function updateTable(req, res) {
+  try {
+    let tableId = req.params.tableId;
+    let bodyUpdate = req.body;
+
+    let tableUpdated = await TableService.update(tableId, bodyUpdate);
+    res.status(HttpStatus.OK).send({ table: tableUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar la mesa: ${err.message}.` });
+  }
+}
+
+async function updateTableByNumber(req, res) {
+  try {
+    let tableNumber = req.params.tableNumber;
+    let bodyUpdate = req.body;
+
+    let tableUpdated = await TableService.updateTableByNumber(tableNumber, bodyUpdate);
+    res.status(HttpStatus.OK).send({ table: tableUpdated });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar la mesa: ${err.message}.` });
+  }
+}
+
+async function unSetAndDeleteTable(req, res) {
+  try {
+    let tableNumber = req.params.tableNumber;
+    await TableService.unSetAndDeleteTable(tableNumber);
+    res.status(HttpStatus.OK).send({ message: `Todos los pedidos con número de mesa ${tableNumber} han quedado sin una mesa asignada` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al eliminar mesa número ${tableNumber} del pedido: ${err}` });
+  }
+}
+
+async function deleteTableById(req, res) {
+  try {
+    //Le mesa se setea en el middleware validatorDelete
+    let table = req.table;
+    await TableService.deleteTable(table);
+    res.status(HttpStatus.OK).send({ message: `La mesa número ${table.number} ha sido eliminada de la base de datos correctamente.` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar la mesa número ${table.number}: ${err.message}` });
+  }
 }
 
 module.exports = {
   getTable,
   getTables,
   getTableByNumber,
-  getTableBySection,
+  getTablesBySection,
   saveTable,
   updateTable,
   updateTableByNumber,
-  deleteTableById,
-  deleteTablesBySection,
-  deleteTableByNumber
+  unSetAndDeleteTable,
+  deleteTableById
 }
