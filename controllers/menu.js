@@ -19,6 +19,21 @@ async function getMenus (req, res) {
   }
 }
 
+async function getMenusAvailables(req, res) {
+  try {
+    let menus = await MenuService.getAllAvailables();
+
+    if (menus !== null && menus !== undefined) {
+      res.status(HttpStatus.OK).send({ menus });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cartas habilitadas registradas en la base de datos.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
 async function getMenu (req, res) {
   try {
     let menuId = req.params.menuId;
@@ -52,7 +67,8 @@ async function saveMenu (req, res) {
     let menu = new Menu();
     menu.name = req.body.name
     menu.picture = req.body.picture
-
+    menu.available = req.body.available
+    
     let menuSaved = await MenuService.saveMenu(menu);
 
     res.status(HttpStatus.OK).send({ menu: menuSaved });
@@ -86,11 +102,22 @@ async function deleteMenu (req, res) {
   }
 }
 
+async function disableMenuAndCategoriesAndProducts(req, res) {
+  try {
+    MenuService.disableMenuAndCategoriesAndProducts(req.params.menuId);
+    res.status(HttpStatus.OK).send({ message: `El menu ha sido inhabilitado de la base de datos correctamente.` });
+  } catch (error) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer inhabilitar el menu de la base de datos: ${err.message}` })
+  }
+}
+
 module.exports = {
   getMenu,  
   getMenus,
+  getMenusAvailables,
   saveMenu,
   updateMenu,
   deleteMenu,
-  hasAtLeastOneCategory
+  hasAtLeastOneCategory,
+  disableMenuAndCategoriesAndProducts
 }

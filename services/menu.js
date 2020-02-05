@@ -1,14 +1,45 @@
 'use strict'
 
+const mongoose = require('mongoose');
 const CategoryDAO = require('../dataAccess/category');
+const MenuTransform = require('../transformers/menu');
 const MenuDAO = require('../dataAccess/menu');
+const ProductDAO = require('../dataAccess/product');
+const CategoryService = require('./category');
 
 async function getAll() {
   try {
+    let menusToReturn = [];
     let sortCondition = { name: 1 };
     let menus = await MenuDAO.getMenusSortedByQuery({}, sortCondition);
 
-    return menus;
+    if (menus !== null && menus !== undefined) {
+      for (let i = 0; i < menus.length; i++) {
+        const menuTransformed = await MenuTransform.transformToBusinessObject(menus[i]);
+        menusToReturn.push(menuTransformed);
+      }
+    }
+
+    return menusToReturn;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+async function getAllAvailables() {
+  try {
+    let menusToReturn = [];
+    let sortCondition = { name: 1 };
+    let menus = await MenuDAO.getMenusSortedByQuery({ available: true }, sortCondition);
+
+    if (menus !== null && menus !== undefined) {
+      for (let i = 0; i < menus.length; i++) {
+        const menuTransformed = await MenuTransform.transformToBusinessObject(menus[i]);
+        menusToReturn.push(menuTransformed);
+      }
+    }
+
+    return menusToReturn;
   } catch (err) {
     throw new Error(err.message);
   }
@@ -27,7 +58,9 @@ async function getMenu(menuId) {
 
     menu = await MenuDAO.getMenuById(menuId);
 
-    return menu;
+    let menuToReturn = await MenuTransform.transformToBusinessObject(menu);
+
+    return menuToReturn;
   }
   catch (err) {
     throw new Error(err);
@@ -59,7 +92,9 @@ async function hasAtLeastOneCategory(menuId) {
 async function saveMenu(menu) {
   let menuSaved = await MenuDAO.save(menu);
 
-  return menuSaved;
+  let menuToReturn = await MenuTransform.transformToBusinessObject(menuSaved);
+
+  return menuToReturn;
 }
 
 /**
@@ -75,10 +110,38 @@ async function deleteMenu(menuId) {
   }
 }
 
+async function disableMenuAndCategoriesAndProducts(menuId) {
+  // Transaccion que inhabilita el menu, sus categorias asociadas y los productos asociados a dicha categoria.
+  const session = await mongoose.startSession();
+  await session.startTransaction();
+  try {
+    const opts = { session: session, new: true, multi: true };
+    await MenuDAO.updateMenuyById(menuId, {available: false}, opts);
+
+    let categories = await CategoryService.getCategoriesByMenu(menuId);
+
+    for (let i = 0; i < categories.length; i++) {
+      let categoryUpdated = await CategoryDAO.updateCategoryById(categories[i]._id, {available: false}, opts);
+      let productsUpdated = await ProductDAO.updateManyProductsByQuery({category: categories[i]._id}, { available: false }, opts);
+    }   
+
+    await session.commitTransaction();
+    await session.endSession();
+  } catch (error) {
+    // If an error occurred, abort the whole transaction and
+    // undo any changes that might have happened
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error.message);
+  }
+}
+
 module.exports = {
   getAll,
+  getAllAvailables,
   getMenu,
   hasAtLeastOneCategory,
   saveMenu,
-  deleteMenu
+  deleteMenu,
+  disableMenuAndCategoriesAndProducts
 }
