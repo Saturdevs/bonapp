@@ -10,7 +10,6 @@ categoryRouter.get('/availables', categoryCtrl.getCategoriesAvailables);
 categoryRouter.get('/:categoryId', categoryCtrl.getCategory);
 categoryRouter.get('/parent/:menuId', categoryCtrl.getCategoryByMenu);
 categoryRouter.get('/availables/parent/:menuId', categoryCtrl.getCategoriesAvailablesByMenu);
-categoryRouter.get('/hasOneProduct/:categoryId', categoryCtrl.hasAtLeastOneProduct);
 categoryRouter.post('/', categoryCtrl.saveCategory);
 categoryRouter.put('/:categoryId', validators.validateDisable, categoryCtrl.updateCategory);
 categoryRouter.put('/disable/:categoryId', categoryCtrl.disableCategoryAndProducts);
