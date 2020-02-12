@@ -1,17 +1,19 @@
 'use strict'
 
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const bcrypt = require('bcrypt-nodejs')
-const jwt = require('jsonwebtoken')
-const moment = require('moment')
-const config = require('../config')
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const UserRole = require('../models/userRole');
+const bcrypt = require('bcrypt-nodejs');
+const jwt = require('jsonwebtoken');
+const moment = require('moment');
+const config = require('../config');
 
 const userSchema = Schema({
   name: { type: String },
   lastname: { type: String },
   phone: { type: String },
-  username: { type: String, lowercase: true, required: [true, "no puede estar vacío"], unique: true, index: true},    
+  username: { type: String, lowercase: true, required: [true, "no puede estar vacío"], unique: true, index: true},
+  roleId: { type: Schema.Types.ObjectId, ref: UserRole, required: true},
   password: { type: String, required: true },
   signUpDate: { type: Date, default: Date.now() },
   lastLogin: { type: Date },

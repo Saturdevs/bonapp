@@ -8,6 +8,7 @@ cashFlowRouter.get('/', cashFlowCtrl.getCashFlows);
 cashFlowRouter.get('/:cashFlowId', cashFlowCtrl.getCashFlow);
 cashFlowRouter.post('/', cashFlowCtrl.saveCashFlow);
 cashFlowRouter.put('/:cashFlowId', cashFlowCtrl.updateCashFlow);
+cashFlowRouter.put('/logicalDelete/:cashFlowId', cashFlowCtrl.logicalDeleteCashFlow);
 cashFlowRouter.delete('/:cashFlowId', cashFlowCtrl.deleteCashFlow);
 
 module.exports = cashFlowRouter;
