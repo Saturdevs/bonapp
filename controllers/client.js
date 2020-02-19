@@ -61,6 +61,7 @@ async function saveClient(req, res) {
     client.addressDpto = req.body.addressDpto || null;
     client.enabledTransactions = req.body.enabledTransactions;
     client.balance = 0;
+    client.limitCtaCte = req.body.limitCtaCte;
 
     let clientSaved = await ClientService.saveClient(client);
 
