@@ -24,7 +24,12 @@ const productSchema = Schema({
     default: { type: Boolean, required: true}
   }],
   available: { type: Boolean, required: true },
-  tags: [{ type: String }]
+  tags: [{ type: String }],
+  stockControl: { type: Boolean, required: true},
+  stock: {
+    min: { type: Number },
+    current: { type: Number}
+  }
 })
 
 module.exports = mongoose.model('Product', productSchema);

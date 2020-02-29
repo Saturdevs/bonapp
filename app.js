@@ -21,6 +21,7 @@ const genericValidationsRouter = require('./routes/genericValidationsRoutes')
 const supplierRouter = require('./routes/supplierRoutes')
 const transactionRouter = require('./routes/transactionRoutes')
 const mercadoPagoRouter = require('./routes/mercadoPagoRoutes')
+const dailyMenuRouter = require('./routes/dailyMenuRoutes')
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
 app.use(bodyParser.json({limit: '50mb'}))
@@ -50,6 +51,7 @@ app.use('/api/genericValidations', genericValidationsRouter)
 app.use('/api/supplier', supplierRouter)
 app.use('/api/transaction', transactionRouter)
 app.use('/api/mercadoPago', mercadoPagoRouter)
+app.use('/api/dailyMenu',dailyMenuRouter)
 
 //Middleware to handle error
 app.use(function errorHandler(err, req, res, next) {

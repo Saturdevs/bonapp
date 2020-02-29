@@ -4,7 +4,7 @@ const sio = require('socket.io');
 function initialize(server){
     var io = sio.listen(server);
     io.on("connection", socket => { //se ejecuta cada vez que un usuario se conecta al socket
-        console.log('a new user just connected!! ');
+        // console.log('a new user just connected!! ');
         socket.on("webSystemConnection", connection => { // escucha el metodo webSystemConnection, que lo mando desde el sistema web para asignarlo a la room WEBSYSTEM 
             socket.join(rooms.WEBSYSTEM); // asigno el sistema web a la room websystem para poder despues comunicarme con el mismo
         });

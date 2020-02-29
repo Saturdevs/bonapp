@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const CashRegister = require('../models/cashRegister')
 const Product = require('../models/product')
+const DailyMenu = require('../models/dailyMenu')
 const Table = require('../models/table')
 const User = require('../models/user')
 const PaymentMethod = require('../models/paymentType')
@@ -44,15 +45,17 @@ const orderSchema = Schema({
     username: { type: String, required: true },
     /**Productos pedidos por UN usuario */
     products: [{
+      /** Id del menu del dia que se encuentra en la coleccion dailyMenu. Si es null. No es un menu del dia */
+      dailyMenuId: { type: Schema.Types.ObjectId, ref: DailyMenu },
       /**Id del producto que se encuentra en la coleccion products */
-      product: { type: Schema.Types.ObjectId, ref: Product, required: true },
+      product: { type: Schema.Types.ObjectId, ref: Product },
       /**Opciones seleccionadas para cada producto del pedido */
       options: [{
         name: { type: String, required:true },
         price: { type: Number, required: true }
       }],
       /**Precio del producto seleccionado */
-      price: { type: Number, required: true },
+      price: { type: Number },
       /**Tamaño del producto seleccionado */
       size: {
         name: { type: String, required: true },

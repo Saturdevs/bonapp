@@ -5,6 +5,7 @@ const CashRegisterDAO = require('../dataAccess/cashRegister');
 const OrderDAO = require('../dataAccess/order');
 const ProductDAO = require('../dataAccess/product');
 const UserDAO = require('../dataAccess/user');
+const DailyMenuDAO = require('../dataAccess/dailyMenu');
 
 /**
  * @description Recupera un único order con cashRegisterId igual al dado como parametro. Si hay mas de uno
@@ -171,13 +172,20 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
    * @returns true si el producto se encuentra en el array preOrderProducts. false si no se encuentra.
    */
 function compareProducts(productInUserProducts, product) {
-  if (productInUserProducts.product.toString() === product.product &&
+  if (productInUserProducts.product !== null && productInUserProducts.product !== undefined && productInUserProducts.product.toString() === product.product &&
     productInUserProducts.name === product.name &&
     productInUserProducts.observations === product.observations &&
     compareProductOptions(productInUserProducts.options, product.options) &&
     productInUserProducts.price === product.price &&
     compareProductSize(productInUserProducts.size, product.size) &&
-    productInUserProducts.deleted === product.deleted) {
+    productInUserProducts.deleted === product.deleted || 
+    productInUserProducts.dailyMenuId !== null && productInUserProducts.dailyMenuId !== undefined && productInUserProducts.dailyMenuId.toString() === product.dailyMenuId &&
+    productInUserProducts.name === product.name &&
+    productInUserProducts.observations === product.observations &&
+    compareProductOptions(productInUserProducts.options, product.options) &&
+    productInUserProducts.price === product.price &&
+    compareProductSize(productInUserProducts.size, product.size) &&
+    productInUserProducts.deleted === product.deleted ) {
     return true;
   }
   else {
@@ -326,6 +334,7 @@ function createProductFromProductBusiness(product) {
   prod.quantity = product.quantity;
   prod.deleted = product.deleted;
   prod.deletedReason = product.deletedReason;
+  prod.dailyMenuId = product.dailyMenuId;
 
   return prod;
 }
@@ -524,18 +533,39 @@ async function transformToBusinessObject(orderEntity) {
       for (let j = 0; j < user.products.length; j++) {
         const product = user.products[j];
         let prod = {};
-        const productStored = await ProductDAO.getProductById(product.product);
+        
+        if(product.product !== null && product.product !== undefined){
+          const productStored = await ProductDAO.getProductById(product.product);
 
-        prod._id = product._id.toString();
-        prod.product = productStored._id;
-        prod.name = productStored.name;
-        prod.options = product.options;
-        prod.price = product.price;
-        prod.size = product.size;
-        prod.observations = product.observations;
-        prod.quantity = product.quantity;
-        prod.deleted = product.deleted;
-        prod.deletedReason = product.deletedReason;
+          prod._id = product._id.toString();
+          prod.product = productStored._id;
+          prod.name = productStored.name;
+          prod.options = product.options;
+          prod.price = product.price;
+          prod.size = product.size;
+          prod.observations = product.observations;
+          prod.quantity = product.quantity;
+          prod.deleted = product.deleted;
+          prod.deletedReason = product.deletedReason;
+
+        }
+        
+        if(product.dailyMenuId !== null && product.dailyMenuId !== undefined){
+          const dailyMenuStored = await DailyMenuDAO.getDailyMenuById(product.dailyMenuId);
+
+          prod._id = product._id.toString();
+          prod.product = null;
+          prod.dailyMenuId = dailyMenuStored._id.toString();
+          prod.name = dailyMenuStored.name;
+          prod.options = null;
+          prod.price = dailyMenuStored.price;
+          prod.size = null;
+          prod.observations = product.observations;
+          prod.quantity = product.quantity;
+          prod.deleted = product.deleted;
+          prod.deletedReason = product.deletedReason;
+        }
+
 
         products.push(prod);
       }

@@ -84,15 +84,20 @@ async function existInAnOrder(req, res) {
 async function saveProduct(req, res) {
   try {
     let product = new Product()
-    product.code = req.body.cod
+    product.code = req.body.code
     product.name = req.body.name
     product.category = req.body.category
-    product.pictures = req.body.picture
+    product.pictures = req.body.pictures
     product.description = req.body.description
     product.price = req.body.price
     product.options = req.body.options
     product.sizes = req.body.sizes
     product.available = req.body.available
+    product.stockControl = req.body.stockControl
+    if(product.stockControl){
+      product.stock.min = req.body.stock.min
+      product.stock.current = req.body.stock.current
+    }
 
     let productSaved = await ProductService.saveProduct(product);
 
