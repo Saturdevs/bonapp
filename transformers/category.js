@@ -11,6 +11,12 @@ async function transformToBusinessObject(categoryEntity) {
   if (categoryEntity !== null && categoryEntity !== undefined) {
     let categoryToReturn = JSON.parse(JSON.stringify(categoryEntity));
 
+    if (categoryToReturn.available) {
+      categoryToReturn.availableDescription = "Si";
+    } else {
+      categoryToReturn.availableDescription = "No";
+    }
+    
     categoryToReturn.menu = (categoryEntity.menuId !== null && categoryEntity.menuId !== undefined) ?
       await MenuDAO.getMenuById(categoryEntity.menuId) :
       null;

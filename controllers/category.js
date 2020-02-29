@@ -1,6 +1,7 @@
 'use strict'
 
 const Category = require('../models/category')
+const Product = require('../models/product')
 const CategoryService = require('../services/category');
 const HttpStatus = require('http-status-codes');
 
@@ -13,6 +14,21 @@ async function getCategories(req, res) {
     }
     else {
       res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cateogrías registradas en la base de datos.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
+async function getCategoriesAvailables(req, res) {
+  try {
+    let categories = await CategoryService.getAllAvailables();
+
+    if (categories !== null && categories !== undefined) {
+      res.status(HttpStatus.OK).send({ categories });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cateogrías habilitadas registradas en la base de datos.` })
     }
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
@@ -45,7 +61,23 @@ async function getCategoryByMenu(req, res) {
       res.status(HttpStatus.OK).send({ categories });
     }
     else {
-      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cateogrías registradas en la base de datos para el menu seleccionado.` })
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen categorías registradas en la base de datos para el menu seleccionado.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
+async function getCategoriesAvailablesByMenu(req, res) {
+  try {
+    let menuId = req.params.menuId;
+    let categories = await CategoryService.getCategoriesAvailablesByMenu(menuId);
+
+    if (categories !== null && categories !== undefined) {
+      res.status(HttpStatus.OK).send({ categories });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen categorías habiltiadas registradas en la base de datos para el menu seleccionado.` })
     }
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
@@ -69,6 +101,7 @@ async function saveCategory(req, res) {
     category.name = req.body.name
     category.menuId = req.body.menu._id
     category.picture = req.body.picture
+    category.available = req.body.available
 
     let categoryrSaved = await CategoryService.saveCategory(category);
 
@@ -101,12 +134,25 @@ async function deleteCategory(req, res) {
   }
 }
 
+async function disableCategoryAndProducts(req, res) {
+  try {
+    CategoryService.disableCategoryAndProducts(req.params.categoryId);
+    res.status(HttpStatus.OK).send({ message: `La categoría ha sido inhabilitada de la base de datos correctamente.` });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer inhabilitar la categoría de la base de datos: ${err.message}` })
+  }
+}
+
 module.exports = {
   getCategory,
+  getCategoriesAvailables,
   getCategoryByMenu,
+  getCategoriesAvailablesByMenu,
   getCategories,
   saveCategory,
   updateCategory,
   deleteCategory,
-  hasAtLeastOneProduct
+  hasAtLeastOneProduct,
+  disableCategoryAndProducts
 }

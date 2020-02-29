@@ -12,8 +12,9 @@ const clientSchema = Schema({
   addressNumber: { type: Number },
   addressDpto: {type: String },
   enabledTransactions: { type: Boolean, required: true }, //Determina si tiene cuenta corriente o no  
-  balance: { type: Number, required: true } //saldo del cliente a la fecha de realizada la transacción. 
+  balance: { type: Number, required: true }, //saldo del cliente a la fecha de realizada la transacción. 
                                             //Debe actualizarse cada vez que se realiza una transacción
+  limitCtaCte: { type: Number }
 });
 
 module.exports = mongoose.model('Client', clientSchema);

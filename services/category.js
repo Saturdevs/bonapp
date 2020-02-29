@@ -1,5 +1,6 @@
 'use strict'
 
+const mongoose = require('mongoose');
 const Category = require('../models/category');
 const CategoryTransform = require('../transformers/category');
 const CategoryDAO = require('../dataAccess/category');
@@ -10,6 +11,26 @@ async function getAll() {
     let categoriesToReturn = [];
     let sortCondition = { name: 1 };
     let categories = await CategoryDAO.getCategoriesSortedByQuery({}, sortCondition);
+
+    if (categories !== null && categories !== undefined) {
+      for (let i = 0; i < categories.length; i++) {
+        const categoryTransformed = await CategoryTransform.transformToBusinessObject(categories[i]);
+        categoriesToReturn.push(categoryTransformed);
+      }
+    }
+
+    return categoriesToReturn;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+//Devuelve todas las categorias disponibles
+async function getAllAvailables() {
+  try {
+    let categoriesToReturn = [];
+    let sortCondition = { name: 1 };
+    let categories = await CategoryDAO.getCategoriesSortedByQuery({available: true}, sortCondition);
 
     if (categories !== null && categories !== undefined) {
       for (let i = 0; i < categories.length; i++) {
@@ -55,6 +76,29 @@ async function getCategoriesByMenu(menuId) {
     }
     let categoriesToReturn = [];
     let query = { menuId: menuId };
+    let sortCondition = { name: 1 };
+    let categories = await CategoryDAO.getCategoriesSortedByQuery(query, sortCondition);
+
+    if (categories !== null && categories !== undefined) {
+      for (let i = 0; i < categories.length; i++) {
+        const categoryTransformed = await CategoryTransform.transformToBusinessObject(categories[i]);
+        categoriesToReturn.push(categoryTransformed);
+      }
+    }
+
+    return categoriesToReturn;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+async function getCategoriesAvailablesByMenu(menuId) {
+  try {
+    if (menuId === null || menuId === undefined) {
+      throw new Error('Se debe especificar el menú para el que se quieren obtener las categorías');
+    }
+    let categoriesToReturn = [];
+    let query = { menuId: menuId, available: true };
     let sortCondition = { name: 1 };
     let categories = await CategoryDAO.getCategoriesSortedByQuery(query, sortCondition);
 
@@ -135,13 +179,37 @@ async function deleteCategory(categoryId) {
     throw new Error(err.message);
   }
 }
+async function disableCategoryAndProducts(categoryId) {
+//Transaccion inhabilita categoria y productos.
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const opts = { session: session, new: true };
+    await CategoryDAO.updateCategoryById(categoryId, {available: false}, opts);
+
+    let products = await ProductDAO.updateManyProductsByQuery({category: categoryId}, {available: false}, opts);
+
+    await session.commitTransaction();
+    session.endSession();  
+  } catch (err) {
+    // If an error occurred, abort the whole transaction and
+    // undo any changes that might have happened
+    await session.abortTransaction();
+    session.endSession();
+    throw new Error(err.message);
+  }
+
+}
 
 module.exports = {
   getAll,
+  getAllAvailables,
   getCategory,
   getCategoriesByMenu,
+  getCategoriesAvailablesByMenu,
   hasAtLeastOneProduct,
   saveCategory,
   update,
-  deleteCategory
+  deleteCategory,
+  disableCategoryAndProducts
 }

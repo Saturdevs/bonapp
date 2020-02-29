@@ -15,7 +15,7 @@ async function getCategoryById(categoryId) {
     if (categoryId === null || categoryId === undefined) {
       throw new Error('El id de la categoría que se quiere recuperar de la base de datos no puede ser nulo');
     }
-    
+
     let category = await Category.findById(categoryId);
     return category;
   }
@@ -82,13 +82,13 @@ async function save(category) {
  * @param {JSON} bodyUpdate propiedades de la categoría que se quieren actualizar.
  * @returns categoría actualizada en la base de datos
  */
-async function updateCategoryById(categoryId, bodyUpdate) {
+async function updateCategoryById(categoryId, bodyUpdate, opts  = { new: true }) {
   try {
     if (categoryId === null || categoryId === undefined) {
       throw new Error('El id de la categoría que se quiere actualizar no puede ser nulo');
     }
 
-    let categoryUpdated = await Category.findByIdAndUpdate(categoryId, bodyUpdate, { new: true });
+    let categoryUpdated = await Category.findByIdAndUpdate(categoryId, bodyUpdate, opts);
     return categoryUpdated;
   } catch (err) {
     if (err.code === 11000) {

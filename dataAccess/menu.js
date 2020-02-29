@@ -40,23 +40,6 @@ async function getMenuById(menuId) {
 }
 
 /**
- * Recupera de la base de datos el menu con id igual al dado como parametro
- * @param {string} menuId id del menu que se quiere recuperar de la base de datos
- */
-async function getMenuById(menuId) {
-  try {
-    if (menuId === null || menuId === undefined) {
-      throw new Error('El id del menu no puede ser nulo');
-    }
-    let menu = await Menu.findById(menuId);
-    return menu;
-  }
-  catch (err) {
-    throw new Error(err);
-  }
-}
-
-/**
  * @description Guarda el menú dado como parámetro en la base de datos
  * @param {Menu} menu
  */
@@ -89,9 +72,26 @@ async function remove(menu) {
   }
 }
 
+async function updateMenuyById(menuId, bodyUpdate, opts  = { new: true }) {
+  try {
+    if (menuId === null || menuId === undefined) {
+      throw new Error('El id del menu que se quiere actualizar no puede ser nulo');
+    }
+    let menuUpdated = await Menu.findByIdAndUpdate(menuId, bodyUpdate, opts);
+    return menuUpdated;
+  } catch (err) {
+    if (err.code === 11000) {
+      throw new Error(`Ya existe un menu con ese nombre. Ingrese uno distinto por favor.`);
+    } else {
+      throw new Error(err);
+    }
+  }
+}
+
 module.exports = {
   getMenusSortedByQuery,
   getMenuById,
   save,
-  remove
+  remove,
+  updateMenuyById
 }
