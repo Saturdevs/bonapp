@@ -11,7 +11,7 @@ const AppMenu = require('../models/appMenu');
  * @param {JSON} query query para realizar la busqueda
  * @param {JSON} sortCondition condiciones para ordenar los resultados
  */
-async function getAppMenusSortedByQuery(query, sortCondition) {
+async function getAppMenusSortedByQuery(query, sortCondition = {}) {
   try {
     return await AppMenu.find(query).sort(sortCondition);
   }

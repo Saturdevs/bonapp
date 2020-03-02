@@ -15,7 +15,7 @@ const userRoleSchema = Schema({
   //Permisos del rol sobre cada recurso del sistema.
   rights: [{
     //Id del permiso que se quiere agregar al rol
-    rightId: { type: Schema.Types.ObjectId, ref: Right, required: true },
+    rightId: { type: String, required: true },
     //Determina si el permiso esta activo o no. Si es true tiene permiso, si es
     //false, undefined o null no tiene permiso.
     active: { type: Boolean, required: true }

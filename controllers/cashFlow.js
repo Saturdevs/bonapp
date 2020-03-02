@@ -47,18 +47,6 @@ async function saveCashFlow (req, res) {
   }
 }
 
-async function updateCashFlow (req, res) {
-  try {
-    let cashFlowId = req.params.cashFlowId;
-    let bodyUpdate = req.body;
-
-    let cashFlowUpdated = await CashFlowService.update(cashFlowId, bodyUpdate);
-    res.status(HttpStatus.OK).send({ cashFlow: cashFlowUpdated });
-  } catch (err) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar movimiento de caja: ${err}.` });
-  }
-}
-
 async function logicalDeleteCashFlow (req, res) {
   try {
     let cashFlowId = req.params.cashFlowId;
@@ -84,7 +72,6 @@ module.exports = {
   getCashFlow,  
   getCashFlows,
   saveCashFlow,
-  updateCashFlow,
   logicalDeleteCashFlow,
   deleteCashFlow
 }
