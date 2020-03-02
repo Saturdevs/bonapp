@@ -14,6 +14,5 @@ orderRouter.put('/products/delete', orderCtrl.deleteProductOrder)
 orderRouter.put('/close/:orderId', orderCtrl.closeOrder)
 orderRouter.put('/:orderId', orderCtrl.deleteOrder)
 orderRouter.put('/', orderCtrl.updatePayments)
-orderRouter.delete('/:orderId', orderCtrl.updateDeleteOrder)
 
 module.exports = orderRouter

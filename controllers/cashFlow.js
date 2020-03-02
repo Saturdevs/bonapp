@@ -47,15 +47,14 @@ async function saveCashFlow (req, res) {
   }
 }
 
-async function updateCashFlow (req, res) {
+async function logicalDeleteCashFlow (req, res) {
   try {
     let cashFlowId = req.params.cashFlowId;
-    let bodyUpdate = req.body;
 
-    let cashFlowUpdated = await CashFlowService.update(cashFlowId, bodyUpdate);
-    res.status(HttpStatus.OK).send({ cashFlow: cashFlowUpdated });
+    let cashFlowUpdated = await CashFlowService.logicalDelete(cashFlowId);
+    res.status(HttpStatus.OK).send({ message: `El moviemiento de caja ha sido eliminado de la base de datos` });
   } catch (err) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer actualizar movimiento de caja: ${err}.` });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el moviemiento de caja de la base de datos: ${err}` })    
   }
 }
 
@@ -73,6 +72,6 @@ module.exports = {
   getCashFlow,  
   getCashFlows,
   saveCashFlow,
-  updateCashFlow,
+  logicalDeleteCashFlow,
   deleteCashFlow
 }

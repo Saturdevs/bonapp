@@ -20,11 +20,12 @@ const clientRouter = require('./routes/clientRoutes')
 const supplierRouter = require('./routes/supplierRoutes')
 const transactionRouter = require('./routes/transactionRoutes')
 const mercadoPagoRouter = require('./routes/mercadoPagoRoutes')
+const userRoleRouter = require('./routes/userRoleRoutes')
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
 app.use(bodyParser.json({limit: '50mb'}))
 app.use(function (req, res, next) {
-res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 res.setHeader('Access-Control-Allow-Credentials', true);
 res.header('access-Control-Allow-Origin', '*');
@@ -48,6 +49,7 @@ app.use('/api/file',fileRouter)
 app.use('/api/supplier', supplierRouter)
 app.use('/api/transaction', transactionRouter)
 app.use('/api/mercadoPago', mercadoPagoRouter)
+app.use('/api/userRole', userRoleRouter)
 
 //Middleware to handle error
 app.use(function errorHandler(err, req, res, next) {

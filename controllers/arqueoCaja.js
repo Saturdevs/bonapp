@@ -105,6 +105,17 @@ async function updateArqueo(req, res) {
   }
 }
 
+async function logicalDeleteArqueo (req, res) {
+  try {
+    let arqueoId = req.params.arqueoId;
+
+    let arqueoUpdated = await ArqueoService.logicalDelete(arqueoId);
+    res.status(HttpStatus.OK).send({ message: `El arqueo ha sido eliminado de la base de datos` });
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el arqueo de la base de datos: ${err}` })    
+  }
+}
+
 /** 
  * @method
  * @description Elimina el arqueo de la base de datos correspondiente al id enviado como parámetro.
@@ -126,5 +137,6 @@ module.exports = {
   getArqueoOpenByCashRegister,
   saveArqueo,
   updateArqueo,
-  deleteArqueo
+  deleteArqueo,
+  logicalDeleteArqueo
 }
