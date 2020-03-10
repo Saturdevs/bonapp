@@ -77,20 +77,20 @@ async function getUserByUsernameWithEnabledMenus(username) {
  */
 async function getMenusSystem(role) {
   try {
-    let menus = [];
+    let appMenus = [];    
 
     //Recupero los que se muestran en la navBar del sistema
     let menusRootSystem = await AppMenuService.retrieveRootMenus();
 
-    menus = getEnabledMenus(menusRootSystem, role);
+    let menus = await getEnabledMenus(menusRootSystem, role, appMenus);
 
-    return menus;
+    return appMenus;
   } catch (err) {
     throw new Error(err.message);
   }
 }
 
-async function getEnabledMenus(parentMenus, userRole) {
+async function getEnabledMenus(parentMenus, userRole, appMenus) {
   let menus = [];
 
   for (let k = 0; k < parentMenus.length; k++) {
@@ -129,7 +129,8 @@ async function getEnabledMenus(parentMenus, userRole) {
 
     //Si tiene menus hijos vuelvo a llamar a la misma funcion para activarlos/desactivarlos.
     if (childMenus && childMenus.length > 0) {
-      childMenus = await getEnabledMenus(childMenus, userRole);
+      childActive = false;
+      childMenus = await getEnabledMenus(childMenus, userRole, appMenus);
 
       for (let i = 0; i < childMenus.length; i++) {
         let childMenu = childMenus[i];
@@ -139,21 +140,18 @@ async function getEnabledMenus(parentMenus, userRole) {
         }
         menus.push(childMenu);
         //Si hay al menos un menu hijo activo el menu padre va a estar activo tambien
-        childActive = childActive && childMenu.active;
+        childActive = childActive || childMenu.show;
       }
     }
 
-    if (menu.active === false) {
-      menu.show = false;
+    if (childActive !== null) {
+      menu.show = menu.active && rightActive && childActive;            
     } else {
-      if (rightActive === null) {
-        menu.show = childActive;
-      } else {
-        menu.show = rightActive;
-      }
+      menu.show = menu.active && rightActive;
     }
     
-    menus.push(await AppMenuTransform.transformToBusinessObject(menu));
+    menus.push(menu);
+    appMenus.push(await AppMenuTransform.transformToBusinessObject(menu));
   }
 
   return menus;
