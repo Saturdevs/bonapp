@@ -1,18 +1,16 @@
 'use strict'
 
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const bcrypt = require('bcrypt-nodejs')
-const jwt = require('jsonwebtoken')
-const moment = require('moment')
-const config = require('../config')
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const UserRole = require('../models/userRole');
+const bcrypt = require('bcrypt-nodejs');
 
 const userSchema = Schema({
-  name: { type: String },
-  lastname: { type: String },
-  phone: { type: String },
-  username: { type: String, lowercase: true, required: [true, "no puede estar vacío"], unique: true, index: true},    
+  name: { type: String, required: true },
+  lastname: { type: String, required: true },
+  username: { type: String, lowercase: true, required: [true, "no puede estar vacío"], unique: true, index: true},
   password: { type: String, required: true },
+  roleId: { type: Schema.Types.ObjectId, ref: UserRole, required: true},  
   signUpDate: { type: Date, default: Date.now() },
   lastLogin: { type: Date },
   salt: { type: String }
@@ -35,26 +33,6 @@ userSchema.pre('save', function (next) {
     })
   })
 });
-
-userSchema.methods.validPassword = function(password) {  
-  if(this.password != null) {        
-    return bcrypt.compareSync(password, this.password)
-  } else {    
-    return false;
-  }  
-};
-
-userSchema.methods.generateJWT = function() {
-  let user = this
-  const payload = {
-    sub: user._id,
-    username: user.username,
-    iat: moment().unix(),
-    exp: moment().add(60, 'days').unix()
-  }
-
-  return jwt.sign(payload, config.SECRET_TOKEN)
-};
 
 userSchema.methods.toAuthJSON = function(){
 

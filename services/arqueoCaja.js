@@ -107,6 +107,26 @@ async function update(arqueoId, bodyUpdate, opts = {}) {
 }
 
 /**
+ * @description Realiza la baja lógica del arqueo con id igual al dado como parametro en la base de datos.
+ * @param {ObjectId} arqueoId 
+ * @param {JSON} bodyUpdate 
+ */
+async function logicalDelete(arqueoId) {
+  try {
+    //TODO: recuperar el id del usuario del token y reemplazarlo en el deletedBy
+    let bodyUpdate = {
+      deleted: true,
+      deletedBy: "5d38ebfcf361ae0cabe45a8e"
+    }
+    let arqueoUpdated = await ArqueoDAO.updateArqueoById(arqueoId, bodyUpdate);
+
+    return ArqueoTransform.transformToBusinessObject(arqueoUpdated);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
  * Elimina el arqueo con id igual al dado como parametro de la base de datos.
  * @param {ObjectID} arqueoId id del arqueo que se quiere eliminar
  */
@@ -140,5 +160,6 @@ module.exports = {
   retrieveOneCashCountForCashRegister,
   deleteArqueo,
   save,
-  update
+  update,
+  logicalDelete
 }

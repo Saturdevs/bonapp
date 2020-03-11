@@ -101,6 +101,28 @@ async function update(cashFlowId, bodyUpdate) {
 }
 
 /**
+ * @description Realiza la baja lógica del cashFlow con id igual al dado como parametro en la base de datos.
+ * @param {ObjectId} cashFlowId 
+ * @param {JSON} bodyUpdate 
+ */
+async function logicalDelete(cashFlowId) {
+  try {
+    //TODO: recuperar el id del usuario del token y reemplazarlo en el deletedBy
+    let bodyUpdate = {
+      deleted: true,
+      deletedBy: "5d38ebfcf361ae0cabe45a8e"
+    }
+    let cashFlowUpdated = await CashFlowDAO.updateCashFlowById(cashFlowId, bodyUpdate);
+
+    await removeCashFlowFromCashCount(cashFlowUpdated);    
+
+    return CashFlowTransform.transformToBusinessObject(cashFlowUpdated);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
  * @description Devuelve el nuevo cashFlow guardado en la base de datos transformado al modelo que se usa en el
  * frontend.
  * @param {*} cashFlowReq cashFlow recibido en el objeto req en el controller
@@ -279,5 +301,6 @@ module.exports = {
   saveCashFlow,
   update,
   deleteCashFlow,
-  retrieveOneCashFlowForCashRegister
+  retrieveOneCashFlowForCashRegister,
+  logicalDelete
 }

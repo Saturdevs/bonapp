@@ -11,6 +11,7 @@ arqueoCajaRouter.get('/:arqueoId', arqueoCajaCtrl.getArqueo);
 arqueoCajaRouter.get('/:cashRegisterId/cashRegister/open', arqueoCajaCtrl.getArqueoOpenByCashRegister);
 arqueoCajaRouter.post('/', validators.validateCreate, businessRules.setCashMovementsByDateToCashCount, arqueoCajaCtrl.saveArqueo);
 arqueoCajaRouter.put('/:arqueoId', arqueoCajaCtrl.updateArqueo);
+arqueoCajaRouter.put('/logicalDelete/:arqueoId', arqueoCajaCtrl.logicalDeleteArqueo);
 arqueoCajaRouter.delete('/:arqueoId', arqueoCajaCtrl.deleteArqueo);
 
 module.exports = arqueoCajaRouter;
