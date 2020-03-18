@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const app = require('./app')
 const config = require('./config')
 const socketIo = require('./services/socket-io')
+const scheduler = require('./services/scheduler')
+
 
 mongoose.connect(config.db, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {
   if (err) {
@@ -15,5 +17,6 @@ mongoose.connect(config.db, { useNewUrlParser: true, useCreateIndex: true }, (er
     console.log(`API REST corriendo en http://localhost:${config.port}`)
   })
 
-  socketIo.initialize(server)
+  socketIo.initialize(server);
+  scheduler.runScheduler();
 })

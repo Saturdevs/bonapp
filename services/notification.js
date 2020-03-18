@@ -16,9 +16,30 @@ async function saveSuscription(reqBody) {
     return suscriptionSaved;
 }
 
+async function saveNotification(reqBody) {
+    let notificationSaved = await NotificationDAO.saveNotification(reqBody);
+    return notificationSaved;
+}
+
 async function getSubscriptions() {
     let subscriptions = await NotificationDAO.getSuscriptions();
     return subscriptions
+}
+
+async function getTypes() {
+    let notificationTypes = await NotificationDAO.getTypes();
+    return notificationTypes
+}
+
+async function resendNotifications() {
+    let nonReadNotifications = await NotificationDAO.getNonReadNotifications();
+    nonReadNotifications.forEach(notification => {
+        const allSubscriptions = await NotificationService.getSubscriptions();
+        //make notification to send
+        allSubscriptions.forEach(subscription => {
+            await sendNotification(subscription, notification);
+        })
+    });
 }
 
 async function setVapidDetails() {
@@ -37,5 +58,8 @@ module.exports = {
     saveSuscription,
     setVapidDetails,
     getSubscriptions,
-    sendNotification
+    sendNotification,
+    saveNotification,
+    getTypes,
+    resendNotifications
 }
