@@ -15,6 +15,16 @@ async function getUserById(userId) {
   }
 }
 
+async function getFullUserById(userId) {
+  try {
+    let user = await User.findById(userId);
+    return user;
+  }
+  catch (err) {
+    handleUserError(err);
+  }
+}
+
 /**
  * @description Recupera el usuario que cumpla con la query dada como parámetro. Si hay mas de uno devuelve 
  * el primero encuentra.
@@ -37,7 +47,7 @@ async function getUserByQuery(query) {
  */
 async function getUsersSortedByQuery(query, sortCondition = {}) {
   try {
-    return await User.find(query).select('-password -salt').sort(sortCondition);    
+    return await User.find(query).select('-password -salt').sort(sortCondition);
   }
   catch (err) {
     handleUserError(err);
@@ -77,6 +87,22 @@ async function remove(user, opts = {}) {
   }
 }
 
+/**
+ * @description Elmina el usuario dado como parámetro de la base de datos.
+ * @param {User} user
+ * @param {JSON} opts
+ */
+async function updateUserById(userId, bodyUpdate) {
+  try {
+    if (userId === null || userId === undefined) {
+      throw new Error('El id del usuario que se quiere actualizar no puede ser nulo');
+    }
+    return await User.findByIdAndUpdate(userId, bodyUpdate);
+  } catch (err) {
+    return err;
+  }
+}
+
 function handleUserError(err) {
   if (err.code === 11000) {
     if (err.keyPattern.username !== null && err.keyPattern.username !== undefined) {
@@ -94,5 +120,7 @@ module.exports = {
   getUserByQuery,
   getUsersSortedByQuery,
   save,
-  remove
+  remove,
+  getFullUserById,
+  updateUserById
 }

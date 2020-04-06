@@ -51,8 +51,8 @@ async function send(req, res) {
     
         Promise.all(allSubscriptions.map(sub =>
             NotificationService.sendNotification(sub, notificationPayload)))
-            .then(result => {
-                res.status(HttpStatus.OK).send({ subscription: subscriptionSaved })
+            .then(notificationsSent => {
+                res.status(HttpStatus.OK).send({ notificationsSent: notificationsSent })
                 console.log(result);
             })
             .catch(err => {

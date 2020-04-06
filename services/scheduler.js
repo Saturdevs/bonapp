@@ -2,10 +2,10 @@
 
 const cron = require('node-cron');
 // const notificationController = require('../controllers/notification');
+const notificationService = require('../services/notification');
 
 const sendNonReadNotifications = () => {
-    console.log('Notification Sent')
-    //llamar al notificationService.resendNotifications()
+    notificationService.resendNotifications();
 }
 
 function runScheduler() {   

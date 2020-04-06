@@ -33,13 +33,15 @@ async function getTypes() {
 
 async function resendNotifications() {
     let nonReadNotifications = await NotificationDAO.getNonReadNotifications();
-    nonReadNotifications.forEach(notification => {
-        const allSubscriptions = await NotificationService.getSubscriptions();
-        //make notification to send
-        allSubscriptions.forEach(subscription => {
-            await sendNotification(subscription, notification);
-        })
-    });
+    if(nonReadNotifications !== undefined && nonReadNotifications !== null){
+        nonReadNotifications.forEach(async (notification) => {
+            const allSubscriptions = await NotificationService.getSubscriptions();
+            //make notification to send
+            allSubscriptions.forEach(async (subscription) => {
+                await sendNotification(subscription, notification);
+            })
+        });
+    }
 }
 
 async function setVapidDetails() {

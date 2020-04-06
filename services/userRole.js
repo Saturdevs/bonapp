@@ -34,7 +34,18 @@ async function getUserRole(userRoleId) {
   }
 }
 
+async function getAllUserRoles(){
+  try {
+    let query = {};
+    return await UserRoleDAO.getAllUserRolesByQuerySorted(query);
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
 module.exports = {
   getAllUserRolesWithoutRights,
-  getUserRole
+  getUserRole,
+  getAllUserRoles
 }

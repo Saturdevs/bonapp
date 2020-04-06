@@ -195,9 +195,46 @@ async function deleteUser(user) {
   }
 }
 
+/**
+ * @description Devuelve el producto con id igual al dado como parámetro
+ * @param {string} userId id del producto que se quiere recuperar.
+ */
+async function getUserById(userId) {
+  try {
+    let user = null;
+    if (userId === null || userId === undefined) {
+      throw new Error('Se debe especificar el id del usuario que se quiere obtener de la base de datos');
+    }
+
+    user = await UserDAO.getFullUserById(userId);
+
+    return user;
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**
+ * @description Actualiza las propiedades dadas como parámetro del usuario con id igual al dado como parámetro.
+ * @param {String} userId id del usuario a actualizar.
+ * @param {JSON} bodyUpdate datos a actualizar en la base de datos.
+ * @returns usuario actualizado y convertido al modelo usado en el frontend.
+ */
+async function update(userId, bodyUpdate) {
+  try {
+    let userUpdated = await UserDAO.updateUserById(userId, bodyUpdate);
+    return userUpdated;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
 module.exports = {
   authenticate,
   getAll,
   create,
-  deleteUser
+  deleteUser,
+  getUserById,
+  update
 }
