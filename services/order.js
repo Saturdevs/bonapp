@@ -576,6 +576,7 @@ async function transformToBusinessObject(orderEntity) {
       usr.payments = user.payments;
       usr.owner = user.owner;
       usr.blocked = user.blocked;
+      usr.clientId = user.clientId;
 
       users.push(usr);
     }

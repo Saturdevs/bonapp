@@ -7,6 +7,7 @@ const Product = require('../models/product')
 const DailyMenu = require('../models/dailyMenu')
 const Table = require('../models/table')
 const User = require('../models/user')
+const Client = require('../models/client')
 const PaymentMethod = require('../models/paymentType')
 
 const orderSchema = Schema({
@@ -92,7 +93,8 @@ const orderSchema = Schema({
      * Sino se setea en false. Debe haber un solo dueño por pedido.
      * Cuando el dueño paga y se retira se setea en true otro usuario.
      */
-    owner: { type: Boolean, required: true }
+    owner: { type: Boolean, required: true },
+    clientId: { type: Schema.Types.ObjectId, ref: Client }
   }],
   /**Fecha y hora de creación del pedido */
   created_at: { type: Date, required: true },

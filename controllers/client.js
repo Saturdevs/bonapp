@@ -62,6 +62,7 @@ async function saveClient(req, res) {
     client.enabledTransactions = req.body.enabledTransactions;
     client.balance = 0;
     client.limitCtaCte = req.body.limitCtaCte;
+    client.email = req.body.email;
 
     let clientSaved = await ClientService.saveClient(client);
 
