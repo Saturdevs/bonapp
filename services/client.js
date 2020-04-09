@@ -18,6 +18,26 @@ async function getAll() {
 }
 
 /**
+ * @description Devuelve todos los clientes almacenados en la base de datos segun un email.
+ * @returns clientes recuperados de la base de datos transformados al modelo que se usa en el frontend.
+ */
+async function getClientByEmail(email){
+  try {
+    let client = null;
+    if (email === null || email === undefined) {
+      throw new Error('Se debe especificar el email del cliente que se quiere obtener de la base de datos');
+    }
+
+    client = await ClientDAO.getClientByEmail(email);
+
+    return client;
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**
  * @description Recupera todos los clientes con cuenta corriente almacenados en la base de datos.
  * @returns clientes recuperados de la base de datos transformados al modelo que se usa en el frontend.
  */
@@ -100,5 +120,6 @@ module.exports = {
   getClient,
   saveClient,
   updateClient,
-  deleteClient
+  deleteClient,
+  getClientByEmail
 }

@@ -40,6 +40,23 @@ async function getClientById(clientId) {
 }
 
 /**
+ * Recupera de la base de datos el cliente con email igual al dado como parametro.
+ * @param {*} email id del cliente que se quiere recuperar de la base de datos.
+ */
+async function getClientByEmail(email) {
+  try {
+    if (email === null || email === undefined) {
+      throw new Error('El Email del cliente que se quiere recuperar no puede ser nulo');
+    }
+    let client = await Client.find({ email: email })
+    return client[0];
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**
  * @description Guarda el cliente dado como parametro en la base de datos.
  * @param {Client} client
  * @returns cliente guardado en la base de datos
@@ -76,5 +93,6 @@ module.exports = {
   getClientsSortedByQuery,
   getClientById,
   save,
-  updateClientById
+  updateClientById,
+  getClientByEmail
 }
