@@ -120,6 +120,10 @@ async function getEnabledMenus(parentMenus, userRole, appMenus) {
               }
             }
           }
+
+          if (!rightFound) {
+            rightActive = false;
+          }
         }
       }
     }
@@ -144,10 +148,14 @@ async function getEnabledMenus(parentMenus, userRole, appMenus) {
       }
     }
 
-    if (childActive !== null) {
-      menu.show = menu.active && rightActive && childActive;            
-    } else {
+    if (menu.neededRights && menu.neededRights.length > 0) {
       menu.show = menu.active && rightActive;
+    } else {
+      if (childActive !== null) {
+        menu.show = menu.active && rightActive && childActive;            
+      } else {
+        menu.show = menu.active && rightActive;
+      }
     }
     
     menus.push(menu);

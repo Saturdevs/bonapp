@@ -83,7 +83,7 @@ async function remove(userRole, opts = {}) {
 
     await userRole.remove(opts);
   } catch (err) {
-    handleTableError(err);
+    handleUserRoleError(err);
   }
 }
 
