@@ -69,7 +69,7 @@ async function saveNotification(notification) {
 async function getNonReadNotifications() {
     try {
         let notifications = await Notification.find();
-        nonReadNotifications = notifications.find(x => x.readBy.length == 0);
+        let nonReadNotifications = notifications.find(x => x.readBy.length == 0);
         return nonReadNotifications
     } catch (err) {
         throw new Error(err);

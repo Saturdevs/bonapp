@@ -51,6 +51,24 @@ async function getClient(req, res) {
   }
 }
 
+
+async function getClientByEmail(req, res){
+  try {
+    let clientEmail = req.params.email;
+    let client = await ClientService.getClientByEmail(clientEmail);
+
+    if (client !== null && client !== undefined) {
+      res.status(HttpStatus.OK).send({ client });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `El cliente con email ${clientEmail} no existe en la base de datos` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
 async function saveClient(req, res) {
   try {
     let client = new Client();
@@ -62,6 +80,7 @@ async function saveClient(req, res) {
     client.enabledTransactions = req.body.enabledTransactions;
     client.balance = 0;
     client.limitCtaCte = req.body.limitCtaCte;
+    client.email = req.body.email;
 
     let clientSaved = await ClientService.saveClient(client);
 
@@ -100,5 +119,6 @@ module.exports = {
   getWithCurrentAccountEnabled,
   saveClient,
   updateClient,
-  deleteClient
+  deleteClient,
+  getClientByEmail
 }

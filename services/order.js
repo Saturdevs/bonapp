@@ -172,14 +172,14 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
    * @returns true si el producto se encuentra en el array preOrderProducts. false si no se encuentra.
    */
 function compareProducts(productInUserProducts, product) {
-  if (productInUserProducts.product !== null && productInUserProducts.product !== undefined && productInUserProducts.product.toString() === product.product &&
+  if (productInUserProducts.product !== undefined && productInUserProducts.product !== null && productInUserProducts.product.toString() === product.product &&
     productInUserProducts.name === product.name &&
     productInUserProducts.observations === product.observations &&
     compareProductOptions(productInUserProducts.options, product.options) &&
     productInUserProducts.price === product.price &&
     compareProductSize(productInUserProducts.size, product.size) &&
     productInUserProducts.deleted === product.deleted || 
-    productInUserProducts.dailyMenuId !== null && productInUserProducts.dailyMenuId !== undefined && productInUserProducts.dailyMenuId.toString() === product.dailyMenuId &&
+    productInUserProducts.dailyMenuId !== undefined && productInUserProducts.dailyMenuId !== null && productInUserProducts.dailyMenuId.toString() === product.dailyMenuId &&
     productInUserProducts.name === product.name &&
     productInUserProducts.observations === product.observations &&
     compareProductOptions(productInUserProducts.options, product.options) &&
@@ -576,6 +576,7 @@ async function transformToBusinessObject(orderEntity) {
       usr.payments = user.payments;
       usr.owner = user.owner;
       usr.blocked = user.blocked;
+      usr.clientId = user.clientId;
 
       users.push(usr);
     }

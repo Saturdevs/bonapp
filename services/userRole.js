@@ -48,6 +48,16 @@ async function getUserRole(userRoleId) {
   }
 }
 
+async function getAllUserRoles(){
+  try {
+    let query = {};
+    return await UserRoleDAO.getAllUserRolesByQuerySorted(query);
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
 /**
  * @description Devuelve el rol de usuario con id igual al dado como parámetro con los permisos organizados segun
  * el menu en el que se van a mostrar en el sistema.
@@ -239,6 +249,7 @@ async function deleteUserRole(userRole) {
 module.exports = {
   getAllUserRolesWithoutRights,
   getUserRole,
+  getAllUserRoles,
   getUserRoleWithRightsByMenu,
   update,
   saveUserRole,
