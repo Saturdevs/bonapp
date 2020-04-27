@@ -229,6 +229,15 @@ async function saveUserRole(reqBody) {
   userRole.name = reqBody.name;
   userRole.isWaiter = reqBody.isWaiter;
   userRole.rights = [];
+
+  const userRoleRights = await RightService.getAll();
+  for (let i = 0; i < userRoleRights.length; i++) {
+    const right = userRoleRights[i];
+    userRole.rights.push({
+      rightId: right._id,
+      active: false
+    })
+  }  
   let userRoleSaved = await UserRoleDAO.save(userRole);
 
   return userRoleSaved;
