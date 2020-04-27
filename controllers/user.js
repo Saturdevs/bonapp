@@ -126,10 +126,10 @@ async function saveUser(req, res) {
 }
 /**
  * @description Elimina el usuario con id igual al dado como parámetro de la base de datos.
- * @param {String} userId id del producto que se quiere eliminar.
  */
-async function deleteUser(userId) {
+async function deleteUser(req, res) {
   try {
+    let userId = req.params.userId;
     let user = await UserService.getUserById(userId);
     let deletedUser = UserService.deleteUser(user);
     if (deletedUser !== null && deletedUser !== undefined) {
@@ -138,7 +138,7 @@ async function deleteUser(userId) {
       res.status(HttpStatus.NOT_FOUND).send({ message: `Ocurrio un error al dar de baja el usuario` });
     }
   }
-  catch{
+  catch(err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }
