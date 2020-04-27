@@ -3,11 +3,12 @@
 const express = require('express');
 const supplierCtrl = require('../controllers/supplier');
 const supplierRouter = express.Router();
+const authorize = require('../middlewares/auth/authorize');
 
-supplierRouter.get('/', supplierCtrl.getSuppliers);
-supplierRouter.get('/:supplierId', supplierCtrl.getSupplier);
-supplierRouter.post('/', supplierCtrl.saveSupplier);
-supplierRouter.put('/:supplierId', supplierCtrl.updateSupplier);
-supplierRouter.delete('/:supplierId', supplierCtrl.deleteSupplier);
+supplierRouter.get('/', authorize(), supplierCtrl.getSuppliers);
+supplierRouter.get('/:supplierId', authorize(), supplierCtrl.getSupplier);
+supplierRouter.post('/', authorize(), supplierCtrl.saveSupplier);
+supplierRouter.put('/:supplierId', authorize(), supplierCtrl.updateSupplier);
+supplierRouter.delete('/:supplierId', authorize(), supplierCtrl.deleteSupplier);
 
 module.exports = supplierRouter;

@@ -3,11 +3,12 @@
 const express = require('express');
 const cashFlowCtrl = require('../controllers/cashFlow');
 const cashFlowRouter = express.Router();
+const authorize = require('../middlewares/auth/authorize');
 
-cashFlowRouter.get('/', cashFlowCtrl.getCashFlows);
-cashFlowRouter.get('/:cashFlowId', cashFlowCtrl.getCashFlow);
-cashFlowRouter.post('/', cashFlowCtrl.saveCashFlow);
-cashFlowRouter.put('/logicalDelete/:cashFlowId', cashFlowCtrl.logicalDeleteCashFlow);
-cashFlowRouter.delete('/:cashFlowId', cashFlowCtrl.deleteCashFlow);
+cashFlowRouter.get('/', authorize(), cashFlowCtrl.getCashFlows);
+cashFlowRouter.get('/:cashFlowId', authorize(), cashFlowCtrl.getCashFlow);
+cashFlowRouter.post('/', authorize(), cashFlowCtrl.saveCashFlow);
+cashFlowRouter.put('/logicalDelete/:cashFlowId', authorize(), cashFlowCtrl.logicalDeleteCashFlow);
+cashFlowRouter.delete('/:cashFlowId', authorize(), cashFlowCtrl.deleteCashFlow);
 
 module.exports = cashFlowRouter;
