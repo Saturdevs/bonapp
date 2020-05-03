@@ -7,7 +7,10 @@ module.exports.up = async next => {
   try {
     const mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
 
+    //Este rol debe tener un id especifico porque va a ser usado en la base de datos general,
+    //por lo que necesitamos saber el id del rol.
     const userAppRole = {
+      "_id": mongodb.ObjectID("000000000000000000000001"),
       "name": "UserApp",
       "isWaiter": false,
       "rights": [
