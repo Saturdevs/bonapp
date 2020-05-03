@@ -5,6 +5,7 @@ const UserRoleDAO = require('../dataAccess/userRole');
 const UserRoleTransform = require('../transformers/userRole');
 const AppMenuService = require('../services/appMenu');
 const RightService = require('../services/right');
+const ROLE_USER_APP = "UserApp";
 
 /**
  * @description Devuelve todos los roles de usuario almacenados en la base de datos
@@ -20,7 +21,9 @@ async function getAllUserRolesWithoutRights() {
     if (roles !== null && roles !== undefined && roles.length > 0) {
       for (let i = 0; i < roles.length; i++) {
         const role = roles[i];
-        rolesToReturn.push(await UserRoleTransform.transformToBusinessObject(role));
+        if (role.name !== ROLE_USER_APP) {
+          rolesToReturn.push(await UserRoleTransform.transformToBusinessObject(role));
+        }
       }
     }
 
