@@ -4,8 +4,9 @@ const MongoClient = mongodb.MongoClient;
 const config = require('../config');
 
 module.exports.up = async next => {
+  let mClient = null;
   try {
-    const mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
+    mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
 
     const paymentTypes = [
       {
@@ -24,11 +25,12 @@ module.exports.up = async next => {
 
     const db = mClient.db();
     await db.createCollection('paymenttypes'); //Si la colección ya existe no la vuelve a crear.
-    await db.collection('paymenttypes').insertMany(paymentTypes);
-    await mClient.close();
+    await db.collection('paymenttypes').insertMany(paymentTypes);    
     return next();
   } catch (err) {
     return next(err);   
+  } finally {
+    mClient.close();
   }  
 }
 

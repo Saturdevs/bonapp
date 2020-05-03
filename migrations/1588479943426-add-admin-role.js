@@ -4,8 +4,9 @@ const MongoClient = mongodb.MongoClient;
 const config = require('../config');
 
 module.exports.up = async next => {
+  let mClient = null;
   try {
-    const mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
+    mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
 
     const adminRole = {
       "name": "Admin",
@@ -692,11 +693,12 @@ module.exports.up = async next => {
 
     await db.createCollection('userroles');
     await db.collection('userroles').insertOne(adminRole);
-    await mClient.close();
     return next();
   } catch (err) {
     throw new Error(err.message);
-  }
+  } finally {
+    mClient.close();
+  } 
 }
 
 module.exports.down = async next => {

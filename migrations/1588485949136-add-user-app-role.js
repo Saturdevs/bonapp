@@ -4,8 +4,9 @@ const MongoClient = mongodb.MongoClient;
 const config = require('../config');
 
 module.exports.up = async next => {
+  let mClient = null;
   try {
-    const mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
+    mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
 
     //Este rol debe tener un id especifico porque va a ser usado en la base de datos general,
     //por lo que necesitamos saber el id del rol.
@@ -695,11 +696,12 @@ module.exports.up = async next => {
 
     await db.createCollection('userroles');
     await db.collection('userroles').insertOne(userAppRole);
-    await mClient.close();
     return next();
   } catch (err) {
     throw new Error(err.message);
-  }
+  } finally {
+    mClient.close();
+  } 
 }
 
 module.exports.down = async next => {

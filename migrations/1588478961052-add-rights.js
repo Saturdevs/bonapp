@@ -4,8 +4,9 @@ const MongoClient = mongodb.MongoClient;
 const config = require('../config');
 
 module.exports.up = async next => {
+  let mClient = null;
   try {
-    const mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
+    mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
 
     const rights = [
       {
@@ -1980,12 +1981,13 @@ module.exports.up = async next => {
 
     const db = mClient.db();
     await db.createCollection('rights');
-    await db.collection('rights').insertMany(rights);
-    await mClient.close();
+    await db.collection('rights').insertMany(rights);    
     return next();
   } catch (err) {
     return next(err);
-  }
+  } finally {
+    mClient.close();
+  } 
 }
 
 module.exports.down = async next => {
