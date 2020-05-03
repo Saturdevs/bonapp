@@ -53,8 +53,15 @@ async function getUserByUsernameWithEnabledMenus(username) {
     let query = { username: username };
     let user = await UserDAO.getUserByQuery(query);
 
+    if (!user) {
+      throw new Error("Nombre de usuario incorrecto.");
+    }
     //Recupero el rol del usuario.
     let role = await UserRoleService.getUserRole(user.roleId);
+
+    if (!role) {
+      throw new Error(`El rol del usuario ${user.username} no existe en la base de datos.`);
+    }
 
     //Recupero todos los menus en la tabla appMenus habilitados o deshabilitados según
     //el rol del usuario.

@@ -27,8 +27,6 @@ const appMenuSchema = Schema({
   displayedRights: [{ 
     rightName: { type: String, required: true, unique: true }
   }],
-  //RouterLink del menú.
-  routerlink: { type: String, required: true },
   //Ruta a la carpeta donde se encuentra en ícono del menú.
   imgsrc: { type: String }
 })
