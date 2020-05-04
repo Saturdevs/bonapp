@@ -705,7 +705,7 @@ module.exports.down = async next => {
   try {
     const mClient = await MongoClient.connect(config.db, { useUnifiedTopology: true });
     const db = mClient.db();
-    await db.collection('userroles').remove({ "name": "Admin" });
+    await db.collection('userroles').deleteOne({ "name": "Admin" });
     await mClient.close();
     return next();
   } catch (err) {
