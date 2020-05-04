@@ -27,6 +27,8 @@ const rightSchema = Schema({
     //Id del permiso hijo.
     rightName: { type: String, required: true }
   }],
+  //Grupo al que pertenece un permiso.
+  group: { type: String},
   //Chequeos adicionales sobre atributos de la colección que se quieren realizar cuando 
   //se ejecuta la accion http guardada (action) sobre el recurso.
   //Por ejemplo, el rol mozo no puede cerrar un pedido.
@@ -47,4 +49,4 @@ const rightSchema = Schema({
   }]
 })
 
-module.exports = mongoose.model('Resource', rightSchema);
+module.exports = mongoose.model('Right', rightSchema);

@@ -1,18 +1,19 @@
 'use strict'
 
-const express = require('express')
-const orderCtrl = require('../controllers/order')
-const orderRouter = express.Router()
+const express = require('express');
+const orderCtrl = require('../controllers/order');
+const orderRouter = express.Router();
+const authorize = require('../middlewares/auth/authorize');
 
-orderRouter.get('/', orderCtrl.getOrders)
-orderRouter.get('/:orderId', orderCtrl.getOrder)
-orderRouter.get('/status/:table', orderCtrl.getOrderByTableByStatus)
-orderRouter.post('/', orderCtrl.saveOrder)
-orderRouter.put('/products', orderCtrl.updateOrderProducts)
-orderRouter.put('/blockUsers', orderCtrl.blockUserForPaymentAndValidateAmounts)
-orderRouter.put('/products/delete', orderCtrl.deleteProductOrder)
-orderRouter.put('/close/:orderId', orderCtrl.closeOrder)
-orderRouter.put('/:orderId', orderCtrl.deleteOrder)
-orderRouter.put('/', orderCtrl.updatePayments)
+orderRouter.get('/', authorize(), orderCtrl.getOrders);
+orderRouter.get('/:orderId', authorize(), orderCtrl.getOrder);
+orderRouter.get('/status/:table', authorize(), orderCtrl.getOrderByTableByStatus);
+orderRouter.post('/', authorize(), orderCtrl.saveOrder);
+orderRouter.put('/products', authorize(), orderCtrl.updateOrderProducts);
+orderRouter.put('/blockUsers', authorize(), orderCtrl.blockUserForPaymentAndValidateAmounts);
+orderRouter.put('/products/delete', authorize(), orderCtrl.deleteProductOrder);
+orderRouter.put('/close/:orderId', authorize(), orderCtrl.closeOrder);
+orderRouter.put('/:orderId', authorize(), orderCtrl.deleteOrder);
+orderRouter.put('/', authorize(), orderCtrl.updatePayments);
 
 module.exports = orderRouter

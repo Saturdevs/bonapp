@@ -5,7 +5,6 @@
  */
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const Right = require('../models/right');
 
 const userRoleSchema = Schema({
   //Nombre del rol. 

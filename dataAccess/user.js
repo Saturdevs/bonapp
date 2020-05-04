@@ -55,6 +55,20 @@ async function getUsersSortedByQuery(query, sortCondition = {}) {
 }
 
 /**
+ * @description Devuelve el número de usuarios para el rol específico dado como parámetro.
+ * @param {String} idRole id del rol para el que se quieren obtener la cantidad de usuarios.
+ */
+async function countUsersByRole(idRole) {
+  try {
+    const users = await User.countDocuments({ roleId: idRole });    
+    return users;
+  }
+  catch (err) {
+    handleUserError(err);
+  }
+}
+
+/**
  * @description Guarda el usuario dado como parámetro en la base de datos.
  * @param {User} user
  */
@@ -119,6 +133,7 @@ module.exports = {
   getUserById,
   getUserByQuery,
   getUsersSortedByQuery,
+  countUsersByRole,
   save,
   remove,
   getFullUserById,
