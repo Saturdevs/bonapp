@@ -13,7 +13,9 @@ const userSchema = Schema({
   roleId: { type: Schema.Types.ObjectId, ref: UserRole, required: true},  
   signUpDate: { type: Date, default: Date.now() },
   lastLogin: { type: Date },
-  salt: { type: String }
+  salt: { type: String },
+  isGeneral: { type: Boolean, required: true},
+  pin: { type: String, unique: true }
 }, {timestamps: true});
 
 userSchema.pre('save', function (next) {

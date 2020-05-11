@@ -9,8 +9,7 @@ const notificationTypeSchema = Schema({
   _id: { 
     type: String, 
     enum: [NotificationTypes.TABLE_TAKEN, NotificationTypes.NEW_ORDER, NotificationTypes.CALL_WAITER], 
-    required: true, 
-    unique: true
+    required: true
   },
   //Mensaje que se muestra al usuario.
   message: { 
