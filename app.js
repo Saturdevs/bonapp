@@ -22,6 +22,7 @@ const transactionRouter = require('./routes/transactionRoutes')
 const mercadoPagoRouter = require('./routes/mercadoPagoRoutes')
 const dailyMenuRouter = require('./routes/dailyMenuRoutes')
 const userRoleRouter = require('./routes/userRoleRoutes')
+const generatorRouter = require('./routes/qrGenerator')
 const paramRouter = require('./routes/paramRoutes')
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
@@ -53,6 +54,7 @@ app.use('/api/transaction', transactionRouter)
 app.use('/api/mercadoPago', mercadoPagoRouter)
 app.use('/api/dailyMenu',dailyMenuRouter)
 app.use('/api/userRole', userRoleRouter)
+app.use('/api/qrGenerator',generatorRouter)
 app.use('/api/param', paramRouter)
 
 //Middleware to handle error
