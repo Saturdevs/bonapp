@@ -1976,7 +1976,36 @@ module.exports.up = async next => {
         "childRights": null,
         "aditionalRules": null,
         "group": null
-      }
+      },
+
+      {
+        "_id": "generateQR",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [{
+            "rightName": "get-tables"
+        }, {
+            "rightName": "post-qr"
+        }],
+        "aditionalRules": null
+      },
+
+      {
+        "_id": "generateQR",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "get-tables"
+          },
+          {
+            "rightName": "post-qr"
+          }
+        ],
+        "aditionalRules": null
+      },
     ]
 
     const db = mClient.db();

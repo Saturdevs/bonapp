@@ -856,6 +856,19 @@ module.exports.up = async next => {
         ],
         "displayedRights": null,
         "imgsrc": null
+      },
+      {
+        "_id": "generate-qr",
+        "order": null,
+        "active": true,
+        "parent": "general-settings",
+        "neededRights": [
+          {
+            "rightName": "generateQR"
+          }
+        ],
+        "displayedRights": null,
+        "imgsrc": null
       }
     ]
 
