@@ -109,7 +109,9 @@ async function saveUser(req, res) {
       username: req.body.username,
       password: req.body.password,
       roleId: req.body.roleId,
-      signUpDate: Date.now()
+      signUpDate: Date.now(),
+      isGeneral: req.body.isGeneral,
+      pin: req.body.pin
     }
 
     let savedUser = await UserService.create(user);

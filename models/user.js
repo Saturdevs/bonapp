@@ -20,19 +20,30 @@ const userSchema = Schema({
 
 userSchema.pre('save', function (next) {
   let user = this
-  if(!user.isModified('password')) return next()
+  if(!user.isModified('password') && !user.isModified('pin')) return next()
 
   bcrypt.genSalt(10, (err, salt) => {
     if (err) return next(err)
 
     user.salt = salt
 
-    bcrypt.hash(user.password, salt, null, (err, hash) => {
-      if(err) return next(err)
+    if (user.isModified('password')) {
+      bcrypt.hash(user.password, salt, null, (err, hash) => {
+        if(err) return next(err)
 
-      user.password = hash
-      next()
-    })
+        user.password = hash
+        next()
+      })
+    }
+
+    if (user.isModified('pin')) {
+      bcrypt.hash(user.pin, salt, null, (err, hash) => {
+        if(err) return next(err)
+
+        user.pin = hash
+        next()
+      })
+    }
   })
 });
 
