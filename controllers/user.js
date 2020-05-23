@@ -92,7 +92,7 @@ async function updateUser(req, res) {
       res.status(HttpStatus.NOT_FOUND).send({ message: `Ocurrio un error al actualizar el usuario` });
     }
   }
-  catch{
+  catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }
