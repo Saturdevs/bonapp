@@ -20,7 +20,7 @@ async function validateSave(req, res, next) {
       //sino sigo con la validación.
       if (userId) {
         let user = await UserDAO.getUserById(userId);
-        if (bcrypt.compareSync(newPin, user.pin)) {
+        if (user.pin && bcrypt.compareSync(newPin, user.pin)) {
           return next();
         }
       }

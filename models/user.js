@@ -32,10 +32,13 @@ userSchema.pre('save', function (next) {
       }
     }
 
-    if (user.isModified('pin')) {       
+    if (user.pin && user.isModified('pin')) {       
       const hash = bcrypt.hashSync(user.pin, salt);
       user.pin = hash;           
+      next();
     }
+
+    next();
   } catch (err) {
     return next(err);
   }
