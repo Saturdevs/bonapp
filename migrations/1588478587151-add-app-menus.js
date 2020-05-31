@@ -485,6 +485,9 @@ module.exports.up = async next => {
           },
           {
             "rightName": "productNew"
+          },
+          {
+            "rightName": "stockControl"
           }
         ],
         "imgsrc": null
