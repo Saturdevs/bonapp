@@ -1926,6 +1926,36 @@ module.exports.up = async next => {
         "group": "size"
       },
       {
+        "_id": "stockControl",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "get-products"
+          },
+          {
+            "rightName": "get-categories"
+          },
+          {
+            "rightName": "get-product-by-id"
+          },
+          {
+            "rightName": "get-sizes"
+          },
+          {
+            "rightName": "get-categories"
+          },
+          {
+            "rightName": "put-products"
+          },
+          {
+            "rightName": "put-products-update-price"
+          }
+        ],
+        "aditionalRules": null
+      },
+      {
         "_id": "paymentTypeEdit",
         "urlPathColection": null,
         "routePath": null,
@@ -2119,7 +2149,7 @@ module.exports.up = async next => {
           }
         ],
         "aditionalRules": null
-      },
+      }
     ]
 
     const db = mClient.db();
