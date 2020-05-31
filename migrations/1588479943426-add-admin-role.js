@@ -671,7 +671,47 @@ module.exports.up = async next => {
         {
           "rightId": "userRolesDelete",
           "active": true
-        }
+        },
+        {
+          "rightId": "generateQR",
+          "active": true
+        }, 
+        {
+          "rightId": "post-qr",
+          "active": true
+        },
+        {
+          "rightId": "dailyMenuList",
+          "active": true
+        }, 
+        {
+          "rightId": "get-dailyMenus",
+          "active": true
+        }, 
+        {
+          "rightId": "get-available-dailyMenus",
+          "active": true
+        }, 
+        {
+          "rightId": "dailyMenuEdit",
+          "active": true
+        }, 
+        {
+          "rightId": "dailyMenuNew",
+          "active": true
+        },
+        {
+          "rightId": "get-dailyMenu-by-id",
+          "active": true
+        },
+        {
+          "rightId": "put-dailyMenu",
+          "active": true
+        },
+        {
+          "rightId": "post-dailyMenu",
+          "active": true
+        },
       ]
     };
 
@@ -684,7 +724,7 @@ module.exports.up = async next => {
 
     const rightsInRole = adminRole.rights;
     rightsInRole.forEach(right => {
-      const index = rights.findIndex(r => r._id === right.rightId )
+      const index = rights.findIndex(r => r._id === right.rightId)
 
       if (index === -1) {
         throw new Error(`El permiso ${right.rightId} no se encuentra registrado en la base de datos`);
@@ -698,7 +738,7 @@ module.exports.up = async next => {
     throw new Error(err.message);
   } finally {
     mClient.close();
-  } 
+  }
 }
 
 module.exports.down = async next => {

@@ -100,6 +100,51 @@ module.exports.up = async next => {
         "group": null
       },
       {
+        "_id": "get-dailyMenus",
+        "urlPathColection": "dailyMenu",
+        "routePath": "/",
+        "httpMethod": "get",
+        "childRights": null,
+        "aditionalRules": null,
+        "group": null
+      },
+      {
+        "_id": "get-available-dailyMenus",
+        "urlPathColection": "dailyMenu",
+        "routePath": "/availables",
+        "httpMethod": "get",
+        "childRights": null,
+        "aditionalRules": null,
+        "group": null
+      },
+      {
+        "_id": "get-dailyMenu-by-id",
+        "urlPathColection": "dailyMenu",
+        "routePath": "/:dailyMenuId",
+        "httpMethod": "get",
+        "childRights": null,
+        "aditionalRules": null,
+        "group": null
+      },
+      {
+        "_id": "put-dailyMenu",
+        "urlPathColection": "dailyMenu",
+        "routePath": "/:dailyMenuId",
+        "httpMethod": "put",
+        "childRights": null,
+        "aditionalRules": null,
+        "group": null
+      },
+      {
+        "_id": "post-dailyMenu",
+        "urlPathColection": "dailyMenu",
+        "routePath": "/",
+        "httpMethod": "post",
+        "childRights": null,
+        "aditionalRules": null,
+        "group": null
+      },
+      {
         "_id": "get-client-by-id",
         "urlPathColection": "client",
         "routePath": "/:clientId",
@@ -788,6 +833,60 @@ module.exports.up = async next => {
         "group": null
       },
       {
+        "_id": "dailyMenuList",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "get-dailyMenus"
+          },
+          {
+            "rightName": "get-available-dailyMenus"
+          },
+          {
+            "rightName": "put-dailyMenu"
+          },
+        ],
+        "aditionalRules": null,
+        "group": null
+      },
+      {
+        "_id": "dailyMenuEdit",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "get-dailyMenu-by-id",
+          },
+          {
+            "rightName": "put-dailyMenu"
+          },
+          {
+            "rightName": "get-products"
+          },
+        ],
+        "aditionalRules": null,
+        "group": null
+      },
+      {
+        "_id": "dailyMenuNew",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "post-dailyMenu"
+          },
+          {
+            "rightName": "get-products"
+          },
+        ],
+        "aditionalRules": null,
+        "group": null
+      },
+      {
         "_id": "get-product-by-id",
         "urlPathColection": "product",
         "routePath": "/:productId",
@@ -851,6 +950,12 @@ module.exports.up = async next => {
             "rightName": "get-menus-availables"
           },
           {
+            "rightName": "get-available-dailyMenus"
+          },
+          {
+            "rightName": "get-dailyMenus"
+          },
+          {
             "rightName": "post-orders"
           },
           {
@@ -878,6 +983,15 @@ module.exports.up = async next => {
         "urlPathColection": "table",
         "routePath": "/",
         "httpMethod": "get",
+        "childRights": null,
+        "aditionalRules": null,
+        "group": null
+      },
+      {
+        "_id": "post-qr",
+        "urlPathColection": "qrGenerator",
+        "routePath": "/",
+        "httpMethod": "post",
         "childRights": null,
         "aditionalRules": null,
         "group": null

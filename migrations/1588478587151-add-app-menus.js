@@ -393,6 +393,59 @@ module.exports.up = async next => {
         "imgsrc": null
       },
       {
+        "_id": "dailyMenu",
+        "order": 4,
+        "active": true,
+        "parent": "restaurant",
+        "mandatory": true,
+        "neededRights": null,
+        "displayedRights": [
+          {
+            "rightName": "dailyMenuList"
+          }        ],
+        "imgsrc": null
+      },
+      {
+        "_id": "dailyMenu-list",
+        "order": null,
+        "active": true,
+        "parent": "dailyMenu",
+        "mandatory": true,
+        "neededRights": [
+          {
+            "rightName": "dailyMenuList"
+          }
+        ],
+        "displayedRights": null,
+        "imgsrc": null
+      },
+      {
+        "_id": "dailyMenu-edit",
+        "order": null,
+        "active": true,
+        "parent": "dailyMenu",
+        "neededRights": [
+          {
+            "rightName": "dailyMenuEdit"
+          }
+        ],
+        "displayedRights": null,
+        "imgsrc": null
+      },
+      {
+        "_id": "dailyMenu-new",
+        "order": null,
+        "active": true,
+        "parent": "dailyMenu",
+        "neededRights": [
+          {
+            "rightName": "dailyMenuNew"
+          }
+        ],
+        "displayedRights": null,
+        "imgsrc": null
+      },
+      {
         "_id": "product",
         "order": 3,
         "active": true,
