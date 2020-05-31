@@ -7,7 +7,7 @@ const User = require('../models/user');
 
 async function getUserById(userId) {
   try {
-    let user = await User.findById(userId).select('-password -salt');
+    let user = await User.findById(userId).select('-password');
     return user;
   }
   catch (err) {
@@ -45,9 +45,9 @@ async function getUserByQuery(query) {
  * @param {JSON} query query para realizar la busqueda
  * @param {JSON} sortCondition condiciones para ordenar los resultados
  */
-async function getUsersSortedByQuery(query, sortCondition = {}) {
+async function getUsersSortedByQuery(query = {}, sortCondition = {}) {
   try {
-    return await User.find(query).select('-password -salt').sort(sortCondition);
+    return await User.find(query).select('-password').sort(sortCondition);
   }
   catch (err) {
     handleUserError(err);
@@ -111,7 +111,9 @@ async function updateUserById(userId, bodyUpdate) {
     if (userId === null || userId === undefined) {
       throw new Error('El id del usuario que se quiere actualizar no puede ser nulo');
     }
-    return await User.findByIdAndUpdate(userId, bodyUpdate);
+    let user = await User.findById(userId);
+    user.set(bodyUpdate);
+    return await save(user);
   } catch (err) {
     return err;
   }

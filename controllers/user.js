@@ -92,7 +92,7 @@ async function updateUser(req, res) {
       res.status(HttpStatus.NOT_FOUND).send({ message: `Ocurrio un error al actualizar el usuario` });
     }
   }
-  catch{
+  catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }
@@ -109,7 +109,9 @@ async function saveUser(req, res) {
       username: req.body.username,
       password: req.body.password,
       roleId: req.body.roleId,
-      signUpDate: Date.now()
+      signUpDate: Date.now(),
+      isGeneral: req.body.isGeneral,
+      pin: req.body.pin
     }
 
     let savedUser = await UserService.create(user);
@@ -120,7 +122,7 @@ async function saveUser(req, res) {
       res.status(HttpStatus.NOT_FOUND).send({ message: `Ocurrio un error al dar de alta el usuario` });
     }
   }
-  catch{
+  catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
   }
 }

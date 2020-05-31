@@ -15,7 +15,7 @@ const rightSchema = Schema({
   //Si es para un permiso específico del frontend que no necesita realizar una acción http sobre una
   //colección del backend, por ejemplo no permitir que un usuario realice un pedido, debe ser algo representativo, 
   //en este caso podría ser notOrdered.
-  _id: { type: String, required: true, unique: true},
+  _id: { type: String, required: true},
   //Es la parte de la url que hace referencia a la colección de la bd que se quiere acceder. Está en el archivo app.js
   urlPathColection: { type: String },
   //Parte de la url que se encuentra en el router.
