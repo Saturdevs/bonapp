@@ -402,7 +402,14 @@ module.exports.up = async next => {
         "displayedRights": [
           {
             "rightName": "dailyMenuList"
-          }        ],
+          },
+          {
+            "rightName": "dailyMenuEdit"
+          },
+          {
+            "rightName": "dailyMenuNew"
+          }
+        ],
         "imgsrc": null
       },
       {
@@ -446,6 +453,20 @@ module.exports.up = async next => {
         "imgsrc": null
       },
       {
+        "_id": "stockControl",
+        "order": 5,
+        "active": true,
+        "parent": "restaurant",
+        "mandatory": true,
+        "neededRights": [
+          {
+            "rightName": "stockControl"
+          }
+        ],
+        "displayedRights": [],
+        "imgsrc": null
+      },
+      {
         "_id": "product",
         "order": 3,
         "active": true,
@@ -464,6 +485,9 @@ module.exports.up = async next => {
           },
           {
             "rightName": "productNew"
+          },
+          {
+            "rightName": "stockControl"
           }
         ],
         "imgsrc": null

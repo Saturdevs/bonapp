@@ -685,6 +685,10 @@ module.exports.up = async next => {
           "active": true
         }, 
         {
+          "rightId": "stockControl",
+          "active": true
+        }, 
+        {
           "rightId": "get-dailyMenus",
           "active": true
         }, 
