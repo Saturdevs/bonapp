@@ -84,9 +84,9 @@ async function update(tableId, bodyUpdate) {
  * @param {JSON} bodyUpdate datos a actualizar en la base de datos.
  * @returns mesa actualizada.
  */
-async function updateTableByNumber(tableNumber, bodyUpdate) {
+async function updateTableByNumber(tableNumber, bodyUpdate, opts = {}) {
   try {
-    return await TableDAO.updateTableByNumber(tableNumber, bodyUpdate);
+    return await TableDAO.updateTableByNumber(tableNumber, bodyUpdate, opts);
   } catch (err) {
     throw new Error(err.message);
   }

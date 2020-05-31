@@ -1,5 +1,8 @@
 'use strict'
+const mongoose = require('mongoose');
 const Order = require('../models/order');
+const TableService = require('../services/table');
+const TableStatus = require('../shared/enums/tableStatus');
 const OrderStatus = require('../shared/enums/orderStatus');
 const CashRegisterDAO = require('../dataAccess/cashRegister');
 const OrderDAO = require('../dataAccess/order');
@@ -30,7 +33,12 @@ async function retrieveOneOrderForCashRegister(cashRegisterId) {
  * @param {*} order pedido a crear recibido desde el front end
  */
 async function createOrder(order) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
+    const opts = { session: session, new: true };
+
+    let table = await TableService.updateTableByNumber(order.table, {status: TableStatus.OCUPADA}, opts);
     let newOrder = new Order();
     let lastOrder = await OrderDAO.getLastOrder();
 
@@ -49,11 +57,15 @@ async function createOrder(order) {
     newOrder.app = order.app;
     newOrder.created_at = new Date();
 
-    const orderSaved = await newOrder.save();
+    const orderSaved = await newOrder.save(opts);
 
+    await session.commitTransaction();
+    session.endSession();
     return transformToBusinessObject(orderSaved);
   }
   catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     throw new Error(err);
   }
 }
