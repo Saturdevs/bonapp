@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt-nodejs');
 const moment = require('moment');
 const config = require('../config');
+const _ = require('lodash');
 
 async function authenticate({ username, password }) {
   const user = await getUserByUsernameWithEnabledMenus(username);
@@ -84,7 +85,7 @@ async function getUserByUsernameWithEnabledMenus(username) {
  */
 async function getMenusSystem(role) {
   try {
-    let appMenus = [];    
+    let appMenus = [];
 
     //Recupero los que se muestran en la navBar del sistema
     let menusRootSystem = await AppMenuService.retrieveRootMenus();
@@ -159,12 +160,12 @@ async function getEnabledMenus(parentMenus, userRole, appMenus) {
       menu.show = menu.active && rightActive;
     } else {
       if (childActive !== null) {
-        menu.show = menu.active && rightActive && childActive;            
+        menu.show = menu.active && rightActive && childActive;
       } else {
         menu.show = menu.active && rightActive;
       }
     }
-    
+
     menus.push(menu);
     appMenus.push(await AppMenuTransform.transformToBusinessObject(menu));
   }
@@ -179,6 +180,34 @@ async function getEnabledMenus(parentMenus, userRole, appMenus) {
 async function getAll() {
   try {
     return await UserDAO.getUsersSortedByQuery({});
+  }
+  catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+/**
+ * @description Devuelve el usuario que tiene el pin dado por parámetro.
+ * @param String pin por el que se quiere buscar al usuario.
+ * @returns {User} usuario recuperado de la base de datos.
+ */
+async function getUserByPin(pin) {
+  try {
+    let users = await UserDAO.getUsersSortedByQuery({});
+    let found = false;
+    let userWithSamePin = null;
+    if (users !== null && users !== undefined && users.length > 0) {
+      for (let i = 0; i < users.length && !found; i++) {   
+        const usr = users[i];
+        if (_.get(usr, 'pin') &&
+          bcrypt.compareSync(pin, usr.pin)) {
+          userWithSamePin = users[i];
+          found = true;
+        }
+      }
+    }
+
+    return userWithSamePin;
   }
   catch (err) {
     throw new Error(err.message);
@@ -248,6 +277,7 @@ async function update(userId, bodyUpdate) {
 module.exports = {
   authenticate,
   getAll,
+  getUserByPin,
   create,
   deleteUser,
   getUserById,

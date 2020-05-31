@@ -79,6 +79,27 @@ async function getUser(req, res) {
   }
 }
 
+async function getUserByPin(req, res) {
+  try {
+    let userPin = req.params.pin;
+    if (userPin === null || userPin === 'undefined') {
+      return res.status(HttpStatus.NOT_FOUND).send({ message: `Debe ingresar un PIN.` });
+    }
+
+    let user = await UserService.getUserByPin(userPin);
+
+    if (user !== null && user !== undefined) {
+      res.status(HttpStatus.OK).send({ user });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `El PIN ingresado es incorrecto.` });
+    }
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
 async function updateUser(req, res) {
   let userId = req.params.userId;
   let bodyUpdate = req.body;
@@ -150,6 +171,7 @@ module.exports = {
   signUp,
   signIn,
   getUser,
+  getUserByPin,
   updateUser,
   getUserById,
   saveUser,

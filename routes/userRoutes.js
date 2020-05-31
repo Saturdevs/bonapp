@@ -8,6 +8,7 @@ const authorize = require('../middlewares/auth/authorize');
 
 userRouter.post('/signup', validators.validateSave, userCtrl.signUp);
 userRouter.post('/signin', userCtrl.signIn);
+userRouter.get('/pinauthentication/:pin', userCtrl.getUserByPin);
 userRouter.get('/:userId', authorize(), userCtrl.getUserById);
 userRouter.get('/', authorize(), userCtrl.getUser);
 userRouter.post('/', authorize(), validators.validateSave, userCtrl.saveUser);
