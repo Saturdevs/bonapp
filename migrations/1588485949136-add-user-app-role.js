@@ -240,6 +240,30 @@ module.exports.up = async next => {
           "active": false
         },
         {
+          "rightId": "post-mercadopago-customer-save-card",
+          "active": true
+        },
+        {
+          "rightId": "post-mercadopago-make-payment-with-saved-card",
+          "active": true
+        },
+        {
+          "rightId": "get-mercadopago-add-card-to-customer",
+          "active": true
+        },
+        {
+          "rightId": "get-customer-cards-mercadopago",
+          "active": true
+        },
+        {
+          "rightId": "get-customers-mercadopago",
+          "active": true
+        },
+        {
+          "rightId": "post-mercadopago-make-payment",
+          "active": true
+        },
+        {
           "rightId": "get-products",
           "active": true
         },
