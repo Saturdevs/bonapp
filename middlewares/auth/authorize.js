@@ -4,7 +4,7 @@ const UserRoleService = require('../../services/userRole');
 const RightService = require('../../services/right');
 const HttpStatus = require('http-status-codes');
 
-function authorize() {
+function authorize() {  
   return [
     // authenticate JWT token and attach user to request object (req.user)
     expressJwt({ secret: SECRET_TOKEN }),
