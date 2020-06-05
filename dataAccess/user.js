@@ -45,7 +45,7 @@ async function getUserByQuery(query) {
  * @param {JSON} query query para realizar la busqueda
  * @param {JSON} sortCondition condiciones para ordenar los resultados
  */
-async function getUsersSortedByQuery(query = {}, sortCondition = {}) {
+async function getUsersSortedByQuery(query = {}, sortCondition = { lastname: 1, name: 1 }) {
   try {
     return await User.find(query).select('-password').sort(sortCondition);
   }
