@@ -39,13 +39,18 @@ const orderSchema = Schema({
    * usuario admin. Sino es un array con los distintos usuarios que ordenen productos dentro de este pedido.
    */
   users: [{
-    /**Username. Si el pedido se realiza en el bar/restaurant usar "admin".
+    /**Username. Si el pedido se realiza en el bar/restaurant usar "bonapp-web".
      * Si el pedido se realiza por la app usar el username del usuario correspondientes que se encuentran
      * en la coleccion users de la base de datos general.
     */
     username: { type: String, required: true },
     /**Productos pedidos por UN usuario */
     products: [{
+      /**Empleado del bar que agregó los productos al pedido. Es un usuario del sistema.
+       * No necesariamente tiene que ser un mozo. */
+      employeeWhoAdded: { type: Schema.Types.ObjectId, required: true },
+      /**Empleado del bar en nombre del cual se agregaron los productos al pedido. Es un usuario del sistema. */
+      employee: { type: Schema.Types.ObjectId, required: true },
       /** Id del menu del dia que se encuentra en la coleccion dailyMenu. Si es null. No es un menu del dia */
       dailyMenuId: { type: Schema.Types.ObjectId, ref: DailyMenu },
       /**Id del producto que se encuentra en la coleccion products */

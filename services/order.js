@@ -34,6 +34,10 @@ async function retrieveOneOrderForCashRegister(cashRegisterId) {
  */
 async function createOrder(order) {
   const session = await mongoose.startSession();
+  const collection = await mongoose.connection.db.listCollections({ name: "orders" }).toArray();
+  if (collection === null || collection === undefined || collection.length === 0) {
+    await Order.createCollection();
+  }
   session.startTransaction();
   try {
     const opts = { session: session, new: true };
@@ -347,6 +351,8 @@ function createProductFromProductBusiness(product) {
   prod.deleted = product.deleted;
   prod.deletedReason = product.deletedReason;
   prod.dailyMenuId = product.dailyMenuId;
+  prod.employeeWhoAdded = product.employeeWhoAdded;
+  prod.employee = product.employee;
 
   return prod;
 }
