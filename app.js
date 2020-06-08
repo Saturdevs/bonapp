@@ -24,6 +24,7 @@ const dailyMenuRouter = require('./routes/dailyMenuRoutes')
 const userRoleRouter = require('./routes/userRoleRoutes')
 const generatorRouter = require('./routes/qrGenerator')
 const paramRouter = require('./routes/paramRoutes')
+const settingsRouter = require('./routes/settingsRoutes')
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
 app.use(bodyParser.json({limit: '50mb'}))
@@ -56,6 +57,7 @@ app.use('/api/dailyMenu',dailyMenuRouter)
 app.use('/api/userRole', userRoleRouter)
 app.use('/api/qrGenerator',generatorRouter)
 app.use('/api/param', paramRouter)
+app.use('/api/settings', settingsRouter)
 
 //Middleware to handle error
 app.use(function errorHandler(err, req, res, next) {
