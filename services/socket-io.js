@@ -13,6 +13,10 @@ function initialize(server){
             socket.to(rooms.WEBSYSTEM).emit('callWaiter', waiterCall); //le emito al sistema web que alguien llamo al mozo
             // si queremos que tambien le mande al mozo, solamente hay que emitirle al mozo el mismo mensaje
         });
+
+        socket.on("updateTable", updateTable => { //escucha el metodo de actualizar las mesas
+            socket.to(rooms.WEBSYSTEM).emit('updateTable', updateTable); //le emito al sistema web que tiene que actualizar las mesas
+        });
     });
 }
 
