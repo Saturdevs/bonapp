@@ -56,11 +56,11 @@ async function send(req, res) {
                 console.log(result);
             })
             .catch(err => {
-                res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
             });
     }
     catch (err){
-        res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
     }
 }
 
