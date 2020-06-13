@@ -31,7 +31,7 @@ async function saveSuscription(subscription) {
  */
 async function getSuscriptions() {
     try {
-        let subscriptions = await Subscription.find();
+        let subscriptions = await Subscription.find({});
         return subscriptions
     } catch (err) {
         throw new Error(err);
@@ -43,7 +43,7 @@ async function getSuscriptions() {
  */
 async function getTypes() {
     try {
-        let notificationTypes = await NotificationType.find();
+        let notificationTypes = await NotificationType.find({});
         return notificationTypes
     } catch (err) {
         throw new Error(err);
@@ -68,7 +68,7 @@ async function saveNotification(notification) {
  */
 async function getNonReadNotifications() {
     try {
-        let notifications = await Notification.find();
+        let notifications = await Notification.find({});
         let nonReadNotifications = notifications.find(x => x.readBy.length == 0);
         return nonReadNotifications
     } catch (err) {

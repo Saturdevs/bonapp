@@ -3,8 +3,8 @@
 const NotificationService = require('../services/notification');
 const HttpStatus = require('http-status-codes');
 
-async function addPushSubscriber(subscription) {
-    console.log(subscription);
+async function addPushSubscriber(req, res) {
+    console.log(req);
     try {
         let subscriptionSaved = await NotificationService.saveSuscription(req.body);
         res.status(HttpStatus.OK).send({ subscription: subscriptionSaved });
@@ -14,7 +14,7 @@ async function addPushSubscriber(subscription) {
     }
 }
 
-async function getNotificationTypes() {
+async function getNotificationTypes(req, res) {
     try {
         let notificationTypes = await NotificationService.getTypes();
         res.status(HttpStatus.OK).send({ notificationTypes: notificationTypes });
@@ -56,11 +56,11 @@ async function send(req, res) {
                 console.log(result);
             })
             .catch(err => {
-                res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
             });
     }
-    catch{
-        res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+    catch (err){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
     }
 }
 
