@@ -17,18 +17,19 @@ const notificationTypeSchema = Schema({
     required: true, 
     unique: true
   },
-  //Duracion que tiene la notificacion cuando se muestra en pantalla.
+  //Duracion que tiene la notificacion cuando se muestra en pantalla. Expresado en segundos.
   duration: {
     type: Number, 
     required: true
   },
-  //Tiempo que debe pasar para que la notificacion se vuelva a mandar si no fue leida.
+  //Tiempo que debe pasar para que la notificacion se vuelva a mandar si no fue leida. Expresado en segundos.
   repeatTime: {
     type: Number,
     required: true
   },
   //Cantidad de veces que se va a reenviar la notificacion antes de avisar al usuario
-  //que la notificacion no fue recibida por el encargado de leerla.
+  //que la notificacion no fue recibida por el encargado de leerla. Si es 0 no interesa 
+  //el encargado leyo o no la notificación
   repeatAttempts: {
     type: Number,
     required: true
