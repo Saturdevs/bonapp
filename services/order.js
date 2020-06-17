@@ -33,14 +33,14 @@ async function retrieveOneOrderForCashRegister(cashRegisterId) {
  * @param {*} order pedido a crear recibido desde el front end
  */
 async function createOrder(order) {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   const collection = await mongoose.connection.db.listCollections({ name: "orders" }).toArray();
   if (collection === null || collection === undefined || collection.length === 0) {
     await Order.createCollection();
   }
-  session.startTransaction();
+  // session.startTransaction();
   try {
-    const opts = { session: session, new: true };
+    const opts = { /*session: session, new: true*/ };
 
     let table = await TableService.updateTableByNumber(order.table, {status: TableStatus.OCUPADA}, opts);
     let newOrder = new Order();
@@ -63,13 +63,13 @@ async function createOrder(order) {
 
     const orderSaved = await newOrder.save(opts);
 
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
     return transformToBusinessObject(orderSaved);
   }
   catch (err) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
     throw new Error(err);
   }
 }
