@@ -12,27 +12,27 @@ async function generateQRCode(req, res) {
             scale: 1,
             width: 1920
         }
-        let homeDir = os.homedir()+'/Documents/BonApp/QRCodes/';
-        let fileName = 'qrCodeTable' + tableNumber + '.png';
+        // let homeDir = os.homedir()+'/Documents/BonApp/QRCodes/';
+        // let fileName = 'qrCodeTable' + tableNumber + '.png';
 
-        if(!fs.existsSync(homeDir)){
-            fs.mkdirSync(homeDir, { recursive: true }, (err) => {
-              if (err) throw err;
-            });
-        }
+        // if(!fs.existsSync(homeDir)){
+        //     fs.mkdirSync(homeDir, { recursive: true }, (err) => {
+        //       if (err) throw err;
+        //     });
+        // }
     
-        if(fs.existsSync(homeDir)){
-            fs.chmod(homeDir,0o777,(err) => {
-                if (err) throw err;
-            });
-        }
+        // if(fs.existsSync(homeDir)){
+        //     fs.chmod(homeDir,0o777,(err) => {
+        //         if (err) throw err;
+        //     });
+        // }
 
-        if(!fs.existsSync(homeDir + fileName)) {
-            await QRCode.toFile(homeDir+fileName, JSON.stringify(req.body), options);
-            fs.chmod(homeDir+fileName,0o777);
-        }
+        // if(!fs.existsSync(homeDir + fileName)) {
+            let qr = await QRCode.toDataURL(JSON.stringify(req.body), options);
+            // fs.chmod(homeDir+fileName,0o777);
+        // }
         
-        let result = {message: "QR Generado Exitosamente", path: os.homedir()+'/Documents/BonApp/QRCodes/'}
+        let result = {message: "QR Generado Exitosamente", path: '~/Downloads/', data: qr}
         res.status(HttpStatus.OK).send({result: result});
         return res;
         
