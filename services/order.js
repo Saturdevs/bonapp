@@ -510,6 +510,8 @@ async function closeOrder(order) {
   ord.totalPrice = order.totalPrice;
 
   orderUpdated = await OrderDAO.update(order);
+  const opts = { /*session: session, new: true*/ };
+  let table = await TableService.updateTableByNumber(order.table, {status: TableStatus.LIBRE}, opts);
   return transformToBusinessObject(orderUpdated);
 }
 
