@@ -196,6 +196,10 @@ module.exports.up = async next => {
           "active": true
         },
         {
+          "rightId": "put-orders-block-users",
+          "active": true
+        },
+        {
           "rightId": "put-orders-delete-product",
           "active": true
         },
