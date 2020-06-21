@@ -5,6 +5,7 @@ const app = require('./app')
 const config = require('./config')
 const socketIo = require('./services/socket-io')
 const scheduler = require('./services/scheduler')
+const notificationService = require('./services/notification')
 
 
 mongoose.connect(config.db, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {
@@ -18,5 +19,6 @@ mongoose.connect(config.db, { useNewUrlParser: true, useCreateIndex: true }, (er
   })
 
   socketIo.initialize(server);
+  notificationService.setVapidDetails();
   scheduler.runScheduler();
 })
