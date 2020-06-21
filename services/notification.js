@@ -45,6 +45,7 @@ async function resendNotifications() {
 }
 
 async function setVapidDetails() {
+    console.log("setVapidDetails");
     webpush.setVapidDetails(
         'mailto:example@yourdomain.org', //ver
         config.VAPID_PUBLIC_KEY,
