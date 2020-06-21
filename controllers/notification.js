@@ -48,7 +48,7 @@ async function send(req, res) {
                 }]
             }
         };
-    
+        console.log(allSubscriptions);
         Promise.all(allSubscriptions.map(sub =>
             NotificationService.sendNotification(sub, notificationPayload)))
             .then(notificationsSent => {

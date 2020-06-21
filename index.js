@@ -17,12 +17,6 @@ mongoose.connect(config.db, { useNewUrlParser: true, useCreateIndex: true }, (er
     console.log(`API REST corriendo en http://localhost:${config.port}`)
   })
 
-  webpush.setVapidDetails(
-    'mailto:imchiodo1@gmail.com', //ver
-    config.VAPID_PUBLIC_KEY,
-    config.VAPID_PRIVATE_KEY
-  );
-
   socketIo.initialize(server);
   scheduler.runScheduler();
 })

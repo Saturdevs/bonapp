@@ -54,6 +54,11 @@ async function setVapidDetails() {
 }
 
 async function sendNotification(subscription, notificationPayload){
+    webpush.setVapidDetails(
+        'mailto:imchiodo1@gmail.com', //ver
+        config.VAPID_PUBLIC_KEY,
+        config.VAPID_PRIVATE_KEY
+    );
     return webpush.sendNotification(subscription, JSON.stringify(notificationPayload))
 }
 
