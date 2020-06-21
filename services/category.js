@@ -100,7 +100,7 @@ async function getCategoriesAvailablesByMenu(menuId) {
     let categoriesToReturn = [];
     let query = { menuId: menuId, available: true };
     let sortCondition = { name: 1 };
-    let categories = await CategoryDAO.getCategoriesSortedByQuery(query, sortCondition);
+    let categories = await getCategoriesWithProducts(await CategoryDAO.getCategoriesSortedByQuery(query, sortCondition));
 
     if (categories !== null && categories !== undefined) {
       for (let i = 0; i < categories.length; i++) {
@@ -113,6 +113,25 @@ async function getCategoriesAvailablesByMenu(menuId) {
   } catch (err) {
     throw new Error(err.message);
   }
+}
+
+/**
+ * @description Devuelve aquellas categorías del array dado como parámetro que tienen productos asociados.
+ * @param {Cateogry[]} categories 
+ * @returns {Category[]} categorías que tienen productos asociados.
+ */
+async function getCategoriesWithProducts(categories) {    
+  for (let i = 0; i < categories.length; i++) {
+    const category = categories[i];
+    const query = { category: category._id, available:true }
+    const products = await ProductDAO.getProductsByQuery(query);
+    if (!products || products.length === 0) {
+      categories.splice(i, 1);
+      i--;
+    }
+  }
+
+  return categories;
 }
 
 /**

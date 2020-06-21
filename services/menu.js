@@ -30,7 +30,7 @@ async function getAllAvailables() {
   try {
     let menusToReturn = [];
     let sortCondition = { name: 1 };
-    let menus = await MenuDAO.getMenusSortedByQuery({ available: true }, sortCondition);
+    let menus = await getMenusWithCategoriesAndProducts(await MenuDAO.getMenusSortedByQuery({ available: true }, sortCondition));
 
     if (menus !== null && menus !== undefined) {
       for (let i = 0; i < menus.length; i++) {
@@ -43,6 +43,25 @@ async function getAllAvailables() {
   } catch (err) {
     throw new Error(err.message);
   }
+}
+
+/**
+ * @description Devuelve aquellos menus del array dado como parámetro que tienen categorias asociadas, y que a su vez 
+ * esas categorías tienen productos asociados.
+ * @param {Menu[]} menus 
+ * @returns {menus[]} menus que tienen categorías asociadas.
+ */
+async function getMenusWithCategoriesAndProducts(menus) {    
+  for (let i = 0; i < menus.length; i++) {
+    const menu = menus[i];    
+    const categories = await CategoryService.getCategoriesAvailablesByMenu(menu._id);
+    if (!categories || categories.length === 0) {
+      menus.splice(i, 1);
+      i--;
+    }
+  }
+
+  return menus;
 }
 
 /**
