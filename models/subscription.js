@@ -7,6 +7,7 @@ const subscriptionSchema = Schema({
   endpoint: { type: String, required: true },
   expirationTime: { type: Date },
   options: { 
+    applicationServerKey: {type: Object},
     userVisibleOnly: { type: Boolean },
    }
 });
