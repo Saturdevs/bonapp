@@ -6,10 +6,10 @@ const Schema = mongoose.Schema;
 const subscriptionSchema = Schema({
   endpoint: { type: String, required: true },
   expirationTime: { type: Date },
-  options: { 
-    applicationServerKey: {type: Object},
-    userVisibleOnly: { type: Boolean },
-   }
+  keys: { 
+      p256dh: {type: String},
+      auth: { type: String }
+    }
 });
 
 module.exports = mongoose.model('Subscription', subscriptionSchema);
