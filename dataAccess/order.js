@@ -75,6 +75,7 @@ async function update(orderToUpdate) {
   try {
     let orderUpdated = new Order();
     orderUpdated = await Order.findByIdAndUpdate(orderToUpdate._id, orderToUpdate, { new: true });
+    console.log('orderUpdated', orderUpdated);
     return orderUpdated;
   }
   catch (err) {

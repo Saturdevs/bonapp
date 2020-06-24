@@ -18,7 +18,10 @@ function initialize(server) {
             console.log('appUserConnection => userIndex: ', userIndex);
             if (userIndex !== -1) {
                 console.log('appUserConnection => Entro al IF');
+                console.log('appUserConnection => SocketID : ',socket.id);
+                console.log('order.users =',order.users[userIndex]);
                 order.users[userIndex].socketId = socket.id;
+                console.log('order.users.socketID =',order.users[userIndex].socketId);                
                 await OrderDAO.update(order);
             };
         });
@@ -35,7 +38,7 @@ function initialize(server) {
         socket.on("acceptOrder", async (acceptedOrder) => { //escucha el metodo de orden aceptada
             console.log("acceptOrder",acceptedOrder);
             const order = await OrderDAO.getOrderById(acceptedOrder.orderId);
-            let user = order.users.find(x => x.username === acceptedOrder.userId);
+            let user = order.users.find(x => x.username === acceptedOrder.username);
             if (user) {
                 socket.to(user.socketId).emit('orderAccepted', {}); //le emito a la app que se acepto la orden
             };
