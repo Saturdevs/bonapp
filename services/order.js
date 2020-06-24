@@ -113,7 +113,6 @@ async function updateOrderProducts(order, productsToAdd, username, totalToAdd) {
  * @returns el array de usuarios del pedido con sus productos actualizados
  */
 function updateProducts(order, productsToAdd, username, totalToAdd) {
-
   let userFound = false;
   let ownerFound = false;
 
@@ -177,7 +176,6 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
 
     order.users.push(usr);
   }
-
   return order.users;
 }
 
