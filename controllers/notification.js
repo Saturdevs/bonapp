@@ -31,9 +31,9 @@ async function send(req, res) {
         const notificationSaved = await NotificationService.saveNotification(req.body);
 
         const allSubscriptions = await NotificationService.getSubscriptions();
-    
+
         const notificationType = await NotificationTypeService.getNotificationType(req.body.notificationType);
-        
+
         //ver el tema del notificationtype para armar la notification a enviar al servidor de chrome
         const notificationPayload = {
             "notification": {
@@ -44,16 +44,19 @@ async function send(req, res) {
                 "actions": req.body.actions
             }
         };
-        Promise.all(allSubscriptions.map(sub =>
-            NotificationService.sendNotification(sub, notificationPayload)))
-            .then(notificationsSent => {
-                res.status(HttpStatus.OK).send({ notificationsSent: notificationsSent })
-            })
-            .catch(err => {
-                res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
-            });
+
+        if (allSubscriptions.length >= 1) {
+            const subscription = allSubscriptions[allSubscriptions.length - 1];
+            NotificationService.sendNotification(subscription, notificationPayload)
+                .then(notificationsSent => {
+                    res.status(HttpStatus.OK).send({ notificationsSent: notificationsSent })
+                })
+                .catch(err => {
+                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+                });
+        }
     }
-    catch (err){
+    catch (err) {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
     }
 }
