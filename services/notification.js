@@ -55,7 +55,6 @@ async function sendNotification(subscription, notificationPayload){
 
 module.exports = {
     saveSuscription,
-    setVapidDetails,
     getSubscriptions,
     sendNotification,
     saveNotification,
