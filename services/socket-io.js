@@ -13,7 +13,7 @@ function initialize(server){
 
         socket.on("appUserConnection", async (appUserData) => { // escucha el metodo appUserConnection appUser tiene el NroMesa y el UserID 
             const order = await OrderDAO.getOrderById(appUserData.orderId);
-            let user = order.user.find(x => x.username === appUserData.username);
+            let user = order.users.find(x => x.username === appUserData.username);
             if(user){
                 user.socketId = socket.id;
                 await OrderDAO.update(order);
