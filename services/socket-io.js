@@ -3,7 +3,7 @@ const sio = require('socket.io');
 const OrderDAO = require('../dataAccess/order');
 const OrderStatus = require('../shared/enums/orderStatus');
 
-function initialize(server){
+function initialize(server) {
     var io = sio.listen(server);
     io.on("connection", socket => { //se ejecuta cada vez que un usuario se conecta al socket
         // console.log('a new user just connected!! ');
@@ -13,13 +13,15 @@ function initialize(server){
 
         socket.on("appUserConnection", async (appUserData) => { // escucha el metodo appUserConnection appUser tiene el NroMesa y el UserID 
             const order = await OrderDAO.getOrderById(appUserData.orderId);
-            let user = order.users.find(x => x.username === appUserData.username);
-            if(user){
-                user.socketId = socket.id;
+            let userIndex = order.users.findIndex(x => { x.username === appUserData.username });
+            console.log('appUserConnection => userIndex: ', userIndex);
+            if (userIndex !== -1) {
+                console.log('appUserConnection => Entro al IF');
+                order.users[userIndex].socketId = socket.id;
                 await OrderDAO.update(order);
-            };      
+            };
         });
-    
+
         socket.on("callWaiter", waiterCall => { //escucha el metodo de llamar al mozo, que lo llamo desde la app
             socket.to(rooms.WEBSYSTEM).emit('callWaiter', waiterCall); //le emito al sistema web que alguien llamo al mozo
             // si queremos que tambien le mande al mozo, solamente hay que emitirle al mozo el mismo mensaje
@@ -31,8 +33,8 @@ function initialize(server){
 
         socket.on("acceptOrder", async (acceptedOrder) => { //escucha el metodo de orden aceptada
             const order = await OrderDAO.getOrderById(acceptedOrder.orderId);
-            let user = order.user.find(x => x.username === acceptedOrder.username);
-            if(user){
+            let user = order.users.find(x => x.username === acceptedOrder.username);
+            if (user) {
                 socket.to(user.socketId).emit('orderAccepted', {}); //le emito a la app que se acepto la orden
             };
         });
