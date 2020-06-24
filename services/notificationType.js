@@ -1,5 +1,5 @@
 'use strict';
-const NotificationTypeDAO = require('');
+const NotificationTypeDAO = require('../dataAccess/notificationType');
 
 async function getNotificationType(notificatioTypeId) {
     try {
