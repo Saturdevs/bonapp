@@ -44,15 +44,6 @@ async function resendNotifications() {
     }
 }
 
-async function setVapidDetails() {
-    console.log("setVapidDetails");
-    webpush.setVapidDetails(
-        'mailto:example@yourdomain.org', //ver
-        config.VAPID_PUBLIC_KEY,
-        config.VAPID_PRIVATE_KEY
-    );
-}
-
 async function sendNotification(subscription, notificationPayload){
     webpush.setVapidDetails(
         'mailto:imchiodo1@gmail.com', //ver
