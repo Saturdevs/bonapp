@@ -45,7 +45,7 @@ const orderSchema = Schema({
     */
     username: { type: String, required: true },
     /** Id de socketio */
-    socketId: { type: String, required: true },
+    socketId: { type: String },
     /**Productos pedidos por UN usuario */
     products: [{
       /**Empleado del bar que agregó los productos al pedido. Es un usuario del sistema.
