@@ -29,7 +29,7 @@ function initialize(server){
             socket.to(rooms.WEBSYSTEM).emit('updateTable', updateTable); //le emito al sistema web que tiene que actualizar las mesas
         });
 
-        socket.on("acceptOrder", acceptedOrder => { //escucha el metodo de orden aceptada
+        socket.on("acceptOrder", async (acceptedOrder) => { //escucha el metodo de orden aceptada
             const order = await OrderDAO.getOrderById(acceptedOrder.orderId);
             let user = order.user.find(x => x.username === acceptedOrder.username);
             if(user){
