@@ -14,7 +14,7 @@ function initialize(server) {
         socket.on("appUserConnection", async (appUserData) => { // escucha el metodo appUserConnection appUser tiene el NroMesa y el UserID 
             const order = await OrderDAO.getOrderById(appUserData.orderId);
             console.log(appUserData);
-            let userIndex = order.users.findIndex(x => x.username === appUserData.username);
+            let userIndex = order.users.findIndex(x => x.username === appUserData.userId);
             console.log('appUserConnection => userIndex: ', userIndex);
             if (userIndex !== -1) {
                 console.log('appUserConnection => Entro al IF');
@@ -33,8 +33,9 @@ function initialize(server) {
         });
 
         socket.on("acceptOrder", async (acceptedOrder) => { //escucha el metodo de orden aceptada
+            console.log("acceptOrder",acceptedOrder);
             const order = await OrderDAO.getOrderById(acceptedOrder.orderId);
-            let user = order.users.find(x => x.username === acceptedOrder.username);
+            let user = order.users.find(x => x.username === acceptedOrder.userId);
             if (user) {
                 socket.to(user.socketId).emit('orderAccepted', {}); //le emito a la app que se acepto la orden
             };
