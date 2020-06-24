@@ -13,7 +13,8 @@ function initialize(server) {
 
         socket.on("appUserConnection", async (appUserData) => { // escucha el metodo appUserConnection appUser tiene el NroMesa y el UserID 
             const order = await OrderDAO.getOrderById(appUserData.orderId);
-            let userIndex = order.users.findIndex(x => { x.username === appUserData.username });
+            console.log(appUserData);
+            let userIndex = order.users.findIndex(x => x.username === appUserData.username);
             console.log('appUserConnection => userIndex: ', userIndex);
             if (userIndex !== -1) {
                 console.log('appUserConnection => Entro al IF');
