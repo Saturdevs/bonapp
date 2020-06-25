@@ -20,8 +20,7 @@ const notificationSchema = Schema({
   },
   //Usuario que mando la notificacion. Puede ser null.
   userFrom: {
-    type: Schema.Types.ObjectId,
-    ref: User
+    type: String
   },
   //Usuarios a los que se manda la notificacion.
   usersTo: [{ 

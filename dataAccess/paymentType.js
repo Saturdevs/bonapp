@@ -1,4 +1,4 @@
-'use script'
+'use scrict'
 
 const PaymentType = require('../models/paymentType');
 

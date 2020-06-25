@@ -21,6 +21,24 @@ async function getOrderByQuery(query) {
 }
 
 /**
+ * Recupera de la base de datos el order con id igual al dado como parametro
+ * @param {ObjectId} orderId id de la orden que se quiere recuperar de la base de datos
+ */
+async function getOrderById(orderId) {
+  try {
+    if (orderId === null || orderId === undefined) {
+      throw new Error('El id de la orden que se quiere recuperar de la base de datos no puede ser nulo');
+    }
+
+    let order = await Order.findById(orderId);
+    return order;
+  }
+  catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**
  * @description Recupera un unico pedido que cumpla con la query dada como parametro. Si hay mas de uno devuelve el primero
  * encuentra.
  * @param {JSON} query 
@@ -57,6 +75,7 @@ async function update(orderToUpdate) {
   try {
     let orderUpdated = new Order();
     orderUpdated = await Order.findByIdAndUpdate(orderToUpdate._id, orderToUpdate, { new: true });
+    console.log('orderUpdated', orderUpdated);
     return orderUpdated;
   }
   catch (err) {
@@ -77,5 +96,6 @@ module.exports = {
   getOneOrderByQuery,
   getLastOrder,
   update,
-  updateMany
+  updateMany,
+  getOrderById
 }
