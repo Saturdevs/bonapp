@@ -169,7 +169,7 @@ function deleteOrder(req, res) {
   Order.findById(orderId, (err, order) => {
     if (err) return res.status(500).send({ message: `Error al querer eliminar el pedido: ${err}` })
 
-    Order.remove(err => {
+    order.remove(err => {
       if (err) return res.status(500).send({ message: `Error al querer eliminar el pedido: ${err}` })
       res.status(200).send({ message: `El pedido ha sido eliminado` })
     })
