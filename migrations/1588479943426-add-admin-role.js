@@ -153,6 +153,10 @@ module.exports.up = async next => {
           "active": true
         },
         {
+          "rightId": "get-menus-availables-with-categories",
+          "active": true
+        },
+        {
           "rightId": "get-menu-by-id",
           "active": true
         },
@@ -716,6 +720,18 @@ module.exports.up = async next => {
           "rightId": "post-dailyMenu",
           "active": true
         },
+        {
+          "rightId": "userList",
+          "active": true
+        },
+        {
+          "rightId": "userEdit",
+          "active": true
+        },
+        {
+          "rightId": "userNew",
+          "active": true
+        }
       ]
     };
 

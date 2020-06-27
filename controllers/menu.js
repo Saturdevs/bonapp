@@ -51,6 +51,22 @@ async function getMenu (req, res) {
   }
 }
 
+
+async function getAvailablesWithCategories (req, res) {
+  try {
+    let menus = await MenuService.getAllAvailablesWithCategories();
+
+    if (menus !== null && menus !== undefined) {
+      res.status(HttpStatus.OK).send({ menus });
+    }
+    else {
+      res.status(HttpStatus.NOT_FOUND).send({ message: `No existen cartas con categorías habilitadas registradas en la base de datos.` })
+    }
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al realizar la petición al servidor ${err}` });
+  }
+}
+
 async function hasAtLeastOneCategory(req, res) {
   try {
     let menuId = req.params.menuId;
@@ -115,6 +131,7 @@ module.exports = {
   getMenu,  
   getMenus,
   getMenusAvailables,
+  getAvailablesWithCategories,
   saveMenu,
   updateMenu,
   deleteMenu,

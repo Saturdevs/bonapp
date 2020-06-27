@@ -30,6 +30,25 @@ async function getAllAvailables() {
   try {
     let menusToReturn = [];
     let sortCondition = { name: 1 };
+    let menus = await MenuDAO.getMenusSortedByQuery({ available: true }, sortCondition);
+
+    if (menus !== null && menus !== undefined) {
+      for (let i = 0; i < menus.length; i++) {
+        const menuTransformed = await MenuTransform.transformToBusinessObject(menus[i]);
+        menusToReturn.push(menuTransformed);
+      }
+    }
+
+    return menusToReturn;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+async function getAllAvailablesWithCategories() {
+  try {
+    let menusToReturn = [];
+    let sortCondition = { name: 1 };
     let menus = await getMenusWithCategoriesAndProducts(await MenuDAO.getMenusSortedByQuery({ available: true }, sortCondition));
 
     if (menus !== null && menus !== undefined) {
@@ -162,5 +181,6 @@ module.exports = {
   hasAtLeastOneCategory,
   saveMenu,
   deleteMenu,
-  disableMenuAndCategoriesAndProducts
+  disableMenuAndCategoriesAndProducts,
+  getAllAvailablesWithCategories
 }

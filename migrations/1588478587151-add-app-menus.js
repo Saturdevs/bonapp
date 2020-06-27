@@ -821,7 +821,11 @@ module.exports.up = async next => {
         "order": 4,
         "active": true,
         "parent": "general-settings",
-        "neededRights": null,
+        "neededRights": [
+          {
+            "rightName": "userList"
+          }
+        ],
         "displayedRights": null,
         "imgsrc": null
       },
@@ -830,7 +834,11 @@ module.exports.up = async next => {
         "order": null,
         "active": true,
         "parent": "users",
-        "neededRights": null,
+        "neededRights": [
+          {
+            "rightName": "userNew"
+          }
+        ],
         "displayedRights": null,
         "imgsrc": null
       },
@@ -839,7 +847,11 @@ module.exports.up = async next => {
         "order": null,
         "active": true,
         "parent": "users",
-        "neededRights": null,
+        "neededRights": [
+          {
+            "rightName": "userEdit"
+          }
+        ],
         "displayedRights": null,
         "imgsrc": null
       },
@@ -848,7 +860,11 @@ module.exports.up = async next => {
         "order": 5,
         "active": true,
         "parent": "general-settings",
-        "neededRights": null,
+        "neededRights": [
+          {
+            "rightName": "paymentTypeList"
+          }
+        ],
         "displayedRights": null,
         "imgsrc": null
       },
@@ -857,7 +873,11 @@ module.exports.up = async next => {
         "order": null,
         "active": true,
         "parent": "roles-users",
-        "neededRights": null,
+        "neededRights": [
+          {
+            "rightName": "paymentTypeNew"
+          }
+        ],
         "displayedRights": null,
         "imgsrc": null
       },
@@ -866,7 +886,11 @@ module.exports.up = async next => {
         "order": null,
         "active": true,
         "parent": "roles-users",
-        "neededRights": null,
+        "neededRights": [
+          {
+            "rightName": "paymentTypeEdit"
+          }
+        ],
         "displayedRights": null,
         "imgsrc": null
       },

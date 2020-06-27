@@ -8,6 +8,7 @@ const authorize = require('../middlewares/auth/authorize');
 
 menuRouter.get('/', authorize(), menuCtrl.getMenus);
 menuRouter.get('/availables', authorize(), menuCtrl.getMenusAvailables);
+menuRouter.get('/availableswithcategories', authorize(), menuCtrl.getAvailablesWithCategories);
 menuRouter.get('/:menuId', authorize(), menuCtrl.getMenu);
 menuRouter.post('/', authorize(), menuCtrl.saveMenu);
 menuRouter.put('/:menuId', authorize(), validators.validateDisable, menuCtrl.updateMenu);
