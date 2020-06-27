@@ -862,7 +862,7 @@ module.exports.up = async next => {
         "parent": "general-settings",
         "neededRights": [
           {
-            "rightName": "paymentTypeList"
+            "rightName": "userRolesList"
           }
         ],
         "displayedRights": null,
@@ -875,7 +875,7 @@ module.exports.up = async next => {
         "parent": "roles-users",
         "neededRights": [
           {
-            "rightName": "paymentTypeNew"
+            "rightName": "userRolesNew"
           }
         ],
         "displayedRights": null,
@@ -888,7 +888,7 @@ module.exports.up = async next => {
         "parent": "roles-users",
         "neededRights": [
           {
-            "rightName": "paymentTypeEdit"
+            "rightName": "userRolesEdit"
           }
         ],
         "displayedRights": null,
