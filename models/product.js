@@ -5,8 +5,7 @@ const Schema = mongoose.Schema;
 const Category = require('../models/category');
 const Size = require('../models/size');
 
-const productSchema = Schema({
-  code: { type: String, required: true, unique: true },
+const productSchema = Schema({  
   name: { type: String, required: true, unique: true },
   //Pictures must start with "http://"
   category: { type: Schema.Types.ObjectId, ref: Category, required: true },
