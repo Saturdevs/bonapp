@@ -307,6 +307,15 @@ module.exports.up = async next => {
         "group": null
       },
       {
+        "_id": "get-menus-availables-with-categories",
+        "urlPathColection": "menu",
+        "routePath": "/availableswithcategories",
+        "httpMethod": "get",
+        "childRights": null,
+        "aditionalRules": null,
+        "group": null
+      },
+      {
         "_id": "get-cashflow-by-id",
         "urlPathColection": "cashFlow",
         "routePath": "/:cashFlowId",
@@ -947,7 +956,7 @@ module.exports.up = async next => {
             "rightName": "get-paymenttypes-availables"
           },
           {
-            "rightName": "get-menus-availables"
+            "rightName": "get-menus-availables-with-categories"
           },
           {
             "rightName": "get-available-dailyMenus"
@@ -2036,15 +2045,22 @@ module.exports.up = async next => {
             "rightName": "post-userroles"
           }
         ],
-        "aditionalRules": "userRole",
-        "group": null
+        "aditionalRules": null,
+        "group": "userRole"
       },
       {
         "_id": "userRolesEdit",
         "urlPathColection": null,
         "routePath": null,
         "httpMethod": null,
-        "childRights": null,
+        "childRights": [
+          {
+            "rightName": "get-userrole-with-rights-by-menu"
+          },
+          {
+            "rightName": "put-userrole"
+          }
+        ],
         "aditionalRules": null,
         "group": "userRole"
       },
@@ -2134,7 +2150,48 @@ module.exports.up = async next => {
         }],
         "aditionalRules": null
       },
-
+      {
+        "_id": "userList",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "get-user"
+          }
+        ],
+        "aditionalRules": null,
+        "group": "user"
+      },
+      {
+        "_id": "userEdit",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "get-user-by-id"
+          },
+          {
+            "rightName": "put-users"
+          }
+        ],
+        "aditionalRules": null,
+        "group": "user"
+      },
+      {
+        "_id": "userNew",
+        "urlPathColection": null,
+        "routePath": null,
+        "httpMethod": null,
+        "childRights": [
+          {
+            "rightName": "post-user"
+          }
+        ],
+        "aditionalRules": null,
+        "group": "user"
+      },
       {
         "_id": "generateQR",
         "urlPathColection": null,
@@ -2149,7 +2206,7 @@ module.exports.up = async next => {
           }
         ],
         "aditionalRules": null
-      }
+      }      
     ]
 
     const db = mClient.db();

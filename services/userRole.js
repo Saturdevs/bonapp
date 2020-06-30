@@ -51,7 +51,7 @@ async function getUserRole(userRoleId) {
   }
 }
 
-async function getAllUserRoles(){
+async function getAllUserRoles() {
   try {
     let query = {};
     return await UserRoleDAO.getAllUserRolesByQuerySorted(query);
@@ -137,7 +137,7 @@ async function isRightActive(right, userRole) {
       return roleRight.active;
     }
   }
-  
+
   return false;
 }
 
@@ -153,7 +153,7 @@ async function update(userRoleId, bodyUpdate) {
     let userRoleRights = Array.from(userRole.rights).map(v => v.toJSON());
     let rights = await RightService.getAll();
     let rightsToDisable = bodyUpdate.rightsToDisable;
-    let rightsToEnable = bodyUpdate.rightsToEnable;          
+    let rightsToEnable = bodyUpdate.rightsToEnable;
 
     for (let i = 0; i < rightsToEnable.length; i++) {
       const rightToEnable = rightsToEnable[i];
@@ -164,7 +164,7 @@ async function update(userRoleId, bodyUpdate) {
       if (rightToEnableDB.childRights && rightToEnableDB.childRights.length > 0) {
         for (let j = 0; j < rightToEnableDB.childRights.length; j++) {
           const childRightToEnable = rightToEnableDB.childRights[j];
-          
+
           let childRightToEnableIndex = userRoleRights.findIndex(r => r.rightId === childRightToEnable.rightName);
           userRoleRights[childRightToEnableIndex].active = true;
         }
@@ -185,17 +185,17 @@ async function update(userRoleId, bodyUpdate) {
         for (let j = 0; j < rightToDisableDB.childRights.length; j++) {
           const childRightToDisable = rightToDisableDB.childRights[j];
           let canDisable = true;
-        
+
           //Para todos los permisos registrados en la bd me fijo si alguno de sus hijos es tambien
           //hijo del permiso a deshabilitar.
           for (let k = 0; k < rights.length && canDisable; k++) {
             const right = rights[k];
-            
+
             if (right.childRights && right.childRights.length > 0) {
               let found = false;
               for (let l = 0; l < right.childRights.length && !found; l++) {
                 const child = right.childRights[l];
-                
+
                 if (child.rightName === childRightToDisable.rightName && right._id !== rightToDisable._id) {
                   found = true;
                   let rightIdx = userRoleRights.findIndex(r => r.rightId === right._id);
@@ -216,7 +216,7 @@ async function update(userRoleId, bodyUpdate) {
     let userRoleToUpdate = bodyUpdate.userRole;
     userRoleToUpdate.rights = userRoleRights;
 
-    return await UserRoleDAO.updateUserRoleById(userRoleId, userRoleToUpdate);    
+    return await UserRoleDAO.updateUserRoleById(userRoleId, userRoleToUpdate);
   } catch (err) {
     throw new Error(err.message);
   }
@@ -228,6 +228,9 @@ async function update(userRoleId, bodyUpdate) {
  * @returns userRole guardado en la base de datos.
  */
 async function saveUserRole(reqBody) {
+  const activeRights = ['get-sections', 'get-tables-by-section', 'get-table-by-number', 'get-order-by-table-by-status', 'tablesOrders', 'get-order-by-table-by-status',
+    'get-products', 'get-menus-availables-with-categories', 'get-cashregisters-availables', 'get-paymenttypes-availables', 'get-dailyMenus', 'get-user',
+    'get-categories-availables-by-menu', 'get-products-availables-by-category'];
   let userRole = new UserRole();
   userRole.name = reqBody.name;
   userRole.isWaiter = reqBody.isWaiter;
@@ -236,11 +239,15 @@ async function saveUserRole(reqBody) {
   const userRoleRights = await RightService.getAll();
   for (let i = 0; i < userRoleRights.length; i++) {
     const right = userRoleRights[i];
+    let active = false;
+    if (activeRights.includes(right._id)) {
+      active = true;
+    }
     userRole.rights.push({
       rightId: right._id,
-      active: false
+      active: active
     })
-  }  
+  }
   let userRoleSaved = await UserRoleDAO.save(userRole);
 
   return userRoleSaved;

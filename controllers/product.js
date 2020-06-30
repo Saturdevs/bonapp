@@ -84,7 +84,6 @@ async function existInAnOrder(req, res) {
 async function saveProduct(req, res) {
   try {
     let product = new Product()
-    product.code = req.body.code
     product.name = req.body.name
     product.category = req.body.category
     product.pictures = req.body.pictures
