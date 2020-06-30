@@ -37,6 +37,17 @@ function initialize(server) {
                 socket.to(user.socketId).emit('orderAccepted', {}); //le emito a la app que se acepto la orden
             };
         });
+
+        socket.on("removeUserFromOrder", async (userToRemoveData) => { //escucha el metodo de eliminar usuario
+            const order = await OrderDAO.getOrderById(userToRemoveData.orderId);
+            let userIndex = order.users.findIndex(x => x.username === userToRemoveData.username);
+            if (userIndex !== -1) {
+                let user = order.users[userIndex];
+                socket.to(user.socketId).emit('userRemovedFromOrder', userToRemoveData); //le emito a la app que se elimino el usuario
+                order.users[userIndex].socketId = null;
+                await OrderDAO.update(order);
+            };
+        });
     });
 }
 

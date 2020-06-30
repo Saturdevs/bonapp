@@ -31,6 +31,11 @@ async function getTypes() {
     return notificationTypes
 }
 
+async function getNonReadNotifications(){
+    let notifications = await NotificationDAO.getNonReadNotifications();
+    return notifications
+}
+
 async function resendNotifications() {
     let nonReadNotifications = await NotificationDAO.getNonReadNotifications();
     if(nonReadNotifications !== undefined && nonReadNotifications !== null){
@@ -59,5 +64,6 @@ module.exports = {
     sendNotification,
     saveNotification,
     getTypes,
-    resendNotifications
+    resendNotifications,
+    getNonReadNotifications
 }
