@@ -72,6 +72,8 @@ function makePaymentWithSavedCard(req, res) {
     }
   };
 
+  console.log("makePaymentWithSavedCard -> ",payment_data);
+  
   // Save and posting the payment
   mercadopago.payment.create(payment_data)
     .then(async function (payment) {
