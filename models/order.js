@@ -42,8 +42,9 @@ const orderSchema = Schema({
     /**Username. Si el pedido se realiza en el bar/restaurant usar "bonapp-web".
      * Si el pedido se realiza por la app usar el username del usuario correspondientes que se encuentran
      * en la coleccion users de la base de datos general.
+     * No puede haber mas de un usuario con el mismo nombre de usuario en un pedido.
     */
-    username: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
     /** Id de socketio */
     socketId: { type: String },
     /**Productos pedidos por UN usuario */
