@@ -122,7 +122,7 @@ const orderSchema = Schema({
     discountAmount: { type: Number },
     subtotal: { type: Number }
   },
-  /**Monto total del pedido sin tener en cuenta el descuento si lo hubiera */
+  /**Monto total del pedido teniendo en cuenta el descuento si lo hubiera */
   totalPrice: { type: Number }
 });
 
