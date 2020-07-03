@@ -9,6 +9,7 @@ const OrderDAO = require('../dataAccess/order');
 const ProductDAO = require('../dataAccess/product');
 const UserDAO = require('../dataAccess/user');
 const DailyMenuDAO = require('../dataAccess/dailyMenu');
+const ProductPaymentStatus = require('../shared/enums/productPaymentStauts')
 
 /**
  * @description Recupera un único order con cashRegisterId igual al dado como parametro. Si hay mas de uno
@@ -135,6 +136,7 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
         if (product.size === null || product.size === undefined) {
           product.size = { name: undefined, price: undefined };
         }
+        product.paymentStatus = ProductPaymentStatus.PENDING;
         //Verifico si el usuario ya tiene productos agregados al pedido
         if (user.products !== null && user.products !== undefined && user.products.length > 0) {
           let found = false;
@@ -199,7 +201,8 @@ function compareProducts(productInUserProducts, product) {
     compareProductOptions(productInUserProducts.options, product.options) &&
     productInUserProducts.price === product.price &&
     compareProductSize(productInUserProducts.size, product.size) &&
-    productInUserProducts.deleted === product.deleted ) {
+    productInUserProducts.deleted === product.deleted &&
+    productInUserProducts.paymentStatus === product.paymentStatus ) {
     return true;
   }
   else {
@@ -351,6 +354,7 @@ function createProductFromProductBusiness(product) {
   prod.dailyMenuId = product.dailyMenuId;
   prod.employeeWhoAdded = product.employeeWhoAdded;
   prod.employee = product.employee;
+  prod.paymentStatus = product.paymentStatus;
 
   return prod;
 }
@@ -461,56 +465,71 @@ async function updateOrderPayments(order, unblockUsers) {
 }
 
 async function closeOrder(order) {
-  if (order.cashRegister === null || order.cashRegister === undefined) {
-    throw new Error("Se debe seleccionar una caja registradora para hacer el cierre del pedido");
+  // const session = await mongoose.startSession();
+  const collection = await mongoose.connection.db.listCollections({ name: "orders" }).toArray();
+  if (collection === null || collection === undefined || collection.length === 0) {
+    await Order.createCollection();
   }
-
-  let paymentFound = false;
-  let ord = new Order();
-  let users = new Array;
-  let orderUpdated = new Order();
-  users = [];
-
-  order.users.forEach(user => {
-    if (user.payments !== null && user.payments !== undefined && !paymentFound) {
-      paymentFound = true;
+  // session.startTransaction();
+  try {
+    const opts = { /*session: session, new: true*/ };
+    
+    let table = await TableService.updateTableByNumber(order.table, {status: TableStatus.LIBRE}, opts);
+    if (order.cashRegister === null || order.cashRegister === undefined) {
+      throw new Error("Se debe seleccionar una caja registradora para hacer el cierre del pedido");
     }
-
-    let usr = {};
-    let products = new Array;
-    products = [];
-
-    user.products.forEach(product => {
-      let prod = createProductFromProductBusiness(product);
-
-      products.push(prod);
+  
+    let paymentFound = false;
+    let ord = new Order();
+    let users = new Array;
+    let orderUpdated = new Order();
+    users = [];
+  
+    order.users.forEach(user => {
+      if (user.payments !== null && user.payments !== undefined && !paymentFound) {
+        paymentFound = true;
+      }
+  
+      let usr = {};
+      let products = new Array;
+      products = [];
+  
+      user.products.forEach(product => {
+        let prod = createProductFromProductBusiness(product);
+  
+        products.push(prod);
+      })
+  
+      usr.username = user.userName;
+      usr.products = products;
+      usr.totalPerUser = user.totalPerUser;
+      usr.payments = user.payments;
+      usr.owner = user.owner;
+  
+      users.push(usr);
     })
-
-    usr.username = user.userName;
-    usr.products = products;
-    usr.totalPerUser = user.totalPerUser;
-    usr.payments = user.payments;
-    usr.owner = user.owner;
-
-    users.push(usr);
-  })
-
-  if (!paymentFound) {
-    throw new Error("Se debe seleccionar al menos un tipo de pago para hacer el cierre del pedido");
+  
+    if (!paymentFound) {
+      throw new Error("Se debe seleccionar al menos un tipo de pago para hacer el cierre del pedido");
+    }
+  
+    ord._id = order._id;
+    ord.cashRegister = order.cashRegister._id;
+    ord.status = OrderStatus.CLOSED;
+    ord.users = users;
+    ord.completed_at = new Date();
+    ord.discount = order.discount;
+    ord.totalPrice = order.totalPrice;
+  
+    orderUpdated = await OrderDAO.update(order);
+    
+    return transformToBusinessObject(orderUpdated);
   }
-
-  ord._id = order._id;
-  ord.cashRegister = order.cashRegister._id;
-  ord.status = order.status;
-  ord.users = users;
-  ord.completed_at = new Date();
-  ord.discount = order.discount;
-  ord.totalPrice = order.totalPrice;
-
-  orderUpdated = await OrderDAO.update(order);
-  const opts = { /*session: session, new: true*/ };
-  let table = await TableService.updateTableByNumber(order.table, {status: TableStatus.LIBRE}, opts);
-  return transformToBusinessObject(orderUpdated);
+  catch (err) {
+    // await session.abortTransaction();
+    // session.endSession();
+    throw new Error(err);
+  }
 }
 
 /**
@@ -565,6 +584,7 @@ async function transformToBusinessObject(orderEntity) {
           prod.quantity = product.quantity;
           prod.deleted = product.deleted;
           prod.deletedReason = product.deletedReason;
+          prod.paymentStatus = product.paymentStatus;
 
         }
         
@@ -588,6 +608,7 @@ async function transformToBusinessObject(orderEntity) {
         products.push(prod);
       }
 
+      usr._id = user._id;
       usr.username = user.username;
       usr.products = products;
       usr.totalPerUser = user.totalPerUser;
