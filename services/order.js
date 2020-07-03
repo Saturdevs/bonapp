@@ -76,7 +76,7 @@ async function createOrder(order) {
 }
 
 /**
- * Hace el update del pedido cuando se agregan o eliminan productos.
+ * Hace el update del pedido cuando se agregan productos.
  * @param {*} order pedido para el que se tienen q actualizar los productos
  * @param {*} productsToAdd productos que se deben agregar al pedido
  * @param {*} username username del user para el que se deben agregar los productos
@@ -89,6 +89,11 @@ async function updateOrderProducts(order, productsToAdd, username, totalToAdd) {
     let orderUpdated = new Order();
 
     ord._id = order._id;
+    //Todos los productos deben ser agregados al pedido con paymentStatus PENDING
+    //para saber que todavia no se pagaron.
+    productsToAdd.forEach(prod => {
+      prod.paymentStatus = ProductPaymentStatus.PENDING;
+    })
     ord.users = updateProducts(order, productsToAdd, username, totalToAdd);
     if (order.totalPrice === null || order.totalPrice === undefined) {
       order.totalPrice = 0;
@@ -136,7 +141,7 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
         if (product.size === null || product.size === undefined) {
           product.size = { name: undefined, price: undefined };
         }
-        product.paymentStatus = ProductPaymentStatus.PENDING;
+        
         //Verifico si el usuario ya tiene productos agregados al pedido
         if (user.products !== null && user.products !== undefined && user.products.length > 0) {
           let found = false;
