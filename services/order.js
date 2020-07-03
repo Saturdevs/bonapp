@@ -43,7 +43,7 @@ async function createOrder(order) {
   try {
     const opts = { /*session: session, new: true*/ };
 
-    let table = await TableService.updateTableByNumber(order.table, {status: TableStatus.OCUPADA}, opts);
+    let table = await TableService.updateTableByNumber(order.table, { status: TableStatus.OCUPADA }, opts);
     let newOrder = new Order();
     let lastOrder = await OrderDAO.getLastOrder();
 
@@ -188,21 +188,20 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
    * @returns true si el producto se encuentra en el array preOrderProducts. false si no se encuentra.
    */
 function compareProducts(productInUserProducts, product) {
-  if (productInUserProducts.product !== undefined && productInUserProducts.product !== null && productInUserProducts.product.toString() === product.product &&
-    productInUserProducts.name === product.name &&
-    productInUserProducts.observations === product.observations &&
-    compareProductOptions(productInUserProducts.options, product.options) &&
-    productInUserProducts.price === product.price &&
-    compareProductSize(productInUserProducts.size, product.size) &&
-    productInUserProducts.deleted === product.deleted || 
-    productInUserProducts.dailyMenuId !== undefined && productInUserProducts.dailyMenuId !== null && productInUserProducts.dailyMenuId.toString() === product.dailyMenuId &&
+  if ((productInUserProducts.product !== undefined && productInUserProducts.product !== null && productInUserProducts.product.toString() === product.product &&
     productInUserProducts.name === product.name &&
     productInUserProducts.observations === product.observations &&
     compareProductOptions(productInUserProducts.options, product.options) &&
     productInUserProducts.price === product.price &&
     compareProductSize(productInUserProducts.size, product.size) &&
     productInUserProducts.deleted === product.deleted &&
-    productInUserProducts.paymentStatus === product.paymentStatus ) {
+    productInUserProducts.paymentStatus === product.paymentStatus) ||
+    (productInUserProducts.dailyMenuId !== undefined && productInUserProducts.dailyMenuId !== null && productInUserProducts.dailyMenuId.toString() === product.dailyMenuId &&
+    productInUserProducts.name === product.name &&
+    productInUserProducts.observations === product.observations &&
+    productInUserProducts.price === product.price &&
+    productInUserProducts.deleted === product.deleted &&
+    productInUserProducts.paymentStatus === product.paymentStatus)) {
     return true;
   }
   else {
@@ -265,12 +264,21 @@ function compareOptions(option1, option2) {
  * @param {*} productSize2 
  */
 function compareProductSize(productSize1, productSize2) {
-  if (productSize1.name === productSize2.name &&
-    productSize1.price === productSize2.price) {
-    return true
-  }
-  else {
-    return false
+  if ((productSize1 === null || productSize1 === undefined) &&
+    (productSize2 === null || productSize2 === undefined)) {
+    return true;
+  } else if (productSize1 === null || productSize1 === undefined) {
+    return false;
+  } else if (productSize2 === null || productSize2 === undefined) {
+    return false;
+  } else {
+    if (productSize1.name === productSize2.name &&
+      productSize1.price === productSize2.price) {
+      return true
+    }
+    else {
+      return false
+    }
   }
 }
 
@@ -446,7 +454,7 @@ async function updateOrderPayments(order, unblockUsers) {
         throw new Error("Error al querer actualizar la orden: la suma de los pagos es mayor al total para el usuario " + user.username);
       }
 
-      if(unblockUsers){
+      if (unblockUsers) {
         user.blocked = false;
       }
     });
@@ -473,46 +481,46 @@ async function closeOrder(order) {
   // session.startTransaction();
   try {
     const opts = { /*session: session, new: true*/ };
-    
-    let table = await TableService.updateTableByNumber(order.table, {status: TableStatus.LIBRE}, opts);
+
+    let table = await TableService.updateTableByNumber(order.table, { status: TableStatus.LIBRE }, opts);
     if (order.cashRegister === null || order.cashRegister === undefined) {
       throw new Error("Se debe seleccionar una caja registradora para hacer el cierre del pedido");
     }
-  
+
     let paymentFound = false;
     let ord = new Order();
     let users = new Array;
     let orderUpdated = new Order();
     users = [];
-  
+
     order.users.forEach(user => {
       if (user.payments !== null && user.payments !== undefined && !paymentFound) {
         paymentFound = true;
       }
-  
+
       let usr = {};
       let products = new Array;
       products = [];
-  
+
       user.products.forEach(product => {
         let prod = createProductFromProductBusiness(product);
-  
+
         products.push(prod);
       })
-  
+
       usr.username = user.userName;
       usr.products = products;
       usr.totalPerUser = user.totalPerUser;
       usr.payments = user.payments;
       usr.owner = user.owner;
-  
+
       users.push(usr);
     })
-  
+
     if (!paymentFound) {
-      throw new Error("Se debe seleccionar al menos un tipo de pago para hacer el cierre del pedido");
+      throw new Error("Se debe seleccionar al menos un tipo de pago para hacer el ciberre del pedido");
     }
-  
+
     ord._id = order._id;
     ord.cashRegister = order.cashRegister._id;
     ord.status = OrderStatus.CLOSED;
@@ -520,9 +528,9 @@ async function closeOrder(order) {
     ord.completed_at = new Date();
     ord.discount = order.discount;
     ord.totalPrice = order.totalPrice;
-  
+
     orderUpdated = await OrderDAO.update(order);
-    
+
     return transformToBusinessObject(orderUpdated);
   }
   catch (err) {
@@ -570,8 +578,8 @@ async function transformToBusinessObject(orderEntity) {
       for (let j = 0; j < user.products.length; j++) {
         const product = user.products[j];
         let prod = {};
-        
-        if(product.product !== null && product.product !== undefined){
+
+        if (product.product !== null && product.product !== undefined) {
           const productStored = await ProductDAO.getProductById(product.product);
 
           prod._id = product._id.toString();
@@ -587,8 +595,8 @@ async function transformToBusinessObject(orderEntity) {
           prod.paymentStatus = product.paymentStatus;
 
         }
-        
-        if(product.dailyMenuId !== null && product.dailyMenuId !== undefined){
+
+        if (product.dailyMenuId !== null && product.dailyMenuId !== undefined) {
           const dailyMenuStored = await DailyMenuDAO.getDailyMenuById(product.dailyMenuId);
 
           prod._id = product._id.toString();
@@ -602,6 +610,7 @@ async function transformToBusinessObject(orderEntity) {
           prod.quantity = product.quantity;
           prod.deleted = product.deleted;
           prod.deletedReason = product.deletedReason;
+          prod.paymentStatus = product.paymentStatus;
         }
 
 
