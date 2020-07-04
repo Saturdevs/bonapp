@@ -120,6 +120,9 @@ async function retrieveOneOrderByPaymentType(paymentTypeId) {
  */
 async function deletePaymentType(paymentType) {
   try {    
+    if (paymentType.cash === true) {
+      throw new Error("El medio de pago 'Efectivo' no puede ser eliminado");
+    }
     await PaymentTypeDAO.removePaymentType(paymentType);
   } catch (err) {
     throw new Error(err.message);

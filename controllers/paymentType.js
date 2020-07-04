@@ -81,10 +81,9 @@ async function updatePaymentType(req, res) {
 }
 
 async function deletePaymentType(req, res) {
-  let paymentType = req.paymentType;
-
   try {
-    PaymentTypeService.deletePaymentType(paymentType);
+    let paymentType = req.paymentType;
+    await PaymentTypeService.deletePaymentType(paymentType);
     res.status(HttpStatus.OK).send({ message: `El medio de pago ha sido eliminado` });
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer borrar el medio de pago: ${err}` })
