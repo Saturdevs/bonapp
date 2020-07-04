@@ -13,13 +13,15 @@ module.exports.up = async next => {
         "name": "Efectivo",
         "available": true,
         "default": true,
-        "currentAccount": false
+        "currentAccount": false,
+        "cash": true
       }, 
       {
         "name": "Cuenta Corriente",
         "available": true,
         "default": false,
-        "currentAccount": true
+        "currentAccount": true,
+        "cash": false
       }
     ]
 

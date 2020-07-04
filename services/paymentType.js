@@ -189,6 +189,8 @@ async function unSetDefaultPaymentType(opts) {
  * @returns medio de pago guardado en la base de datos.
  */
 async function savePaymentType(paymentType) {
+  //El unico medio de pago que tiene cash igual true es "Efectivo" y se agrega en una migration.
+  paymentType.cash = false;
   let paymentTypeSaved = await PaymentTypeDAO.save(paymentType);
 
   return PaymentTypeTransform.transformToBusinessObject(paymentTypeSaved);
