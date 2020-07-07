@@ -9,6 +9,7 @@ const Table = require('../models/table')
 const User = require('../models/user')
 const Client = require('../models/client')
 const PaymentMethod = require('../models/paymentType')
+const ProductPaymentStatus = require('../shared/enums/productPaymentStauts')
 
 const orderSchema = Schema({
   /**Nro interno de pedido */
@@ -80,7 +81,7 @@ const orderSchema = Schema({
       deletedReason: { type: String },
       /**Estado del pago del pedido, para imprimir si se pago completo o parcial
        * cuando se inicia un pedido tiene que estar en Pending.*/
-      status: {type: String, enum: ['Pending', 'Partial', 'Payed']} //Todavia no puse que es required = true porque tengo una duda para implementar esto. No se como hacer para darme cuenta de cuales payments son nuevos.
+      paymentStatus: {type: String, enum: [ProductPaymentStatus.PENDING, ProductPaymentStatus.PARTIAL, ProductPaymentStatus.PAYED]} //Todavia no puse que es required = true porque tengo una duda para implementar esto. No se como hacer para darme cuenta de cuales payments son nuevos.
     }],
     /**Atributo para verificar si el usuario esta bloqueado. Se utiliza cuando se realiza un pago,
      * cuando alguien realiza un pago para ese usuario, este se bloquea para menter la integridad de los datos
@@ -121,7 +122,7 @@ const orderSchema = Schema({
     discountAmount: { type: Number },
     subtotal: { type: Number }
   },
-  /**Monto total del pedido */
+  /**Monto total del pedido teniendo en cuenta el descuento si lo hubiera */
   totalPrice: { type: Number }
 });
 

@@ -120,6 +120,9 @@ async function retrieveOneOrderByPaymentType(paymentTypeId) {
  */
 async function deletePaymentType(paymentType) {
   try {    
+    if (paymentType.cash === true) {
+      throw new Error("El medio de pago 'Efectivo' no puede ser eliminado");
+    }
     await PaymentTypeDAO.removePaymentType(paymentType);
   } catch (err) {
     throw new Error(err.message);
@@ -189,6 +192,8 @@ async function unSetDefaultPaymentType(opts) {
  * @returns medio de pago guardado en la base de datos.
  */
 async function savePaymentType(paymentType) {
+  //El unico medio de pago que tiene cash igual true es "Efectivo" y se agrega en una migration.
+  paymentType.cash = false;
   let paymentTypeSaved = await PaymentTypeDAO.save(paymentType);
 
   return PaymentTypeTransform.transformToBusinessObject(paymentTypeSaved);
