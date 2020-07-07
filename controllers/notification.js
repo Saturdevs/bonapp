@@ -28,7 +28,7 @@ async function getNotificationTypes(req, res) {
 async function getNonReadNotifications(req, res){
     try {
         let notifications = await NotificationService.getNonReadNotifications();
-        notifications.forEach(notification => {
+        notifications.forEach(async (notification) => {
             let notificationType = await NotificationTypeService.getNotificationType(notification.notificationType);
             notification.notificationTypeDetail = notificationType;
         });
