@@ -28,13 +28,6 @@ async function getNotificationTypes(req, res) {
 async function getNonReadNotifications(req, res){
     try {
         let notifications = await NotificationService.getNonReadNotifications();
-        notifications.forEach(async (notification) => {
-            console.log('getNonReadNotifications Entro al foreach =>', notification);
-            let notificationType = await NotificationTypeService.getNotificationType(notification.notificationType);
-            let notificationIndex = notifications.indexOf(notification);
-            notifications[notificationIndex].notificationTypeDetail = notificationType;
-            console.log('getNonReadNotifications notifications con el detalle =>', notifications[notificationIndex]);
-        });
         res.status(HttpStatus.OK).send({notificaions: notifications});
     } catch (error) {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message });
