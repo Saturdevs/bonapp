@@ -36,6 +36,11 @@ const notificationSchema = Schema({
     type: Date,
     required: true
   },
+  data: {
+    notificationType: { type: String, required: true},
+    orderId: { type: String },
+    username: { username: String }
+  },
   //Fecha y hora en la que se leyo la notificacion.
   readBy: [{ 
     readId: { type: Schema.Types.ObjectId, ref: User, required: true, unique: true },
