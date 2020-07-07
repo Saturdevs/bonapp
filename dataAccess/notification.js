@@ -72,7 +72,11 @@ async function getNonReadNotifications() {
         let nonReadNotifications = notifications.filter(x => x.readBy === null);
 
         nonReadNotifications.forEach(async (notif) => {
-            notif.detailedType = await NotificationType.findById(notif.notificationType);
+            notif.detailedType = {};
+            console.log(notif);
+            let detailedType = await NotificationType.findById(notif.notificationType);
+            console.log(detailedType);
+            notif.detailedType = detailedType;
             console.log(notif);
         });
 
