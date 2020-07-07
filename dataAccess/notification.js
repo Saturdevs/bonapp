@@ -68,7 +68,7 @@ async function saveNotification(notification) {
  */
 async function getNonReadNotifications() {
     try {
-        await Notification.find({})
+        let notifications = await Notification.find({})
         let nonReadNotifications = notifications.filter(x => x.readBy === null);
 
         nonReadNotifications.forEach(async (notif) => {
