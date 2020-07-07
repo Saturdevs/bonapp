@@ -74,6 +74,7 @@ async function getNonReadNotifications() {
 
         nonReadNotifications.map(notif => {
             notif.detailedType = notificationTypes.find(x => x._id === notif.notificationType);
+            console.log(notif);
         });
 
         console.log(nonReadNotifications);

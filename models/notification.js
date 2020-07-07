@@ -45,7 +45,8 @@ const notificationSchema = Schema({
   readBy: [{ 
     readId: { type: Schema.Types.ObjectId, ref: User, required: true, unique: true },
     readAt: { type: Date, required: true }
-  }]
+  }],
+  detailedType: {}
 });
 
 module.exports = mongoose.model('Notification', notificationSchema);
