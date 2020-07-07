@@ -68,11 +68,15 @@ async function saveNotification(notification) {
  */
 async function getNonReadNotifications() {
     try {
-        await Notification.find({}).populate('notificationType')
-        .exec((err, notifications) => {
-          let nonReadNotifications = notifications.filter(x => x.readBy === null);
-          return nonReadNotifications
+        await Notification.find({})
+        let nonReadNotifications = notifications.filter(x => x.readBy === null);
+        
+        nonReadNotifications.forEach(async (notif) => {
+            notif.detailedType = await NotificationType.findById(notif.NotificationType);
+            console.log(notif);
         });
+
+        return nonReadNotifications;
     } catch (err) {
         throw new Error(err);
     }
