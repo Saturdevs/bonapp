@@ -21,6 +21,11 @@ async function saveNotification(reqBody) {
     return notificationSaved;
 }
 
+async function updateNotification(notificationId,reqBody) {
+    let notificationSaved = await NotificationDAO.updateNotification(notificationId,reqBody);
+    return notificationSaved;
+}
+
 async function getSubscriptions() {
     let subscriptions = await NotificationDAO.getSuscriptions();
     return subscriptions
@@ -65,5 +70,6 @@ module.exports = {
     saveNotification,
     getTypes,
     resendNotifications,
-    getNonReadNotifications
+    getNonReadNotifications,
+    updateNotification
 }

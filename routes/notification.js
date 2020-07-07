@@ -8,5 +8,6 @@ notificationRouter.post('/', notificationCtrl.addPushSubscriber);
 notificationRouter.post('/send', notificationCtrl.send);
 notificationRouter.get('/types', notificationCtrl.getNotificationTypes);
 notificationRouter.get('/nonRead', notificationCtrl.getNonReadNotifications);
+notificationRouter.put('/:notificationId', notificationCtrl.updateNotification);
 
 module.exports = notificationRouter;

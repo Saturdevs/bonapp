@@ -64,6 +64,23 @@ async function saveNotification(notification) {
 }
 
 /**
+ * @description Updatea la notificacion en la base
+ * @param {notification} notification
+ */
+async function updateNotification(notificationId, bodyUpdate, opts = {}) {
+    try {
+        if (notificationId === null || notificationId === undefined) {
+            throw new Error('El id de la notification a actualizar no puede ser nulo');
+          }
+      
+        let notificationSaved = await Notification.findByIdAndUpdate(notificationId, bodyUpdate, opts);
+        return notificationSaved
+    } catch (err) {
+        throw new Error(err);
+    }
+}
+
+/**
  * @description Devuelve notificaciones no leidas
  */
 async function getNonReadNotifications() {
@@ -90,5 +107,6 @@ module.exports = {
     getSuscriptions,
     saveNotification,
     getTypes,
-    getNonReadNotifications
+    getNonReadNotifications,
+    updateNotification
 }
