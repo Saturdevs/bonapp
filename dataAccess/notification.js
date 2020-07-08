@@ -64,13 +64,38 @@ async function saveNotification(notification) {
 }
 
 /**
+ * @description Updatea la notificacion en la base
+ * @param {notification} notification
+ */
+async function updateNotification(notificationId, bodyUpdate, opts = {}) {
+    try {
+        if (notificationId === null || notificationId === undefined) {
+            throw new Error('El id de la notification a actualizar no puede ser nulo');
+          }
+      
+        let notificationSaved = await Notification.findByIdAndUpdate(notificationId, bodyUpdate, opts);
+        return notificationSaved
+    } catch (err) {
+        throw new Error(err);
+    }
+}
+
+/**
  * @description Devuelve notificaciones no leidas
  */
 async function getNonReadNotifications() {
     try {
+        let notificationTypes = await NotificationType.find({});
         let notifications = await Notification.find({});
         let nonReadNotifications = notifications.filter(x => x.readBy === null);
-        return nonReadNotifications
+
+        nonReadNotifications.map(notif => {
+            notif.detailedType = notificationTypes.find(x => x._id === notif.notificationType);
+            console.log(notif);
+        });
+
+        console.log(nonReadNotifications);
+        return nonReadNotifications;
     } catch (err) {
         throw new Error(err);
     }
@@ -82,5 +107,6 @@ module.exports = {
     getSuscriptions,
     saveNotification,
     getTypes,
-    getNonReadNotifications
+    getNonReadNotifications,
+    updateNotification
 }

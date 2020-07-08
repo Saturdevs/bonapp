@@ -25,6 +25,20 @@ async function getNotificationTypes(req, res) {
     }
 }
 
+
+async function updateNotification(req, res) {
+    let notificationId = req.params.notificationId;
+    let bodyUpdate = req.body;
+
+    try {
+        let notification = await NotificationService.updateNotification(notificationId,bodyUpdate);
+        res.status(HttpStatus.OK).send({notification: notification}); 
+    }
+    catch (err) {
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
+    }
+}
+
 async function getNonReadNotifications(req, res){
     try {
         let notifications = await NotificationService.getNonReadNotifications();
@@ -74,5 +88,6 @@ module.exports = {
     addPushSubscriber,
     send,
     getNotificationTypes,
-    getNonReadNotifications
+    getNonReadNotifications,
+    updateNotification
 }
