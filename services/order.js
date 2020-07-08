@@ -9,7 +9,8 @@ const OrderDAO = require('../dataAccess/order');
 const ProductDAO = require('../dataAccess/product');
 const UserDAO = require('../dataAccess/user');
 const DailyMenuDAO = require('../dataAccess/dailyMenu');
-const ProductPaymentStatus = require('../shared/enums/productPaymentStauts')
+const ProductPaymentStatus = require('../shared/enums/productPaymentStauts');
+const PaymentTypeService = require('../services/paymentType');
 
 /**
  * @description Recupera un único order con cashRegisterId igual al dado como parametro. Si hay mas de uno
@@ -141,7 +142,7 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
         if (product.size === null || product.size === undefined) {
           product.size = { name: undefined, price: undefined };
         }
-        
+
         //Verifico si el usuario ya tiene productos agregados al pedido
         if (user.products !== null && user.products !== undefined && user.products.length > 0) {
           let found = false;
@@ -202,11 +203,11 @@ function compareProducts(productInUserProducts, product) {
     productInUserProducts.deleted === product.deleted &&
     productInUserProducts.paymentStatus === product.paymentStatus) ||
     (productInUserProducts.dailyMenuId !== undefined && productInUserProducts.dailyMenuId !== null && productInUserProducts.dailyMenuId.toString() === product.dailyMenuId &&
-    productInUserProducts.name === product.name &&
-    productInUserProducts.observations === product.observations &&
-    productInUserProducts.price === product.price &&
-    productInUserProducts.deleted === product.deleted &&
-    productInUserProducts.paymentStatus === product.paymentStatus)) {
+      productInUserProducts.name === product.name &&
+      productInUserProducts.observations === product.observations &&
+      productInUserProducts.price === product.price &&
+      productInUserProducts.deleted === product.deleted &&
+      productInUserProducts.paymentStatus === product.paymentStatus)) {
     return true;
   }
   else {
@@ -356,6 +357,10 @@ function removeProduct(order, productToRemove, username) {
 function createProductFromProductBusiness(product) {
   let prod = {};
 
+  prod._id = product._id;
+  prod.employeeWhoAdded = product.employeeWhoAdded;
+  prod.employee = product.employee;
+  prod.dailyMenuId = product.dailyMenuId;
   prod.product = product.product;
   prod.options = product.options;
   prod.price = product.price;
@@ -363,10 +368,7 @@ function createProductFromProductBusiness(product) {
   prod.observations = product.observations;
   prod.quantity = product.quantity;
   prod.deleted = product.deleted;
-  prod.deletedReason = product.deletedReason;
-  prod.dailyMenuId = product.dailyMenuId;
-  prod.employeeWhoAdded = product.employeeWhoAdded;
-  prod.employee = product.employee;
+  prod.deletedReason = product.deletedReason;    
   prod.paymentStatus = product.paymentStatus;
 
   return prod;
@@ -438,33 +440,89 @@ async function updateOrder(order) {
   }
 }
 
-/**Realiza las validaciones correspondientes al pago y luego
+/**@description Realiza las validaciones correspondientes al pago y luego
  *  actualiza o cierra la orden segun dorresponda 
- * @param {*} order 
+ * @param {*} order pedido sobre el que se deben actualizar los pagos de los usuarios.
+ * @param {boolean} unblockUsers
+ * @param users usuarios para los que se esta realizando el pago.
  */
-async function updateOrderPayments(order, unblockUsers) {
+async function updateOrderPayments(order, unblockUsers, users) {
   try {
     let totalPayed = 0;
     let orderUpdated = null;
 
-    order.users.forEach(user => {
+    for (let i = 0; i < users.length; i++) {
+      let user = users[i];
       let totalPerUser = 0;
       user.payments.forEach(payment => {
         totalPerUser += payment.amount
       });
 
-      totalPayed += totalPerUser;
-
       if (totalPerUser > user.totalPerUser) {
-        throw new Error("Error al querer actualizar la orden: la suma de los pagos es mayor al total para el usuario " + user.username);
+        let found = false;
+        let cashPaymentIndex = null;
+        //Busco el tipo de pago efectivo para descontarle la diferencia.
+        for (let j = 0; j < user.payments.length && !found; j++) {
+          const payment = user.payments[j];
+          const paymentDb = await PaymentTypeService.getPaymentType(payment.methodId);
+          if (paymentDb.cash) {
+            cashPaymentIndex = j;
+            found = true;
+          }
+        }
+
+        //Si el tipo de pago efectivo se encuentra en el array de payments del usuario le descuento la diferencia.
+        //Sino devuelvo error. (solo debería ser cuando se paga desde el sistema web, en la app no hay pago en efectivo - 06/07/20)
+        if (cashPaymentIndex !== null) {
+          let orderTotalPayed = 0;
+          for (let k = 0; k < order.users.length; k++) {
+            const usr = order.users[k];
+            if (usr.username !== user.username) {
+              usr.payments.forEach(payment => {
+                orderTotalPayed += payment.amount
+              });
+            }
+          }
+          for (let l = 0; l < user.payments.length; l++) {
+            const payment = user.payments[l];
+            orderTotalPayed += payment.amount;
+          }
+
+          //Si el total del pago de los usuarios para los que se esta actualizando el pago mas lo ya pagado por otros usuarios
+          //en el objeto order es mayo que el precio total del pedido calculo el monto real (monto ingrasado menos el vuelto)
+          //Sino devuelvo error.
+          if (orderTotalPayed > order.totalPrice) {
+            user.payments[cashPaymentIndex].amount -= (orderTotalPayed - order.totalPrice);
+          } else {
+            throw new Error(`El monto ingresado no es suficiente para pagar el total del pedido y no se permiten pagos parciales. Por favor, revise los montos y vuelva a intentar.`);
+          }
+        } else {
+          throw new Error(`La suma de los pagos es mayor al total para el usuario ${user.username} y el pago no es en efectivo por lo que no se le puede dar vuelto. Ingrese el monto exacto`);
+        }
       }
 
       if (unblockUsers) {
         user.blocked = false;
       }
-    });
 
-    if (totalPayed === order.totalPrice) {
+      //Si llego hasta aca es porque el pago es valido. Busco el usuario en el pedido y actualizo los pagos y los productos.
+      const userInOrder = order.users.find(usr => usr.username === user.username);
+      if (userInOrder) {
+        userInOrder.payments = user.payments;
+        userInOrder.products.forEach(prod => {
+          prod.paymentStatus = ProductPaymentStatus.PAYED;
+        })
+      }
+    }
+
+    for (let i = 0; i < order.users.length; i++) {
+      const user = order.users[i];
+      user.payments.forEach(payment => {
+        totalPayed += payment.amount
+      });
+    }
+
+    if (totalPayed >= order.totalPrice) {
       orderUpdated = await closeOrder(order);
     } else {
       orderUpdated = await updateOrder(order);
@@ -473,7 +531,7 @@ async function updateOrderPayments(order, unblockUsers) {
     return orderUpdated
   }
   catch (err) {
-    throw new Error(err);
+    throw new Error(err.message);
   }
 }
 
@@ -494,7 +552,7 @@ async function closeOrder(order) {
 
     let paymentFound = false;
     let ord = new Order();
-    let users = new Array;
+    let users = new Array();
     let orderUpdated = new Order();
     users = [];
 
@@ -504,7 +562,7 @@ async function closeOrder(order) {
       }
 
       let usr = {};
-      let products = new Array;
+      let products = new Array();
       products = [];
 
       user.products.forEach(product => {
@@ -513,17 +571,21 @@ async function closeOrder(order) {
         products.push(prod);
       })
 
-      usr.username = user.userName;
+      usr._id = user._id;
+      usr.username = user.username;
+      usr.socketId = user.socketId ? user.socketId : null;
       usr.products = products;
+      usr.blocked = user.blocked ? user.blocked : null; 
       usr.totalPerUser = user.totalPerUser;
       usr.payments = user.payments;
       usr.owner = user.owner;
+      usr.clientId = user.clientId ? user.clientId : null;  
 
       users.push(usr);
     })
 
     if (!paymentFound) {
-      throw new Error("Se debe seleccionar al menos un tipo de pago para hacer el ciberre del pedido");
+      throw new Error("Se debe seleccionar al menos un tipo de pago para hacer el cierre del pedido");
     }
 
     ord._id = order._id;
@@ -534,7 +596,7 @@ async function closeOrder(order) {
     ord.discount = order.discount;
     ord.totalPrice = order.totalPrice;
 
-    orderUpdated = await OrderDAO.update(order);
+    orderUpdated = await OrderDAO.update(ord);
 
     return transformToBusinessObject(orderUpdated);
   }
@@ -598,7 +660,8 @@ async function transformToBusinessObject(orderEntity) {
           prod.deleted = product.deleted;
           prod.deletedReason = product.deletedReason;
           prod.paymentStatus = product.paymentStatus;
-
+          prod.employeeWhoAdded = product.employeeWhoAdded;
+          prod.employee = product.employee;
         }
 
         if (product.dailyMenuId !== null && product.dailyMenuId !== undefined) {
@@ -616,6 +679,8 @@ async function transformToBusinessObject(orderEntity) {
           prod.deleted = product.deleted;
           prod.deletedReason = product.deletedReason;
           prod.paymentStatus = product.paymentStatus;
+          prod.employeeWhoAdded = product.employeeWhoAdded;
+          prod.employee = product.employee;
         }
 
 

@@ -129,9 +129,10 @@ async function updateDeleteOrder(req, res) {
 
 async function updatePayments(req, res) {
   try {
-    let orderDTO = req.body;
+    let orderDTO = req.body.order;
+    let userPayments = req.body.userPayments;
 
-    const orderUpdated = await OrderService.updateOrderPayments(orderDTO, true);
+    const orderUpdated = await OrderService.updateOrderPayments(orderDTO, true, userPayments);
 
     if (orderUpdated !== null && orderUpdated !== undefined) {
       res.status(200).send({ order: orderUpdated });
@@ -141,7 +142,7 @@ async function updatePayments(req, res) {
     }
   }
   catch (err) {
-    res.status(500).send({ message: `Error al querer actualizar la orden: ${err}` });
+    res.status(500).send({ message: `Error al querer actualizar los pagos del pedido: \n\n${err.message}` });
   }
 }
 
