@@ -23,7 +23,7 @@ const notificationSchema = Schema({
     type: String
   },
   //Usuarios a los que se manda la notificacion.
-  usersTo: [{ 
+  usersTo: [{
     userId: {
       type: Schema.Types.ObjectId,
       ref: User,
@@ -37,12 +37,16 @@ const notificationSchema = Schema({
     required: true
   },
   data: {
-    notificationType: { type: String, required: true},
+    notificationType: { type: String, required: true },
     orderId: { type: String },
-    username: { username: String }
+    username: { username: String },
+    newProducts: [{
+      name: { type: String },
+      observations: { type: String }
+    }]
   },
   //Fecha y hora en la que se leyo la notificacion.
-  readBy: [{ 
+  readBy: [{
     readId: { type: Schema.Types.ObjectId, ref: User, required: true, unique: true },
     readAt: { type: Date, required: true }
   }],

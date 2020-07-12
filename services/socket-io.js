@@ -30,7 +30,7 @@ function initialize(server) {
         });
 
         socket.on("acceptOrder", async (acceptedOrder) => { //escucha el metodo de orden aceptada
-            console.log("acceptOrder",acceptedOrder);
+            console.log("acceptOrder", acceptedOrder);
             const order = await OrderDAO.getOrderById(acceptedOrder.orderId);
             let user = order.users.find(x => x.username === acceptedOrder.username);
             if (user) {
@@ -43,9 +43,13 @@ function initialize(server) {
             let userIndex = order.users.findIndex(x => x.username === userToRemoveData.username);
             if (userIndex !== -1) {
                 let user = order.users[userIndex];
-                socket.to(user.socketId).emit('userRemovedFromOrder', userToRemoveData); //le emito a la app que se elimino el usuario
-                order.users[userIndex].socketId = null;
-                await OrderDAO.update(order);
+                if (userToRemoveData.isRemovingOtherUser === true) {
+                    socket.io(user.socketId).emit('removingFromOrder', userToRemoveData);
+                } else {
+                    socket.to(user.socketId).emit('userRemovedFromOrder', userToRemoveData); //le emito a la app que se elimino el usuario
+                    order.users[userIndex].socketId = null;
+                    await OrderDAO.update(order);
+                }
             };
         });
     });

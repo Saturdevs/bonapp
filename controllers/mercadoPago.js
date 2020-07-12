@@ -31,9 +31,10 @@ function makePayment(req, res) {
     .then(async function (payment) {
 
       let orderDTO = req.body.order;
+      let users = req.body.users; 
 
       try {
-        const orderUpdated = await OrderService.updateOrderPayments(orderDTO, req.body.unblockUsers);
+        const orderUpdated = await OrderService.updateOrderPayments(orderDTO, req.body.unblockUsers, users);
         if (orderUpdated !== null && orderUpdated !== undefined) {
           res.status(HttpStatus.OK).send({ order: orderUpdated, payment: payment });
         }
@@ -78,9 +79,10 @@ function makePaymentWithSavedCard(req, res) {
   mercadopago.payment.create(payment_data)
     .then(async function (payment) {
       let orderDTO = req.body.order;
+      let users = req.body.users;
 
       try {
-        const orderUpdated = await OrderService.updateOrderPayments(orderDTO, req.body.unblockUsers);
+        const orderUpdated = await OrderService.updateOrderPayments(orderDTO, req.body.unblockUsers, users);
         if (orderUpdated !== null && orderUpdated !== undefined) {
           return res.status(HttpStatus.OK).send({ order: orderUpdated, payment: payment });
         }
