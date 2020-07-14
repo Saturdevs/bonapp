@@ -44,7 +44,7 @@ function initialize(server) {
             console.log('removeUserFromOrder userToRemoveData:', userToRemoveData);
             const order = await OrderDAO.getOrderById(userToRemoveData.orderId);
             console.log('removeUserFromOrder', order);
-            let userIndex = order.users.findIndex(x => x.username == userToRemoveData.username);
+            let userIndex = order.users.findIndex(x => x.username == userToRemoveData.userName);
             console.log('removeUserFromOrder userIndex:', userIndex);            
             if (userIndex !== -1) {
                 let user = order.users[userIndex];
