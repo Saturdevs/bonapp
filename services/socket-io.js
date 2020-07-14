@@ -18,7 +18,6 @@ function initialize(server) {
             if (userIndex !== -1) {
                 order.users[userIndex].socketId = socket.id;
                 await OrderDAO.update(order);
-                socket.join(socket.id);
             };
         });
 
@@ -37,7 +36,7 @@ function initialize(server) {
             let user = order.users.find(x => x.username == acceptedOrder.username);
             console.log("acceptOrder", user);
             if (user) {
-                socket.to(user.socketId).emit('orderAccepted', {}); //le emito a la app que se acepto la orden
+                io.to(user.socketId).emit('orderAccepted', {}); //le emito a la app que se acepto la orden
             };
         });
 
@@ -52,9 +51,9 @@ function initialize(server) {
                 console.log('removeUserFromOrder user:', user);            
                 if (userToRemoveData.isRemovingOtherUser === true) {
                     console.log('removeUserFromOrder ENTRO AL IF DE ISREMOVING');                            
-                    socket.to(user.socketId).emit('removingFromOrder', userToRemoveData);
+                    io.to(user.socketId).emit('removingFromOrder', userToRemoveData);
                 } else {
-                    socket.to(user.socketId).emit('userRemovedFromOrder', userToRemoveData); //le emito a la app que se elimino el usuario
+                    io.to(user.socketId).emit('userRemovedFromOrder', userToRemoveData); //le emito a la app que se elimino el usuario
                     order.users[userIndex].socketId = null;
                     await OrderDAO.update(order);
                 }
