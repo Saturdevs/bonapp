@@ -51,11 +51,15 @@ async function getNonReadNotifications(req, res){
 async function send(req, res) {
 
     try {
+        
         const notificationSaved = await NotificationService.saveNotification(req.body);
+        console.log('NotificationController Send notificationSaved =>',notificationSaved );
 
         const allSubscriptions = await NotificationService.getSubscriptions();
+        console.log('NotificationController Send allSubscriptions =>',allSubscriptions );
 
         const notificationType = await NotificationTypeService.getNotificationType(req.body.notificationType);
+        console.log('NotificationController Send notificationType =>',notificationType );
 
         //ver el tema del notificationtype para armar la notification a enviar al servidor de chrome
         const notificationPayload = {
@@ -80,6 +84,8 @@ async function send(req, res) {
         }
     }
     catch (err) {
+        console.log('NotificationController Send err =>',err );
+
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message });
     }
 }

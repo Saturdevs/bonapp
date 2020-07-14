@@ -26,9 +26,7 @@ const notificationSchema = Schema({
   usersTo: [{
     userId: {
       type: Schema.Types.ObjectId,
-      ref: User,
-      required: true,
-      unique: true
+      ref: User
     }
   }],
   //Fecha y hora en la que se creo la notificacion.
