@@ -10,7 +10,7 @@ const notificationSchema = Schema({
   //Tipo de la notificacion.
   notificationType: {
     type: String,
-    enum: [NotificationTypesEnum.TABLE_TAKEN, NotificationTypesEnum.NEW_ORDER, NotificationTypesEnum.CALL_WAITER],
+    enum: [NotificationTypesEnum.TABLE_TAKEN, NotificationTypesEnum.NEW_ORDER, NotificationTypesEnum.CALL_WAITER, NotificationTypesEnum.NEW_PAYMENT],
     ref: NotificationType,
     required: true
   },
@@ -26,7 +26,9 @@ const notificationSchema = Schema({
   usersTo: [{
     userId: {
       type: Schema.Types.ObjectId,
-      ref: User
+      ref: User,
+      required: true,
+      unique: true
     }
   }],
   //Fecha y hora en la que se creo la notificacion.
