@@ -32,7 +32,7 @@ function initialize(server) {
         socket.on("acceptOrder", async (acceptedOrder) => { //escucha el metodo de orden aceptada
             console.log("acceptOrder", acceptedOrder);
             const order = await OrderDAO.getOrderById(acceptedOrder.orderId);
-            let user = order.users.find(x => x.username === acceptedOrder.username);
+            let user = order.users.find(x => x.username == acceptedOrder.username);
             if (user) {
                 socket.to(user.socketId).emit('orderAccepted', {}); //le emito a la app que se acepto la orden
             };
@@ -40,7 +40,7 @@ function initialize(server) {
 
         socket.on("removeUserFromOrder", async (userToRemoveData) => { //escucha el metodo de eliminar usuario
             const order = await OrderDAO.getOrderById(userToRemoveData.orderId);
-            let userIndex = order.users.findIndex(x => x.username === userToRemoveData.username);
+            let userIndex = order.users.findIndex(x => x.username == userToRemoveData.username);
             if (userIndex !== -1) {
                 let user = order.users[userIndex];
                 if (userToRemoveData.isRemovingOtherUser === true) {
