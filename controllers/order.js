@@ -128,8 +128,7 @@ async function updateDeleteOrder(req, res) {
 
 async function updateOrder(req, res){
   try {
-    let orderDTO = req.body.order;
-    console.log(req.body.order);
+    let orderDTO = req.body;
 
     const orderUpdated = await OrderService.updateOrder(orderDTO);
 
