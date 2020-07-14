@@ -18,7 +18,7 @@ function initialize(server) {
             if (userIndex !== -1) {
                 order.users[userIndex].socketId = socket.id;
                 await OrderDAO.update(order);
-                socket.join(socke.id);
+                socket.join(socket.id);
             };
         });
 
@@ -42,11 +42,16 @@ function initialize(server) {
         });
 
         socket.on("removeUserFromOrder", async (userToRemoveData) => { //escucha el metodo de eliminar usuario
+            console.log('removeUserFromOrder userToRemoveData:', userToRemoveData);
             const order = await OrderDAO.getOrderById(userToRemoveData.orderId);
+            console.log('removeUserFromOrder', order);
             let userIndex = order.users.findIndex(x => x.username == userToRemoveData.username);
+            console.log('removeUserFromOrder userIndex:', userIndex);            
             if (userIndex !== -1) {
                 let user = order.users[userIndex];
+                console.log('removeUserFromOrder user:', user);            
                 if (userToRemoveData.isRemovingOtherUser === true) {
+                    console.log('removeUserFromOrder ENTRO AL IF DE ISREMOVING');                            
                     socket.io(user.socketId).emit('removingFromOrder', userToRemoveData);
                 } else {
                     socket.to(user.socketId).emit('userRemovedFromOrder', userToRemoveData); //le emito a la app que se elimino el usuario
