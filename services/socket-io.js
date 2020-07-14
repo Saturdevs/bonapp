@@ -18,6 +18,7 @@ function initialize(server) {
             if (userIndex !== -1) {
                 order.users[userIndex].socketId = socket.id;
                 await OrderDAO.update(order);
+                socket.join(socke.id);
             };
         });
 
