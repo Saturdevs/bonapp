@@ -88,6 +88,7 @@ async function updateOrderProducts(order, productsToAdd, username, totalToAdd) {
   try {
     let ord = new Order();
     let orderUpdated = new Order();
+    let orderDb = await OrderDAO.getOrderById(order._id);
 
     ord._id = order._id;
     //Todos los productos deben ser agregados al pedido con paymentStatus PENDING
@@ -95,12 +96,12 @@ async function updateOrderProducts(order, productsToAdd, username, totalToAdd) {
     productsToAdd.forEach(prod => {
       prod.paymentStatus = ProductPaymentStatus.PENDING;
     })
-    ord.users = updateProducts(order, productsToAdd, username, totalToAdd);
-    if (order.totalPrice === null || order.totalPrice === undefined) {
-      order.totalPrice = 0;
+    ord.users = updateProducts(orderDb, productsToAdd, username, totalToAdd);
+    if (orderDb.totalPrice === null || orderDb.totalPrice === undefined) {
+      orderDb.totalPrice = 0;
     }
 
-    ord.totalPrice = order.totalPrice + totalToAdd;
+    ord.totalPrice = orderDb.totalPrice + totalToAdd;
 
     orderUpdated = await OrderDAO.update(ord);
 
