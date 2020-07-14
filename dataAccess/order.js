@@ -73,6 +73,7 @@ async function getLastOrder() {
  */
 async function update(orderToUpdate) {
   try {
+    console.log(orderToUpdate);
     let orderUpdated = new Order();
     orderUpdated = await Order.findByIdAndUpdate(orderToUpdate._id, orderToUpdate, { new: true });
     console.log('orderUpdated', orderUpdated);

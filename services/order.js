@@ -431,6 +431,7 @@ async function getOpenedOrderForTable(tableNro) {
  */
 async function updateOrder(order) {
   try {
+    console.log(order);
     let orderUpdated = await OrderDAO.update(order);
 
     return transformToBusinessObject(orderUpdated);
