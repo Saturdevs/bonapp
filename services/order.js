@@ -369,7 +369,7 @@ function createProductFromProductBusiness(product) {
   prod.observations = product.observations;
   prod.quantity = product.quantity;
   prod.deleted = product.deleted;
-  prod.deletedReason = product.deletedReason;    
+  prod.deletedReason = product.deletedReason;
   prod.paymentStatus = product.paymentStatus;
 
   return prod;
@@ -577,11 +577,11 @@ async function closeOrder(order) {
       usr.username = user.username;
       usr.socketId = user.socketId ? user.socketId : null;
       usr.products = products;
-      usr.blocked = user.blocked ? user.blocked : null; 
+      usr.blocked = user.blocked ? user.blocked : null;
       usr.totalPerUser = user.totalPerUser;
       usr.payments = user.payments;
       usr.owner = user.owner;
-      usr.clientId = user.clientId ? user.clientId : null;  
+      usr.clientId = user.clientId ? user.clientId : null;
 
       users.push(usr);
     })
@@ -606,6 +606,15 @@ async function closeOrder(order) {
     // await session.abortTransaction();
     // session.endSession();
     throw new Error(err);
+  }
+}
+
+async function getOrderById(orderId) {
+  try {
+    let orderDb = await OrderDAO.getOrderById(orderId);
+    return transformToBusinessObject(orderDb);
+  } catch (error) {
+    throw new Error(error.message);
   }
 }
 
@@ -739,5 +748,6 @@ module.exports = {
   getOpenedOrderForTable,
   updateOrderPayments,
   getOrdersByCashRegisterByStatusAndCompletedDate,
-  retrieveOneOrderForCashRegister
+  retrieveOneOrderForCashRegister,
+  getOrderById
 }

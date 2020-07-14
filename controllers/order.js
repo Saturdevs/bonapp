@@ -13,19 +13,24 @@ function getOrders(req, res) {
   })
 }
 
-function getOrder(req, res) {
+async function getOrder(req, res) {
   let orderId = req.params.orderId
+  
+  try {
+    let order = await OrderService.getOrderById(orderId);
 
-  Order.findById(orderId)
-    .populate('cashRegister')
-    .exec((err, order) => {
-      if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}` })
-      if (!order) return res.status(404).send({ message: `La orden ${orderId} no existe` })
+    if (order !== null && order !== undefined) {
+      res.status(200).send({ order: order });
+    }
+    else {
+      res.status(500).send({ message: `Error al guardar en la base de datos` });
+    }
+  }
+  catch (err) {
+    res.status(500).send({ message: `Error al obtener la orden de la base de datos: ${err}` });
+  }
 
-      res.status(200).send({ order }) //Cuando la clave y el valor son iguales
-    })
 }
-
 //Devuelve los pedidos abiertos o cerrados (segun query) para la mesa que se recibe como parametro
 async function getOrderByTableByStatus(req, res) {
   let tableNro = parseInt(req.params.table);
