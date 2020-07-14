@@ -13,6 +13,7 @@ orderRouter.put('/products', authorize(), orderCtrl.updateOrderProducts);
 orderRouter.put('/blockUsers', authorize(), orderCtrl.blockUserForPaymentAndValidateAmounts);
 orderRouter.put('/products/delete', authorize(), orderCtrl.deleteProductOrder);
 orderRouter.put('/close/:orderId', authorize(), orderCtrl.closeOrder);
+orderRouter.put('/updateOrder', authorize(), orderCtrl.updateOrder);
 orderRouter.put('/:orderId', authorize(), orderCtrl.deleteOrder);
 orderRouter.put('/', authorize(), orderCtrl.updatePayments);
 

@@ -133,7 +133,7 @@ function updateProducts(order, productsToAdd, username, totalToAdd) {
 
     if (user.username === username) {
       userFound = true;
-      if (user.totalPerUser === null || user.totalPerUser === undefined) {
+      if (user.totalPerUser === null || user.totalPerUser === undefined || !user.totalPerUser) {
         user.totalPerUser = 0;
       }
       user.totalPerUser += totalToAdd;

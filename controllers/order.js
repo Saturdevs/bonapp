@@ -126,6 +126,22 @@ async function updateDeleteOrder(req, res) {
   }
 }
 
+async function updateOrder(req, res){
+  try {
+    let orderDTO = req.body.order;
+
+    const orderUpdated = await OrderService.updateOrder(orderDTO);
+
+    if (orderUpdated !== null && orderUpdated !== undefined) {
+      res.status(200).send({ order: orderUpdated });
+    }
+    else {
+      res.status(500).send({ message: `Error al querer actualizar la orden: orderUpdated es null o undefined` });
+    }
+  } catch (error) {
+    res.status(500).send({ message: `Error al querer actualizar la orden: : ${error.message}` });
+  }
+}
 
 async function updatePayments(req, res) {
   try {
@@ -214,5 +230,6 @@ module.exports = {
   closeOrder,
   deleteOrder,
   unSetTable,
-  blockUserForPaymentAndValidateAmounts
+  blockUserForPaymentAndValidateAmounts,
+  updateOrder
 }
