@@ -52,7 +52,7 @@ function initialize(server) {
                 console.log('removeUserFromOrder user:', user);            
                 if (userToRemoveData.isRemovingOtherUser === true) {
                     console.log('removeUserFromOrder ENTRO AL IF DE ISREMOVING');                            
-                    socket.io(user.socketId).emit('removingFromOrder', userToRemoveData);
+                    socket.to(user.socketId).emit('removingFromOrder', userToRemoveData);
                 } else {
                     socket.to(user.socketId).emit('userRemovedFromOrder', userToRemoveData); //le emito a la app que se elimino el usuario
                     order.users[userIndex].socketId = null;
