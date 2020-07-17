@@ -10,12 +10,13 @@ const User = require('../models/user')
 const Client = require('../models/client')
 const PaymentMethod = require('../models/paymentType')
 const ProductPaymentStatus = require('../shared/enums/productPaymentStauts')
+const OrderTypes = require('../shared/enums/orderTypes')
 
 const orderSchema = Schema({
   /**Nro interno de pedido */
   orderNumber: { type: Number, required: true, unique: true },
   /**Tipo de pedido */
-  type: { type: String, required: true, enum: ['Delivery', 'Restaurant', 'Mostrador', 'App'] },
+  type: { type: String, required: true, enum: [OrderTypes.DELIVERY, OrderTypes.RESTAURANT, OrderTypes.MOSTRADOR, OrderTypes.ROOM_SERVICE] },
   /**Mesa de la cual fue hecho el pedido. Si no es de tipo "Restaurant" o "App" es nulo */
   table: { type: Number, ref: Table },
   /**Caja registradora donde se realiza el pago del pedido
