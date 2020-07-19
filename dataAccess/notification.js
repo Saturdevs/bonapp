@@ -117,6 +117,18 @@ async function getSubscriptionById(subscriptionId) {
   }
 }
 
+/**
+ * @description Elmina la suscripcion a notificaciones dada como parametro de la base de datos.
+ * @param {*} subsctiption
+ */
+async function remove(subsctiption) {
+  try {
+    await subsctiption.remove();
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
 
 module.exports = {
   saveSuscription,
@@ -125,5 +137,6 @@ module.exports = {
   getTypes,
   getNonReadNotifications,
   updateNotification,
-  getSubscriptionById
+  getSubscriptionById,
+  remove
 }
