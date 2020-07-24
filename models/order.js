@@ -47,6 +47,10 @@ const orderSchema = Schema({
      * No puede haber mas de un usuario con el mismo nombre de usuario en un pedido.
     */
     username: { type: String, required: true, unique: true },
+    /**Nombre del usuario que realiza el pedido desde la app. Puede ser null si el pedido se hace desde el sistema web */
+    name: { type: String },
+    /**Apeelido del usuario que realiza el pedido desde la app. Puede ser null si el pedido se hace desde el sistema web */
+    lastName: { type: String },
     /** Id de socketio */
     socketId: { type: String },
     /**Productos pedidos por UN usuario */
