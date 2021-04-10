@@ -14,7 +14,8 @@ const userSchema = Schema({
   signUpDate: { type: Date, default: Date.now() },
   lastLogin: { type: Date },
   isGeneral: { type: Boolean, required: true },
-  pin: { type: String }
+  pin: { type: String },
+  businessUnits: { type: [Schema.Types.ObjectId], required: true }
 }, { timestamps: true });
 
 userSchema.pre('save', function (next) {  

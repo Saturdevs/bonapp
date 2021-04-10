@@ -15,7 +15,8 @@ const clientSchema = Schema({
   email: {type: String, required: true},
   balance: { type: Number, required: true }, //saldo del cliente a la fecha de realizada la transacción. 
                                             //Debe actualizarse cada vez que se realiza una transacción
-  limitCtaCte: { type: Number }
+  limitCtaCte: { type: Number },
+  businessUnits: { type: [Schema.Types.ObjectId], required: true }
 });
 
 module.exports = mongoose.model('Client', clientSchema);

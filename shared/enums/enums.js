@@ -1,0 +1,5 @@
+module.exports.BUSINESS_UNITS_TYPES = {
+  RESTAURANT: 'RESTAURANT',
+  BAR: 'BAR',
+  HOTEL: 'HOTEL'
+}

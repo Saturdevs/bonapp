@@ -18,7 +18,8 @@ const userRoleSchema = Schema({
     //Determina si el permiso esta activo o no. Si es true tiene permiso, si es
     //false, undefined o null no tiene permiso.
     active: { type: Boolean, required: true }
-  }]
+  }],
+  businessUnits: { type: [Schema.Types.ObjectId], required: true }
 })
 
 module.exports = mongoose.model('UserRole', userRoleSchema);

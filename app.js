@@ -26,6 +26,7 @@ const generatorRouter = require('./routes/qrGenerator')
 const paramRouter = require('./routes/paramRoutes')
 const settingsRouter = require('./routes/settingsRoutes')
 const notificationRouter = require('./routes/notification')
+const businessUnitRouter = require('./routes/businessUnit')
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
 app.use(bodyParser.json({limit: '50mb'}))
@@ -60,6 +61,7 @@ app.use('/api/qrGenerator',generatorRouter)
 app.use('/api/notification',notificationRouter)
 app.use('/api/param', paramRouter)
 app.use('/api/settings', settingsRouter)
+app.use('/api/businessUnit', businessUnitRouter)
 
 //Middleware to handle error
 app.use(function errorHandler(err, req, res, next) {

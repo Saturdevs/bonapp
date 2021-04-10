@@ -16,7 +16,8 @@ const cashFlowSchema = Schema({
   paymentType: { type: Schema.Types.ObjectId, ref: PaymentType, required: true},
   comment: { type: String },
   deleted: { type: Boolean, required: true },
-  deletedBy: { type: Schema.Types.ObjectId, ref: User }
+  deletedBy: { type: Schema.Types.ObjectId, ref: User },
+  businessUnits: { type: Schema.Types.ObjectId, required: true }
 });
 
 module.exports = mongoose.model('CashFlow', cashFlowSchema);

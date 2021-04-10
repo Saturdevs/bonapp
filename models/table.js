@@ -12,7 +12,8 @@ const tableSchema = Schema({
   col: { type: Number, required: true },
   row: { type: Number, required: true },
   sizex: { type: Number, required: true },
-  sizey: { type: Number, required: true }  
+  sizey: { type: Number, required: true },
+  businessUnits: { type: Schema.Types.ObjectId, required: true }
 }); 
 
 module.exports = mongoose.model('Table', tableSchema);

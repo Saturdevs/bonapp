@@ -10,9 +10,9 @@ module.exports.up = async next => {
 
     const param = [
       {
-        "_id": "ask.for.user.pin",
+        "code": "ask.for.user.pin",
         "description": "si es true se le pide el pin al usuario cuando quiere agregar productos a un pedido para identificarlo",
-        "value": true,
+        "value": true
       }
     ]
 

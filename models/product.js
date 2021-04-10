@@ -28,7 +28,8 @@ const productSchema = Schema({
   stock: {
     min: { type: Number },
     current: { type: Number}
-  }
+  },
+  businessUnits: { type: Schema.Types.ObjectId, required: true }
 })
 
 module.exports = mongoose.model('Product', productSchema);

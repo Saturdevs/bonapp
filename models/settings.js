@@ -10,7 +10,8 @@ const settingsSchema = Schema({
   phoneNumber: { type: String },
   email: { type: String }, 
   address: { type: String }, 
-  wifi: { type: String }
+  wifi: { type: String },
+  businessUnits: { type: Schema.Types.ObjectId, required: true }
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);

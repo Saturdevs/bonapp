@@ -11,7 +11,8 @@ const paymentTypeSchema = Schema({
   //determina si es forma de pago cuenta corriente. Solo puede haber uno en true
   currentAccount: { type: Boolean, required: true },
   //true si es tipo de pago efectivo, false si no lo es. Solo puede haber uno en true.
-  cash: { type: Boolean, required: true }
+  cash: { type: Boolean, required: true },
+  businessUnits: { type: Schema.Types.ObjectId, required: true }
 });
 
 module.exports = mongoose.model('PaymentType', paymentTypeSchema);

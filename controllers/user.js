@@ -12,7 +12,9 @@ async function signUp(req, res, next) {
       username: req.body.username,
       password: req.body.password,
       roleId: req.body.roleId,
-      signUpDate: Date.now()
+      signUpDate: Date.now(),
+      isGeneral: req.body.isGeneral,
+      businessUnits: req.body.businessUnits
     }
 
     let userSaved = await UserService.create(user);

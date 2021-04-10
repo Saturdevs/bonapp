@@ -13,7 +13,8 @@ const transactionSchema = Schema({
   date: { type: Date, default: Date.now() },
   comment: { type: String },
   deleted: { type: Boolean, required: true },
-  client: { type: Schema.Types.ObjectId, ref: Client, required: true }
+  client: { type: Schema.Types.ObjectId, ref: Client, required: true },
+  businessUnits: { type: Schema.Types.ObjectId, required: true }
 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

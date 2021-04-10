@@ -10,7 +10,8 @@ const supplierSchema = Schema({
   addressStreet: { type: String },
   addressNumber: { type: Number },
   addressDpto: {type: String },
-  active: { type: Boolean, required: true }
+  active: { type: Boolean, required: true },
+  businessUnits: { type: [Schema.Types.ObjectId], required: true }
 });
 
 module.exports = mongoose.model('Supplier', supplierSchema);

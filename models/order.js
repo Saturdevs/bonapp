@@ -128,7 +128,8 @@ const orderSchema = Schema({
     subtotal: { type: Number }
   },
   /**Monto total del pedido teniendo en cuenta el descuento si lo hubiera */
-  totalPrice: { type: Number }
+  totalPrice: { type: Number },
+  businessUnits: { type: Schema.Types.ObjectId, required: true }
 });
 
 module.exports = mongoose.model('Order', orderSchema)
