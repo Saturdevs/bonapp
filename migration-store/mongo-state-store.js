@@ -5,7 +5,7 @@ const MongoClient = mongodb.MongoClient;
 const config = require('../config');
 
 class MongoDbStore {
-  load = async function (fn) {
+  async load(fn) {
     let client = null;
     let data = null;
     try {
@@ -24,7 +24,7 @@ class MongoDbStore {
     return fn(null, data[0])
   };
 
-  save = async function (set, fn) {
+  async save(set, fn) {
     let client = null;
     let result = null;
     try {
